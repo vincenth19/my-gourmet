@@ -1,36 +1,11 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router';
 
-const UserHomePage: React.FC = () => {
+const UserHomePage = () => {
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <span className="text-2xl font-bold text-orange-600">MyGourmet</span>
-            </div>
-            <div className="flex items-center space-x-4">
-              <button 
-                className="text-gray-600 hover:text-orange-600"
-                onClick={() => navigate('/profile')}
-              >
-                Profile
-              </button>
-              <button className="text-gray-600 hover:text-orange-600">
-                Orders
-              </button>
-              <button className="text-gray-600 hover:text-orange-600">
-                Cart
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

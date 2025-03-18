@@ -77,7 +77,9 @@ Stores user payment methods.
 | id | UUID | Primary key |
 | profile_id | UUID | Reference to profiles.id (CASCADE DELETE) |
 | method_type | VARCHAR | Type of payment method |
-| details | VARCHAR | Payment details (encrypted/tokenized) |
+| card_number | VARCHAR | Credit/debit card number |
+| expiry_date | VARCHAR | Card expiration date (MM/YY format) |
+| cvv | VARCHAR | Card verification value |
 | created_at | TIMESTAMP | Record creation timestamp |
 
 ### `dishes`
@@ -300,6 +302,20 @@ This script will:
 3. Copy the contents of the migration file (`migrations/20240316_initial_schema.sql`)
 4. Paste into the SQL Editor and run the query
 5. Then apply the RLS policies by running the contents of `migrations/20240317_rls_policies.sql`
+
+### Seeding Data
+
+The project includes seed files to populate initial data for reference tables:
+
+1. To seed the dietary_tags table:
+   ```bash
+   psql -h localhost -p 54322 -U postgres -d postgres -f supabase/seeds/dietary_tags_seed.sql
+   ```
+
+   Or using Supabase dashboard:
+   1. Go to the SQL Editor
+   2. Copy the contents of `seeds/dietary_tags_seed.sql`
+   3. Paste into the SQL Editor and run the query
 
 ## Local Development vs Production Configuration
 

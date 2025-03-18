@@ -1,10 +1,20 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router';
 import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabase';
-import type { Profile } from '../types/database.types';
+import type { Profile, ProfileRole } from '../types/database.types';
+import { Pencil } from 'lucide-react';
+import DietaryPreferences from '../components/DietaryPreferences';
 
-const ProfilePage: React.FC = () => {
+interface PaymentMethod {
+  id: string;
+  method_type: string;
+  card_number: string;
+  expiry_date: string;
+  cvv: string;
+}
+
+const ProfilePage = () => {
   const [profile, setProfile] = useState<Partial<Profile> | null>(null);
   const [editedProfile, setEditedProfile] = useState<Partial<Profile> | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -12,6 +22,9 @@ const ProfilePage: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [selectedDietaryTags, setSelectedDietaryTags] = useState<string[]>([]);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
+  const [editedPaymentMethod, setEditedPaymentMethod] = useState<PaymentMethod | null>(null);
   const navigate = useNavigate();
 
   const fetchProfile = useCallback(async () => {
@@ -26,9 +39,8 @@ const ProfilePage: React.FC = () => {
       
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, display_name, email, contact_number, preferences, created_at, updated_at')
-        .eq('id', session.user.id)
-        .single();
+        .select('id, display_name, email, contact_number, preferences, created_at, updated_at, role')
+        .eq('id', session.user.id);
       
       if (error) {
         console.error('Error fetching profile:', error);
@@ -36,8 +48,49 @@ const ProfilePage: React.FC = () => {
         return;
       }
       
-      setProfile(data);
-      setEditedProfile(data);
+      if (data && data.length > 0) {
+        setProfile(data[0]);
+        setEditedProfile(data[0]);
+        
+        // Only fetch dietary tags and payment method if not a chef
+        if (data[0].role !== 'chef') {
+          fetchUserDietaryTags(data[0].id);
+          fetchPaymentMethod(data[0].id);
+        }
+      } else {
+        // Handle case where no profile exists
+        console.log('No profile found for user, creating a default one');
+        // Create a default profile
+        const defaultProfile = {
+          id: session.user.id,
+          display_name: session.user.email?.split('@')[0] || 'User',
+          email: session.user.email || '',
+          contact_number: '',
+          preferences: '',
+          role: 'customer' as ProfileRole, // Type cast to ProfileRole
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert(defaultProfile);
+          
+        if (insertError) {
+          console.error('Error creating profile:', insertError);
+          setError('Failed to create profile');
+          return;
+        }
+        
+        setProfile(defaultProfile);
+        setEditedProfile(defaultProfile);
+        
+        // Only fetch dietary tags and payment method if not a chef
+        if (defaultProfile.role !== 'chef') {
+          fetchUserDietaryTags(defaultProfile.id);
+          fetchPaymentMethod(defaultProfile.id);
+        }
+      }
     } catch (error) {
       console.error('Error:', error);
       setError('An unexpected error occurred');
@@ -64,6 +117,21 @@ const ProfilePage: React.FC = () => {
     // Reset edit form if canceling
     if (isEditing) {
       setEditedProfile(profile);
+      // Also refresh dietary tags to reset any unsaved changes
+      fetchUserDietaryTags(profile?.id);
+      // Reset payment method changes
+      setEditedPaymentMethod(paymentMethod);
+    } else {
+      // If entering edit mode and no payment method exists, create a default empty one
+      if (!paymentMethod && profile?.role !== 'chef') {
+        setEditedPaymentMethod({
+          id: '',
+          method_type: 'card',
+          card_number: '',
+          expiry_date: '',
+          cvv: ''
+        });
+      }
     }
     // Clear any success or error messages
     setError(null);
@@ -75,6 +143,140 @@ const ProfilePage: React.FC = () => {
     setEditedProfile(prev => prev ? { ...prev, [name]: value } : null);
   };
 
+  const handlePaymentMethodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setEditedPaymentMethod(prev => prev ? { ...prev, [name]: value } : null);
+  };
+
+  const fetchUserDietaryTags = async (profileId?: string) => {
+    if (!profileId) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('profile_dietary_tags')
+        .select('dietary_tag_id')
+        .eq('profile_id', profileId);
+        
+      if (error) throw error;
+      
+      if (data) {
+        const userTagIds = data.map((item: { dietary_tag_id: string }) => item.dietary_tag_id);
+        setSelectedDietaryTags(userTagIds);
+      } else {
+        setSelectedDietaryTags([]);
+      }
+    } catch (error) {
+      console.error('Error fetching user dietary tags:', error);
+    }
+  };
+
+  const fetchPaymentMethod = async (profileId?: string) => {
+    if (!profileId) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('payment_methods')
+        .select('*')
+        .eq('profile_id', profileId)
+        .limit(1);
+        
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        setPaymentMethod(data[0]);
+        setEditedPaymentMethod(data[0]);
+      } else {
+        setPaymentMethod(null);
+        setEditedPaymentMethod(null);
+      }
+    } catch (error) {
+      console.error('Error fetching payment method:', error);
+    }
+  };
+
+  const handleDietaryTagsChange = (tags: string[]) => {
+    setSelectedDietaryTags(tags);
+  };
+
+  const saveDietaryTags = async (profileId: string) => {
+    // Skip for chef role
+    if (profile?.role === 'chef') return true;
+    
+    try {
+      // First, delete all existing profile-tag associations
+      const { error: deleteError } = await supabase
+        .from('profile_dietary_tags')
+        .delete()
+        .eq('profile_id', profileId);
+        
+      if (deleteError) throw deleteError;
+      
+      // Then insert new associations if there are any selected tags
+      if (selectedDietaryTags.length > 0) {
+        const tagsToInsert = selectedDietaryTags.map(tagId => ({
+          profile_id: profileId,
+          dietary_tag_id: tagId
+        }));
+        
+        const { error: insertError } = await supabase
+          .from('profile_dietary_tags')
+          .insert(tagsToInsert);
+          
+        if (insertError) throw insertError;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error saving dietary preferences:', error);
+      return false;
+    }
+  };
+
+  const savePaymentMethod = async (profileId: string) => {
+    // Skip for chef role
+    if (profile?.role === 'chef') return true;
+    
+    try {
+      if (!editedPaymentMethod) {
+        return true;
+      }
+      
+      if (paymentMethod?.id) {
+        // Update existing payment method
+        const { error: updateError } = await supabase
+          .from('payment_methods')
+          .update({
+            card_number: editedPaymentMethod.card_number,
+            expiry_date: editedPaymentMethod.expiry_date,
+            cvv: editedPaymentMethod.cvv
+          })
+          .eq('id', paymentMethod.id);
+          
+        if (updateError) throw updateError;
+      } else {
+        // Insert new payment method
+        const { error: insertError } = await supabase
+          .from('payment_methods')
+          .insert({
+            profile_id: profileId,
+            method_type: 'card',
+            card_number: editedPaymentMethod.card_number,
+            expiry_date: editedPaymentMethod.expiry_date,
+            cvv: editedPaymentMethod.cvv
+          });
+          
+        if (insertError) throw insertError;
+      }
+      
+      // Update the displayed payment method
+      setPaymentMethod(editedPaymentMethod);
+      return true;
+    } catch (error) {
+      console.error('Error saving payment method:', error);
+      return false;
+    }
+  };
+
   const handleSave = async () => {
     if (!editedProfile || !profile?.id) return;
     
@@ -83,6 +285,7 @@ const ProfilePage: React.FC = () => {
       setError(null);
       setSuccessMessage(null);
       
+      // Update profile information
       const { error } = await supabase
         .from('profiles')
         .update({
@@ -96,6 +299,20 @@ const ProfilePage: React.FC = () => {
       if (error) {
         console.error('Error updating profile:', error);
         setError('Failed to update profile');
+        return;
+      }
+      
+      // Save dietary tags
+      const dietaryTagsSuccess = await saveDietaryTags(profile.id);
+      if (!dietaryTagsSuccess) {
+        setError('Profile updated but dietary preferences failed to save');
+        return;
+      }
+      
+      // Save payment method
+      const paymentMethodSuccess = await savePaymentMethod(profile.id);
+      if (!paymentMethodSuccess) {
+        setError('Profile updated but payment method failed to save');
         return;
       }
       
@@ -122,37 +339,6 @@ const ProfilePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <span className="text-2xl font-bold text-orange-600" onClick={() => navigate('/home')} style={{ cursor: 'pointer' }}>
-                MyGourmet
-              </span>
-            </div>
-            <div className="flex items-center space-x-4">
-              <button 
-                className="text-gray-600 hover:text-orange-600"
-                onClick={() => navigate('/home')}
-              >
-                Home
-              </button>
-              <button 
-                className="text-gray-600 hover:text-orange-600"
-                onClick={() => navigate('/orders')}
-              >
-                Orders
-              </button>
-              <button 
-                className="text-orange-600 border-b-2 border-orange-600 pb-1"
-              >
-                Profile
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
-
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -166,17 +352,11 @@ const ProfilePage: React.FC = () => {
               {!isEditing && (
                 <button
                   onClick={handleEditToggle}
-                  className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors duration-200"
+                  className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors duration-200"
                 >
-                  Edit Profile
+                 <Pencil className="w-4 h-4" /> Edit
                 </button>
               )}
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-200"
-              >
-                Logout
-              </button>
             </div>
           </div>
 
@@ -228,10 +408,48 @@ const ProfilePage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="bg-gray-50 rounded-lg p-6">
-                    <h2 className="text-lg font-medium text-gray-900 mb-4">Preferences</h2>
-                    <p className="text-gray-700">{profile.preferences || 'No preferences set'}</p>
-                  </div>
+                  {/* Only show preferences section for non-chef users */}
+                  {profile.role !== 'chef' && (
+                    <>
+                      <div className="bg-gray-50 rounded-lg p-6">
+                        <h2 className="text-lg font-medium text-gray-900 mb-4">Preferences</h2>
+                        <p className="text-gray-700">{profile.preferences || 'No preferences set'}</p>
+                      </div>
+                      
+                      {/* Dietary Preferences Section */}
+                      <div className="bg-gray-50 rounded-lg p-6">
+                        <DietaryPreferences 
+                          profileId={profile.id} 
+                          readOnly={true}
+                          selectedTags={selectedDietaryTags}
+                          onTagsChange={handleDietaryTagsChange}
+                        />
+                      </div>
+                      
+                      {/* Payment Method Section */}
+                      <div className="bg-gray-50 rounded-lg p-6">
+                        <h2 className="text-lg font-medium text-gray-900 mb-4">Payment Method</h2>
+                        {paymentMethod ? (
+                          <div className="space-y-2">
+                            <div>
+                              <span className="text-sm font-medium text-gray-500">Card Number:</span>
+                              <p className="text-gray-700">•••• •••• •••• {paymentMethod.card_number.slice(-4)}</p>
+                            </div>
+                            <div>
+                              <span className="text-sm font-medium text-gray-500">Expiry Date:</span>
+                              <p className="text-gray-700">{paymentMethod.expiry_date}</p>
+                            </div>
+                            <div>
+                              <span className="text-sm font-medium text-gray-500">CVV:</span>
+                              <p className="text-gray-700">•••</p>
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="text-gray-700">No payment method added</p>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </>
               ) : (
                 /* Edit Mode */
@@ -280,19 +498,87 @@ const ProfilePage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="bg-gray-50 rounded-lg p-6">
-                    <label htmlFor="preferences" className="block text-lg font-medium text-gray-900 mb-4">
-                      Preferences
-                    </label>
-                    <textarea
-                      id="preferences"
-                      name="preferences"
-                      value={editedProfile?.preferences || ''}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent h-32"
-                      placeholder="Enter your food preferences, dietary restrictions, etc."
-                    />
-                  </div>
+                  {/* Only show preferences editing section for non-chef users */}
+                  {profile.role !== 'chef' && (
+                    <>
+                      <div className="bg-gray-50 rounded-lg p-6">
+                        <label htmlFor="preferences" className="block text-lg font-medium text-gray-900 mb-4">
+                          Preferences
+                        </label>
+                        <textarea
+                          id="preferences"
+                          name="preferences"
+                          value={editedProfile?.preferences || ''}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent h-32"
+                          placeholder="Enter your food preferences, dietary restrictions, etc."
+                        />
+                      </div>
+                      
+                      {/* Dietary Preferences Section */}
+                      <div className="bg-gray-50 rounded-lg p-6">
+                        <DietaryPreferences 
+                          profileId={profile.id} 
+                          readOnly={false}
+                          selectedTags={selectedDietaryTags}
+                          onTagsChange={handleDietaryTagsChange}
+                        />
+                      </div>
+                      
+                      {/* Payment Method Section - Edit Mode */}
+                      <div className="bg-gray-50 rounded-lg p-6">
+                        <h2 className="text-lg font-medium text-gray-900 mb-4">Payment Method</h2>
+                        <div className="space-y-4">
+                          <div>
+                            <label htmlFor="card_number" className="block text-sm font-medium text-gray-700 mb-1">
+                              Card Number
+                            </label>
+                            <input
+                              id="card_number"
+                              name="card_number"
+                              type="text"
+                              value={editedPaymentMethod?.card_number || ''}
+                              onChange={handlePaymentMethodChange}
+                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                              placeholder="XXXX XXXX XXXX XXXX"
+                            />
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label htmlFor="expiry_date" className="block text-sm font-medium text-gray-700 mb-1">
+                                Expiry Date
+                              </label>
+                              <input
+                                id="expiry_date"
+                                name="expiry_date"
+                                type="text"
+                                value={editedPaymentMethod?.expiry_date || ''}
+                                onChange={handlePaymentMethodChange}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                placeholder="MM/YY"
+                              />
+                            </div>
+                            
+                            <div>
+                              <label htmlFor="cvv" className="block text-sm font-medium text-gray-700 mb-1">
+                                CVV
+                              </label>
+                              <input
+                                id="cvv"
+                                name="cvv"
+                                type="text"
+                                value={editedPaymentMethod?.cvv || ''}
+                                onChange={handlePaymentMethodChange}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                placeholder="123"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </>
               )}
 
@@ -324,6 +610,14 @@ const ProfilePage: React.FC = () => {
             </div>
           )}
         </motion.div>
+        <div className="mt-8 flex justify-center w-full">
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 w-full bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-200"
+          >
+            Logout
+          </button>
+        </div>
       </main>
     </div>
   );

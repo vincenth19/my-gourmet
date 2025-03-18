@@ -45,7 +45,9 @@ CREATE TABLE public.payment_methods (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   profile_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
   method_type VARCHAR NOT NULL,
-  details VARCHAR NOT NULL,
+  card_number VARCHAR NOT NULL,
+  expiry_date VARCHAR NOT NULL,
+  cvv VARCHAR NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -56,6 +58,7 @@ CREATE TABLE public.dishes (
   name VARCHAR NOT NULL,
   price DECIMAL(10, 2) NOT NULL,
   description TEXT,
+  dish_image_url VARCHAR,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE
 );
@@ -186,6 +189,7 @@ BEGIN
     email,
     display_name,
     role,
+    contact_number,
     created_at,
     updated_at
   )
@@ -194,6 +198,7 @@ BEGIN
     new.email,
     COALESCE(new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'display_name', 'User'),
     (COALESCE(new.raw_user_meta_data->>'role', 'customer'))::text::public.app_role,
+    COALESCE(new.raw_user_meta_data->>'contact_number', ''),
     now(),
     now()
   );

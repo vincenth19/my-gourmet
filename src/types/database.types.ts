@@ -39,7 +39,9 @@ export interface PaymentMethod {
   id: string;
   profile_id: string;
   method_type: string;
-  details: string;
+  card_number: string;
+  expiry_date: string;
+  cvv: string;
   created_at: string;
 }
 
