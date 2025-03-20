@@ -8,6 +8,7 @@ export interface Profile {
   email: string;
   contact_number?: string;
   preferences?: string;
+  avatar_url?: string;
   role: ProfileRole;
   created_at: string;
   updated_at?: string;
@@ -51,6 +52,7 @@ export interface Dish {
   name: string;
   price: number;
   description?: string;
+  image_url?: string;
   created_at: string;
   updated_at?: string;
 }

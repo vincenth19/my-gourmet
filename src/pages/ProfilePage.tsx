@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router';
 import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import type { Profile, ProfileRole } from '../types/database.types';
-import { Pencil } from 'lucide-react';
+import { Pencil, Upload, X, User } from 'lucide-react';
 import DietaryPreferences from '../components/DietaryPreferences';
+import { useDropzone } from 'react-dropzone';
+import { v4 as uuidv4 } from 'uuid';
 
 interface PaymentMethod {
   id: string;
@@ -25,6 +27,9 @@ const ProfilePage = () => {
   const [selectedDietaryTags, setSelectedDietaryTags] = useState<string[]>([]);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
   const [editedPaymentMethod, setEditedPaymentMethod] = useState<PaymentMethod | null>(null);
+  const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const navigate = useNavigate();
 
   const fetchProfile = useCallback(async () => {
@@ -39,7 +44,7 @@ const ProfilePage = () => {
       
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, display_name, email, contact_number, preferences, created_at, updated_at, role')
+        .select('id, display_name, email, contact_number, preferences, created_at, updated_at, role, avatar_url')
         .eq('id', session.user.id);
       
       if (error) {
@@ -51,6 +56,15 @@ const ProfilePage = () => {
       if (data && data.length > 0) {
         setProfile(data[0]);
         setEditedProfile(data[0]);
+        
+        // Set profile image preview if it exists
+        if (data[0].avatar_url) {
+          const { data: imageData } = supabase.storage
+            .from('profile_avatars')
+            .getPublicUrl(data[0].avatar_url);
+          
+          setProfileImagePreview(imageData.publicUrl);
+        }
         
         // Only fetch dietary tags and payment method if not a chef
         if (data[0].role !== 'chef') {
@@ -67,6 +81,7 @@ const ProfilePage = () => {
           email: session.user.email || '',
           contact_number: '',
           preferences: '',
+          avatar_url: '',
           role: 'customer' as ProfileRole, // Type cast to ProfileRole
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
@@ -277,6 +292,82 @@ const ProfilePage = () => {
     }
   };
 
+  // Handle profile image drop
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    if (acceptedFiles.length === 0) return;
+    
+    const file = acceptedFiles[0];
+    
+    // Check file size (limit to 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Image size should not exceed 5MB');
+      return;
+    }
+    
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      setError('Only image files are allowed');
+      return;
+    }
+    
+    setProfileImage(file);
+    setError(null);
+    
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = () => {
+      setProfileImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'image/*': ['.jpg', '.jpeg', '.png', '.gif']
+    },
+    maxFiles: 1
+  });
+
+  // Remove current profile image
+  const handleRemoveImage = () => {
+    setProfileImage(null);
+    setProfileImagePreview(null);
+    setEditedProfile(prev => prev ? { ...prev, avatar_url: '' } : null);
+  };
+
+  // Upload profile image to Supabase storage
+  const uploadProfileImage = async (userId: string): Promise<string> => {
+    if (!profileImage) return '';
+    
+    try {
+      setIsUploading(true);
+      
+      // Generate a unique filename
+      const fileExt = profileImage.name.split('.').pop();
+      const fileName = `${uuidv4()}.${fileExt}`;
+      const filePath = `${userId}/${fileName}`;
+      
+      // Upload to Supabase storage
+      const { error } = await supabase.storage
+        .from('profile_avatars')
+        .upload(filePath, profileImage, {
+          cacheControl: '3600',
+          upsert: true // Override if exists
+        });
+        
+      if (error) throw error;
+      
+      setIsUploading(false);
+      return filePath;
+    } catch (error) {
+      console.error('Error uploading profile image:', error);
+      setError('Failed to upload profile image');
+      setIsUploading(false);
+      throw error;
+    }
+  };
+
   const handleSave = async () => {
     if (!editedProfile || !profile?.id) return;
     
@@ -285,6 +376,13 @@ const ProfilePage = () => {
       setError(null);
       setSuccessMessage(null);
       
+      let profileImagePath = editedProfile.avatar_url || '';
+      
+      // Upload profile image if a new one was selected
+      if (profileImage) {
+        profileImagePath = await uploadProfileImage(profile.id);
+      }
+      
       // Update profile information
       const { error } = await supabase
         .from('profiles')
@@ -292,6 +390,7 @@ const ProfilePage = () => {
           display_name: editedProfile.display_name,
           contact_number: editedProfile.contact_number,
           preferences: editedProfile.preferences,
+          avatar_url: profileImagePath,
           updated_at: new Date().toISOString()
         })
         .eq('id', profile.id);
@@ -316,8 +415,8 @@ const ProfilePage = () => {
         return;
       }
       
-      // Update the displayed profile with edited values
-      setProfile(editedProfile);
+      // Update the displayed profile with edited values including profile image
+      setProfile({...editedProfile, avatar_url: profileImagePath});
       setSuccessMessage('Profile updated successfully');
       setIsEditing(false);
     } catch (error) {
@@ -387,6 +486,21 @@ const ProfilePage = () => {
               {!isEditing ? (
                 /* View Mode */
                 <>
+                  {/* Profile Image (View Mode) */}
+                  <div className="flex justify-center mb-6">
+                    {profile.avatar_url ? (
+                      <img 
+                        src={profileImagePreview || ''}
+                        alt={`${profile.display_name}'s profile`}
+                        className="w-32 h-32 rounded-full object-cover border-4 border-orange-200"
+                      />
+                    ) : (
+                      <div className="w-32 h-32 rounded-full bg-orange-100 flex items-center justify-center text-orange-500 border-4 border-orange-200">
+                        <User size={48} />
+                      </div>
+                    )}
+                  </div>
+                  
                   <div className="bg-orange-50 rounded-lg p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
@@ -454,6 +568,38 @@ const ProfilePage = () => {
               ) : (
                 /* Edit Mode */
                 <>
+                  {/* Profile Image Upload (Edit Mode) */}
+                  <div className="flex justify-center mb-6">
+                    {profileImagePreview ? (
+                      <div className="relative">
+                        <img 
+                          src={profileImagePreview}
+                          alt="Profile preview" 
+                          className="w-32 h-32 rounded-full object-cover border-4 border-orange-200"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleRemoveImage}
+                          className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-md hover:bg-red-50"
+                        >
+                          <X size={16} className="text-red-500" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div 
+                        {...getRootProps()} 
+                        className={`w-32 h-32 rounded-full border-4 border-dashed flex flex-col items-center justify-center cursor-pointer 
+                          ${isDragActive ? 'border-orange-500 bg-orange-50' : 'border-gray-300 hover:border-orange-400 bg-gray-50'}`}
+                      >
+                        <input {...getInputProps()} />
+                        <Upload size={24} className="text-gray-400 mb-2" />
+                        <p className="text-xs text-gray-500 text-center">
+                          {isDragActive ? 'Drop here' : 'Upload'}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                
                   <div className="bg-orange-50 rounded-lg p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>

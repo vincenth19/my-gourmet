@@ -58,7 +58,6 @@ CREATE TABLE public.dishes (
   name VARCHAR NOT NULL,
   price DECIMAL(10, 2) NOT NULL,
   description TEXT,
-  dish_image_url VARCHAR,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE
 );

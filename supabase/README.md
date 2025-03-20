@@ -92,6 +92,7 @@ Stores food items created by chefs.
 | name | VARCHAR | Dish name |
 | price | DECIMAL(10,2) | Dish price |
 | description | TEXT | Dish description |
+| image_url | VARCHAR | URL to the dish image in the storage bucket |
 | created_at | TIMESTAMP | Record creation timestamp |
 | updated_at | TIMESTAMP | Record update timestamp |
 
@@ -251,6 +252,24 @@ This ensures that users can only access their own address records, enhancing pri
 ### Data Redundancy for Historical Accuracy
 - Order-related tables store copies of relevant data at the time of order
 - This ensures historical accuracy even if the original data changes or is deleted
+
+## Storage Buckets
+
+The application uses Supabase Storage for file management:
+
+### `dish_images` Bucket
+Stores images for dishes uploaded by chefs.
+
+| Access | Description |
+|--------|-------------|
+| Public Read | Anyone can view dish images |
+| Authenticated Upload | Any authenticated user can upload images |
+| Owner Update/Delete | Users can only update or delete their own images |
+| Admin Access | Admins have full control over all images |
+
+**File Path Pattern:** `{user_id}/{dish_id}/filename.jpg`
+
+This structure ensures that images are organized by user and dish, making it easy to manage permissions and associate images with specific dishes.
 
 ## Indexes
 

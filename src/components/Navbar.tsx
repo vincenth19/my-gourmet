@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { useAuth } from '../contexts/AuthContext';
 interface NavbarProps {
   activePage?: 'home' | 'profile' | 'orders' | 'dishes' | 'cart';
@@ -24,27 +24,29 @@ const Navbar = ({ activePage = 'home' }: NavbarProps) => {
           </div>
           <div className="flex items-center space-x-4">
             {/* Profile link - available for all roles */}
+            <Link to="/profile">
             <button 
               className={`${activePage === 'profile' 
                 ? 'text-orange-600 border-b-2 border-orange-600 pb-1' 
                 : 'text-gray-600 hover:text-orange-600'}`}
-              onClick={() => navigate('/profile')}
             >
               Profile
             </button>
+            </Link>
             
             {/* Orders link - available for all roles */}
-            <button 
-              className={`${activePage === 'orders' 
-                ? 'text-orange-600 border-b-2 border-orange-600 pb-1' 
-                : 'text-gray-600 hover:text-orange-600'}`}
-              onClick={() => navigate('/orders')}
-            >
-              Orders
-            </button>
-            
+            <Link to="/orders">
+              <button 
+                className={`${activePage === 'orders' 
+                  ? 'text-orange-600 border-b-2 border-orange-600 pb-1' 
+                  : 'text-gray-600 hover:text-orange-600'}`}
+              >
+                Orders
+              </button>
+            </Link>
             {/* Role-specific links */}
             {userRole === 'chef' ? (
+              <Link to="/chef/dishes">
               <button 
                 className={`${activePage === 'dishes' 
                   ? 'text-orange-600 border-b-2 border-orange-600 pb-1' 
@@ -52,14 +54,17 @@ const Navbar = ({ activePage = 'home' }: NavbarProps) => {
               >
                 My Dishes
               </button>
+              </Link>
             ) : (
-              <button 
-                className={`${activePage === 'cart' 
-                  ? 'text-orange-600 border-b-2 border-orange-600 pb-1' 
-                  : 'text-gray-600 hover:text-orange-600'}`}
-              >
-                Cart
-              </button>
+              <Link to="/cart">
+                <button 
+                  className={`${activePage === 'cart' 
+                    ? 'text-orange-600 border-b-2 border-orange-600 pb-1' 
+                    : 'text-gray-600 hover:text-orange-600'}`}
+                >
+                  Cart
+                </button>
+              </Link>
             )}
           </div>
         </div>
