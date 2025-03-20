@@ -2,8 +2,6 @@
 
 MyGourmet is a premium platform connecting high-net-worth individuals with professional chefs for personalized fine dining experiences in the comfort of their own homes.
 
-![MyGourmet Preview](https://images.unsplash.com/photo-1414541944151-2f3ec1cfd87d?q=80&w=2673&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)
-
 ## Features
 
 - **User Authentication**: Secure login/signup system with role-based access (Chef/Customer)
@@ -26,6 +24,7 @@ MyGourmet is a premium platform connecting high-net-worth individuals with profe
 - Node.js (v16+)
 - npm or yarn
 - Supabase account and project
+- Docker (for running Supabase locally)
 
 ## Getting Started
 
@@ -46,19 +45,66 @@ yarn
 
 ### 3. Set up Supabase
 
+#### Option A: Using Supabase Cloud
+
 1. Create a new Supabase project at [supabase.com](https://supabase.com)
 2. Run the migration files located in the `supabase/migrations` directory
 3. Create required storage buckets:
    - `dish_images` - For storing chef dish images
    - `profile_avatars` - For storing user profile images
 
+#### Option B: Running Supabase Locally
+
+1. Install Supabase CLI:
+   ```bash
+   # Using npm
+   npm install -g supabase
+   
+   # Using Homebrew (macOS)
+   brew install supabase/tap/supabase
+   ```
+
+2. Start Supabase locally (requires Docker):
+   ```bash
+   supabase start
+   ```
+
+3. Run migrations to set up the database schema:
+   ```bash
+   supabase db push
+   ```
+
+4. Create required storage buckets:
+   ```bash
+   # The storage buckets will be created by migrations, but you can also create them manually:
+   supabase storage create-bucket dish_images --public
+   supabase storage create-bucket profile_avatars --public
+   ```
+
+5. Set appropriate RLS (Row Level Security) policies for storage:
+   ```bash
+   # You can apply the RLS policies by running the SQL files in the migrations directory:
+   supabase db reset
+   ```
+
+6. Get local credentials:
+   ```bash
+   supabase status
+   ```
+   This will provide you with the local URL and anon key to use in your environment variables.
+
 ### 4. Configure environment variables
 
 Create a `.env` file in the root directory with the following variables:
 
 ```
+# For Supabase Cloud
 VITE_SUPABASE_URL=your-supabase-url
 VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+
+# OR for local Supabase (example values, replace with your actual values from `supabase status`)
+# VITE_SUPABASE_URL=http://localhost:54321
+# VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
 ```
 
 ### 5. Run the development server
