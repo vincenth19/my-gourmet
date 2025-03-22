@@ -5,7 +5,7 @@ CREATE TYPE public.payment_status AS ENUM ('unpaid', 'paid', 'refunded');
 
 -- Create profiles table
 CREATE TABLE public.profiles (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   display_name VARCHAR NOT NULL,
   email VARCHAR UNIQUE NOT NULL,
   contact_number VARCHAR,
@@ -48,8 +48,12 @@ CREATE TABLE public.payment_methods (
   card_number VARCHAR NOT NULL,
   expiry_date VARCHAR NOT NULL,
   cvv VARCHAR NOT NULL,
+  name_on_card VARCHAR NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Add comment for the name_on_card column
+COMMENT ON COLUMN public.payment_methods.name_on_card IS 'Name as it appears on the payment card';
 
 -- Create dishes table
 CREATE TABLE public.dishes (
@@ -186,7 +190,7 @@ BEGIN
   VALUES (
     new.id,
     new.email,
-    COALESCE(new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'display_name', 'User'),
+    COALESCE(new.raw_user_meta_data->>'display_name', 'User'),
     (COALESCE(new.raw_user_meta_data->>'role', 'customer'))::text::public.app_role,
     COALESCE(new.raw_user_meta_data->>'contact_number', ''),
     now(),

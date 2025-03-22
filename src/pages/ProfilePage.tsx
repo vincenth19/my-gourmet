@@ -5,15 +5,19 @@ import { supabase } from '../lib/supabase';
 import type { Profile, ProfileRole } from '../types/database.types';
 import { Pencil, Upload, X, User } from 'lucide-react';
 import DietaryPreferences from '../components/DietaryPreferences';
+import PaymentMethodForm from '../components/PaymentMethodForm';
 import { useDropzone } from 'react-dropzone';
 import { v4 as uuidv4 } from 'uuid';
+import toast from 'react-hot-toast';
 
 interface PaymentMethod {
-  id: string;
-  method_type: string;
+  id?: string;
+  profile_id?: string;
+  method_type?: string;
   card_number: string;
   expiry_date: string;
   cvv: string;
+  name_on_card: string;
 }
 
 const ProfilePage = () => {
@@ -30,6 +34,9 @@ const ProfilePage = () => {
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [currentYear] = useState(new Date().getFullYear());
+  const [expiryMonth, setExpiryMonth] = useState<string>('');
+  const [expiryYear, setExpiryYear] = useState<string>('');
   const navigate = useNavigate();
 
   const fetchProfile = useCallback(async () => {
@@ -118,6 +125,33 @@ const ProfilePage = () => {
     fetchProfile();
   }, [fetchProfile]);
 
+  // For handling the expiry date dropdowns
+  useEffect(() => {
+    if (editedPaymentMethod?.expiry_date) {
+      const [month, year] = editedPaymentMethod.expiry_date.split('/');
+      if (month) setExpiryMonth(month);
+      if (year) setExpiryYear(year);
+    }
+  }, [editedPaymentMethod?.expiry_date]);
+
+  // Update the expiry date when dropdowns change
+  const handleExpiryChange = (type: 'month' | 'year', value: string) => {
+    if (type === 'month') {
+      setExpiryMonth(value);
+    } else {
+      setExpiryYear(value);
+    }
+    
+    // Update the editedPaymentMethod with the new expiry date
+    const newExpiryDate = type === 'month' 
+      ? `${value}/${expiryYear}` 
+      : `${expiryMonth}/${value}`;
+      
+    setEditedPaymentMethod(prev => 
+      prev ? { ...prev, expiry_date: newExpiryDate } : null
+    );
+  };
+
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
@@ -128,29 +162,25 @@ const ProfilePage = () => {
   };
 
   const handleEditToggle = () => {
-    setIsEditing(!isEditing);
-    // Reset edit form if canceling
     if (isEditing) {
-      setEditedProfile(profile);
-      // Also refresh dietary tags to reset any unsaved changes
-      fetchUserDietaryTags(profile?.id);
-      // Reset payment method changes
-      setEditedPaymentMethod(paymentMethod);
+      // If we're exiting edit mode, reset to the original payment method
+      setEditedPaymentMethod(paymentMethod ? { ...paymentMethod } : null);
     } else {
-      // If entering edit mode and no payment method exists, create a default empty one
-      if (!paymentMethod && profile?.role !== 'chef') {
+      // If entering edit mode, create a default payment method if none exists
+      if (!paymentMethod) {
         setEditedPaymentMethod({
-          id: '',
+          profile_id: profile?.id || '',
           method_type: 'card',
+          name_on_card: '',
           card_number: '',
           expiry_date: '',
           cvv: ''
         });
       }
     }
+    setIsEditing(!isEditing);
     // Clear any success or error messages
     setError(null);
-    setSuccessMessage(null);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -247,48 +277,51 @@ const ProfilePage = () => {
     }
   };
 
-  const savePaymentMethod = async (profileId: string) => {
-    // Skip for chef role
-    if (profile?.role === 'chef') return true;
-    
+  const savePaymentMethod = async () => {
+    if (!editedPaymentMethod || !profile?.id) return;
+
     try {
-      if (!editedPaymentMethod) {
-        return true;
-      }
+      setSaving(true);
       
+      // Check if we need to update or insert
       if (paymentMethod?.id) {
         // Update existing payment method
-        const { error: updateError } = await supabase
+        const { error } = await supabase
           .from('payment_methods')
           .update({
+            name_on_card: editedPaymentMethod.name_on_card,
             card_number: editedPaymentMethod.card_number,
             expiry_date: editedPaymentMethod.expiry_date,
             cvv: editedPaymentMethod.cvv
           })
           .eq('id', paymentMethod.id);
-          
-        if (updateError) throw updateError;
+
+        if (error) throw error;
       } else {
         // Insert new payment method
-        const { error: insertError } = await supabase
+        const { error } = await supabase
           .from('payment_methods')
           .insert({
-            profile_id: profileId,
+            profile_id: profile.id,
             method_type: 'card',
+            name_on_card: editedPaymentMethod.name_on_card,
             card_number: editedPaymentMethod.card_number,
             expiry_date: editedPaymentMethod.expiry_date,
             cvv: editedPaymentMethod.cvv
           });
-          
-        if (insertError) throw insertError;
+
+        if (error) throw error;
       }
-      
-      // Update the displayed payment method
-      setPaymentMethod(editedPaymentMethod);
-      return true;
+
+      // Fetch updated payment method
+      fetchPaymentMethod(profile.id);
+      setIsEditing(false);
+      toast.success("Payment method saved successfully");
     } catch (error) {
       console.error('Error saving payment method:', error);
-      return false;
+      toast.error("Failed to save payment method");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -409,11 +442,7 @@ const ProfilePage = () => {
       }
       
       // Save payment method
-      const paymentMethodSuccess = await savePaymentMethod(profile.id);
-      if (!paymentMethodSuccess) {
-        setError('Profile updated but payment method failed to save');
-        return;
-      }
+      await savePaymentMethod();
       
       // Update the displayed profile with edited values including profile image
       setProfile({...editedProfile, avatar_url: profileImagePath});
@@ -434,6 +463,134 @@ const ProfilePage = () => {
       month: 'long',
       day: 'numeric'
     });
+  };
+
+  // Payment method section JSX
+  const renderPaymentMethod = () => {
+    return (
+      <div className="bg-white rounded-lg p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Payment Method</h2>
+          {profile?.role === 'customer' && (
+            <div>
+              {isEditing ? (
+                <button
+                  onClick={handleEditToggle}
+                  className="text-navy hover:text-navy-light"
+                >
+                  Cancel
+                </button>
+              ) : paymentMethod ? (
+                <button
+                  onClick={handleRemovePaymentMethod}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  Remove
+                </button>
+              ) : (
+                <button
+                  onClick={handleEditToggle}
+                  className="text-navy hover:text-navy-light"
+                >
+                  Add
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+
+        {profile?.role === 'chef' ? (
+          <p className="text-gray-600">Payment methods are only available for customers.</p>
+        ) : isEditing ? (
+          <div className="space-y-4">
+            <PaymentMethodForm
+              initialValues={editedPaymentMethod || undefined}
+              onChange={(values) => setEditedPaymentMethod(values as PaymentMethod)}
+            />
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={savePaymentMethod}
+                disabled={saving}
+                className="bg-navy text-white px-4 py-2 rounded hover:bg-navy-light disabled:opacity-50"
+              >
+                {saving ? 'Saving...' : 'Save'}
+              </button>
+            </div>
+          </div>
+        ) : paymentMethod ? (
+          <div className="rounded-lg border border-gray-200 p-6">
+            <div className="flex flex-col space-y-3">
+              <div className="flex items-center">
+                <span className="font-medium w-32">Card Number:</span>
+                <span>•••• •••• •••• {paymentMethod.card_number.slice(-4)}</span>
+              </div>
+              <div className="flex items-center">
+                <span className="font-medium w-32">Name on Card:</span>
+                <span>{paymentMethod.name_on_card}</span>
+              </div>
+              <div className="flex items-center">
+                <span className="font-medium w-32">Expiry Date:</span>
+                <span>{paymentMethod.expiry_date}</span>
+              </div>
+              <div className="flex items-center">
+                <span className="font-medium w-32">CVV:</span>
+                <span>•••</span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <div className="mb-4 rounded-full bg-gray-100 p-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+              </svg>
+            </div>
+            <p className="text-gray-600 mb-4">No payment method added yet.</p>
+            <button
+              onClick={handleEditToggle}
+              className="bg-navy text-white px-4 py-2 rounded hover:bg-navy-light transition-colors"
+            >
+              Add Payment Method
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Remove payment method
+  const handleRemovePaymentMethod = async () => {
+    if (!paymentMethod?.id || !profile?.id) return;
+
+    try {
+      setSaving(true);
+      const { error } = await supabase
+        .from('payment_methods')
+        .delete()
+        .eq('id', paymentMethod.id);
+
+      if (error) throw error;
+
+      // Clear payment method data
+      setPaymentMethod(null);
+      setEditedPaymentMethod({
+        profile_id: profile.id,
+        method_type: 'card',
+        name_on_card: '',
+        card_number: '',
+        expiry_date: '',
+        cvv: ''
+      });
+      
+      // Enter edit mode to add new payment method
+      setIsEditing(true);
+      toast.success("Payment method removed successfully");
+    } catch (error) {
+      console.error('Error removing payment method:', error);
+      toast.error("Failed to remove payment method");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -522,14 +679,16 @@ const ProfilePage = () => {
                     </div>
                   </div>
 
+                  <div className="bg-gray-50 rounded-lg p-6">
+                    <h2 className="text-lg font-medium text-gray-900 mb-4">
+                      {profile.role === 'chef' ? 'About Me' : 'Preferences'}
+                    </h2>
+                    <p className="text-gray-700">{profile.preferences || 'No preferences set'}</p>
+                  </div>
+
                   {/* Only show preferences section for non-chef users */}
                   {profile.role !== 'chef' && (
                     <>
-                      <div className="bg-gray-50 rounded-lg p-6">
-                        <h2 className="text-lg font-medium text-gray-900 mb-4">Preferences</h2>
-                        <p className="text-gray-700">{profile.preferences || 'No preferences set'}</p>
-                      </div>
-                      
                       {/* Dietary Preferences Section */}
                       <div className="bg-gray-50 rounded-lg p-6">
                         <DietaryPreferences 
@@ -541,27 +700,7 @@ const ProfilePage = () => {
                       </div>
                       
                       {/* Payment Method Section */}
-                      <div className="bg-gray-50 rounded-lg p-6">
-                        <h2 className="text-lg font-medium text-gray-900 mb-4">Payment Method</h2>
-                        {paymentMethod ? (
-                          <div className="space-y-2">
-                            <div>
-                              <span className="text-sm font-medium text-gray-500">Card Number:</span>
-                              <p className="text-gray-700">•••• •••• •••• {paymentMethod.card_number.slice(-4)}</p>
-                            </div>
-                            <div>
-                              <span className="text-sm font-medium text-gray-500">Expiry Date:</span>
-                              <p className="text-gray-700">{paymentMethod.expiry_date}</p>
-                            </div>
-                            <div>
-                              <span className="text-sm font-medium text-gray-500">CVV:</span>
-                              <p className="text-gray-700">•••</p>
-                            </div>
-                          </div>
-                        ) : (
-                          <p className="text-gray-700">No payment method added</p>
-                        )}
-                      </div>
+                      {renderPaymentMethod()}
                     </>
                   )}
                 </>
@@ -671,58 +810,8 @@ const ProfilePage = () => {
                         />
                       </div>
                       
-                      {/* Payment Method Section - Edit Mode */}
-                      <div className="bg-gray-50 rounded-lg p-6">
-                        <h2 className="text-lg font-medium text-gray-900 mb-4">Payment Method</h2>
-                        <div className="space-y-4">
-                          <div>
-                            <label htmlFor="card_number" className="block text-sm font-medium text-gray-700 mb-1">
-                              Card Number
-                            </label>
-                            <input
-                              id="card_number"
-                              name="card_number"
-                              type="text"
-                              value={editedPaymentMethod?.card_number || ''}
-                              onChange={handlePaymentMethodChange}
-                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent"
-                              placeholder="XXXX XXXX XXXX XXXX"
-                            />
-                          </div>
-                          
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <label htmlFor="expiry_date" className="block text-sm font-medium text-gray-700 mb-1">
-                                Expiry Date
-                              </label>
-                              <input
-                                id="expiry_date"
-                                name="expiry_date"
-                                type="text"
-                                value={editedPaymentMethod?.expiry_date || ''}
-                                onChange={handlePaymentMethodChange}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent"
-                                placeholder="MM/YY"
-                              />
-                            </div>
-                            
-                            <div>
-                              <label htmlFor="cvv" className="block text-sm font-medium text-gray-700 mb-1">
-                                CVV
-                              </label>
-                              <input
-                                id="cvv"
-                                name="cvv"
-                                type="text"
-                                value={editedPaymentMethod?.cvv || ''}
-                                onChange={handlePaymentMethodChange}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent"
-                                placeholder="123"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                      {/* Payment Method Section */}
+                      {renderPaymentMethod()}
                     </>
                   )}
                 </>

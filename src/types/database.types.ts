@@ -43,6 +43,7 @@ export interface PaymentMethod {
   card_number: string;
   expiry_date: string;
   cvv: string;
+  name_on_card: string;
   created_at: string;
 }
 

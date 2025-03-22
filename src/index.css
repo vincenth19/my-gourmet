@@ -16,6 +16,22 @@ body {
   font-family: 'Montserrat', sans-serif;
 }
 
+/* Custom animations */
+@keyframes shine-rotate {
+  0% {
+    transform: rotate(0deg);
+    opacity: 0.3;
+  }
+  100% {
+    transform: rotate(360deg);
+    opacity: 0.3;
+  }
+}
+
+.animate-shine-rotate {
+  animation: shine-rotate 8s infinite linear;
+}
+
 /* Luxury gold color theme for luxury design */
 @layer utilities {
   .text-navy {

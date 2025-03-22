@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import type { FormEvent, ChangeEvent } from 'react';
 import { supabase } from '../lib/supabase';
 import logoBnw from '../assets/logo-w-text-bnw.svg';
+import PaymentMethodForm from '../components/PaymentMethodForm';
+import { PaymentMethod } from '../types/database.types';
 
 const SignUpPage = () => {
   // Track the current step of the signup flow
@@ -17,8 +19,11 @@ const SignUpPage = () => {
     lastName: '',
     phoneNumber: '',
     userType: 'customer', // 'customer' or 'chef'
-    
-    // Step 2 fields
+  });
+  
+  // State for payment method details
+  const [paymentDetails, setPaymentDetails] = useState<Partial<PaymentMethod>>({
+    name_on_card: '',
     card_number: '',
     expiry_date: '',
     cvv: ''
@@ -66,80 +71,58 @@ const SignUpPage = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
-
-    // Final validation before submission
-    if (step === 1 && formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
     setLoading(true);
 
     try {
-      // Sign up with Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      // Sign up the user in Supabase with metadata for profile creation
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
           data: {
-            display_name: formData.firstName + ' ' + formData.lastName,
+            display_name: formData.firstName+" "+formData.lastName,
             contact_number: formData.phoneNumber,
             role: formData.userType,
-          },
-        },
+          }
+        }
       });
 
-      if (authError) {
-        console.error('Auth Error:', authError);
-        throw authError;
-      }
+      if (signUpError) throw signUpError;
 
-      if (!authData.user) {
-        throw new Error('No user data returned');
-      }
+      if (authData.user) {
+        // If user is a customer, add payment details
+        if (formData.userType === 'customer' && authData.session) {
+          const { error: paymentError } = await supabase
+            .from('payment_methods')
+            .insert({
+              profile_id: authData.user.id,
+              method_type: 'card',
+              name_on_card: paymentDetails.name_on_card,
+              card_number: paymentDetails.card_number,
+              expiry_date: paymentDetails.expiry_date,
+              cvv: paymentDetails.cvv,
+            });
 
-      // If we have a session and the user is a customer, save payment method
-      if (authData.session && formData.userType === 'customer') {
-        const userId = authData.user.id;
-        
-        // Save payment method
-        const { error: paymentError } = await supabase
-          .from('payment_methods')
-          .insert({
-            profile_id: userId,
-            method_type: 'card',
-            card_number: formData.card_number,
-            expiry_date: formData.expiry_date,
-            cvv: formData.cvv
-          });
-        
-        if (paymentError) {
-          console.error('Error saving payment method:', paymentError);
+          if (paymentError) throw paymentError;
         }
-      }
 
-      // Check if email confirmation is required
-      if (authData.session === null) {
-        setError('Please check your email for the confirmation link');
-        return;
-      }
+        // Check if email confirmation is required
+        if (!authData.session) {
+          setError('Please check your email for the confirmation link before continuing');
+          setLoading(false);
+          return;
+        }
 
-      // Navigate based on role with auth success parameter
-      const path = formData.userType === 'chef' ? '/chef/home' : '/home';
-      navigate(`${path}?auth=success`);
-    } catch (err) {
-      console.error('Signup Error:', err);
-      if (err instanceof Error) {
-        if (err.message.includes('already registered')) {
-          setError('This email is already registered. Please sign in instead.');
-        } else if (err.message.includes('password')) {
-          setError('Password must be at least 6 characters long');
+        // Redirect based on user type
+        if (formData.userType === 'chef') {
+          navigate('/chef/home');
         } else {
-          setError(err.message);
+          navigate('/home');
         }
-      } else {
-        setError('Failed to create account. Please try again.');
       }
+    } catch (error: any) {
+      console.error('Error during signup:', error);
+      setError(error.message || 'An error occurred during signup');
     } finally {
       setLoading(false);
     }
@@ -290,60 +273,11 @@ const SignUpPage = () => {
         {/* Payment Method */}
         <div className="bg-gray-50 rounded-lg p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Payment Method</h3>
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="card_number" className="block text-sm font-medium text-gray-700 mb-1">
-                Card Number
-              </label>
-              <input
-                id="card_number"
-                name="card_number"
-                type="text"
-                required
-                value={formData.card_number}
-                onChange={handleChange}
-                className="appearance-none relative block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent transition-colors duration-200"
-                placeholder="Enter your card number"
-                disabled={loading}
-              />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="expiry_date" className="block text-sm font-medium text-gray-700 mb-1">
-                  Expiry Date
-                </label>
-                <input
-                  id="expiry_date"
-                  name="expiry_date"
-                  type="text"
-                  required
-                  value={formData.expiry_date}
-                  onChange={handleChange}
-                  className="appearance-none relative block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent transition-colors duration-200"
-                  placeholder="MM/YY"
-                  disabled={loading}
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="cvv" className="block text-sm font-medium text-gray-700 mb-1">
-                  CVV
-                </label>
-                <input
-                  id="cvv"
-                  name="cvv"
-                  type="text"
-                  required
-                  value={formData.cvv}
-                  onChange={handleChange}
-                  className="appearance-none relative block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent transition-colors duration-200"
-                  placeholder="123"
-                  disabled={loading}
-                />
-              </div>
-            </div>
-          </div>
+          <PaymentMethodForm
+            initialValues={paymentDetails}
+            onChange={setPaymentDetails}
+            disabled={loading}
+          />
         </div>
       </div>
 
