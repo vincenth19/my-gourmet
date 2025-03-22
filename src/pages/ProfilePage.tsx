@@ -2,10 +2,11 @@ import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router';
 import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabase';
-import type { Profile, ProfileRole } from '../types/database.types';
-import { Pencil, Upload, X, User } from 'lucide-react';
+import type { Profile, ProfileRole, Address } from '../types/database.types';
+import { Pencil, Upload, X, User, Plus, MapPin, Check, Home } from 'lucide-react';
 import DietaryPreferences from '../components/DietaryPreferences';
 import PaymentMethodForm from '../components/PaymentMethodForm';
+import AddressForm from '../components/AddressForm';
 import { useDropzone } from 'react-dropzone';
 import { v4 as uuidv4 } from 'uuid';
 import toast from 'react-hot-toast';
@@ -31,12 +32,20 @@ const ProfilePage = () => {
   const [selectedDietaryTags, setSelectedDietaryTags] = useState<string[]>([]);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
   const [editedPaymentMethod, setEditedPaymentMethod] = useState<PaymentMethod | null>(null);
+  const [isEditingPayment, setIsEditingPayment] = useState(false);
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [currentYear] = useState(new Date().getFullYear());
   const [expiryMonth, setExpiryMonth] = useState<string>('');
   const [expiryYear, setExpiryYear] = useState<string>('');
+  
+  // New state for addresses
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
+  const [newAddress, setNewAddress] = useState<Partial<Address>>({});
+
   const navigate = useNavigate();
 
   const fetchProfile = useCallback(async () => {
@@ -51,7 +60,7 @@ const ProfilePage = () => {
       
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, display_name, email, contact_number, preferences, created_at, updated_at, role, avatar_url')
+        .select('id, display_name, email, contact_number, preferences, created_at, updated_at, role, avatar_url, default_address')
         .eq('id', session.user.id);
       
       if (error) {
@@ -66,17 +75,23 @@ const ProfilePage = () => {
         
         // Set profile image preview if it exists
         if (data[0].avatar_url) {
-          const { data: imageData } = supabase.storage
-            .from('profile_avatars')
-            .getPublicUrl(data[0].avatar_url);
-          
-          setProfileImagePreview(imageData.publicUrl);
+          if (data[0].avatar_url.startsWith('http')) {
+            // Already a full URL
+            setProfileImagePreview(data[0].avatar_url);
+          } else {
+            // Get URL from Supabase bucket
+            const { data: imageData } = supabase.storage
+              .from('profile_avatars')
+              .getPublicUrl(data[0].avatar_url);
+            setProfileImagePreview(imageData.publicUrl);
+          }
         }
         
-        // Only fetch dietary tags and payment method if not a chef
+        // Only fetch dietary tags, payment method, and addresses if not a chef
         if (data[0].role !== 'chef') {
           fetchUserDietaryTags(data[0].id);
           fetchPaymentMethod(data[0].id);
+          fetchAddresses(data[0].id);
         }
       } else {
         // Handle case where no profile exists
@@ -89,6 +104,7 @@ const ProfilePage = () => {
           contact_number: '',
           preferences: '',
           avatar_url: '',
+          default_address: null,
           role: 'customer' as ProfileRole, // Type cast to ProfileRole
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
@@ -107,10 +123,11 @@ const ProfilePage = () => {
         setProfile(defaultProfile);
         setEditedProfile(defaultProfile);
         
-        // Only fetch dietary tags and payment method if not a chef
+        // Only fetch dietary tags, payment method, and addresses if not a chef
         if (defaultProfile.role !== 'chef') {
           fetchUserDietaryTags(defaultProfile.id);
           fetchPaymentMethod(defaultProfile.id);
+          fetchAddresses(defaultProfile.id);
         }
       }
     } catch (error) {
@@ -161,8 +178,23 @@ const ProfilePage = () => {
     }
   };
 
+  // Handle toggling edit mode for profile information only
   const handleEditToggle = () => {
     if (isEditing) {
+      // If we're exiting edit mode, reset to the original values
+      setEditedProfile(profile ? { ...profile } : null);
+    } else {
+      // If entering edit mode, copy the current profile
+      setEditedProfile(profile ? { ...profile } : null);
+    }
+    setIsEditing(!isEditing);
+    // Clear any success or error messages
+    setError(null);
+  };
+
+  // Handle toggling payment method editing
+  const handlePaymentEditToggle = () => {
+    if (isEditingPayment) {
       // If we're exiting edit mode, reset to the original payment method
       setEditedPaymentMethod(paymentMethod ? { ...paymentMethod } : null);
     } else {
@@ -178,7 +210,7 @@ const ProfilePage = () => {
         });
       }
     }
-    setIsEditing(!isEditing);
+    setIsEditingPayment(!isEditingPayment);
     // Clear any success or error messages
     setError(null);
   };
@@ -315,7 +347,7 @@ const ProfilePage = () => {
 
       // Fetch updated payment method
       fetchPaymentMethod(profile.id);
-      setIsEditing(false);
+      setIsEditingPayment(false);
       toast.success("Payment method saved successfully");
     } catch (error) {
       console.error('Error saving payment method:', error);
@@ -441,8 +473,8 @@ const ProfilePage = () => {
         return;
       }
       
-      // Save payment method
-      await savePaymentMethod();
+      // We no longer save payment method as part of general profile edit
+      // Payment methods are handled separately
       
       // Update the displayed profile with edited values including profile image
       setProfile({...editedProfile, avatar_url: profileImagePath});
@@ -473,9 +505,9 @@ const ProfilePage = () => {
           <h2 className="text-xl font-semibold">Payment Method</h2>
           {profile?.role === 'customer' && (
             <div>
-              {isEditing ? (
+              {isEditingPayment ? (
                 <button
-                  onClick={handleEditToggle}
+                  onClick={handlePaymentEditToggle}
                   className="text-navy hover:text-navy-light"
                 >
                   Cancel
@@ -489,7 +521,7 @@ const ProfilePage = () => {
                 </button>
               ) : (
                 <button
-                  onClick={handleEditToggle}
+                  onClick={handlePaymentEditToggle}
                   className="text-navy hover:text-navy-light"
                 >
                   Add
@@ -501,7 +533,7 @@ const ProfilePage = () => {
 
         {profile?.role === 'chef' ? (
           <p className="text-gray-600">Payment methods are only available for customers.</p>
-        ) : isEditing ? (
+        ) : isEditingPayment ? (
           <div className="space-y-4">
             <PaymentMethodForm
               initialValues={editedPaymentMethod || undefined}
@@ -547,7 +579,7 @@ const ProfilePage = () => {
             </div>
             <p className="text-gray-600 mb-4">No payment method added yet.</p>
             <button
-              onClick={handleEditToggle}
+              onClick={handlePaymentEditToggle}
               className="bg-navy text-white px-4 py-2 rounded hover:bg-navy-light transition-colors"
             >
               Add Payment Method
@@ -583,7 +615,7 @@ const ProfilePage = () => {
       });
       
       // Enter edit mode to add new payment method
-      setIsEditing(true);
+      setIsEditingPayment(true);
       toast.success("Payment method removed successfully");
     } catch (error) {
       console.error('Error removing payment method:', error);
@@ -591,6 +623,278 @@ const ProfilePage = () => {
     } finally {
       setSaving(false);
     }
+  };
+
+  // Add the fetchAddresses function
+  const fetchAddresses = async (profileId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('addresses')
+        .select('*')
+        .eq('profile_id', profileId)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      if (data) {
+        setAddresses(data);
+        
+        // If there's only one address and no default is set, make it default
+        if (data.length === 1 && !profile?.default_address) {
+          setDefaultAddress(data[0].id);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching addresses:', error);
+    }
+  };
+
+  // Function to set an address as default
+  const setDefaultAddress = async (addressId: string) => {
+    if (!profile?.id) return;
+    
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ default_address: addressId })
+        .eq('id', profile.id);
+      
+      if (error) throw error;
+      
+      // Update local state
+      setProfile(prev => prev ? { ...prev, default_address: addressId } : null);
+      setEditedProfile(prev => prev ? { ...prev, default_address: addressId } : null);
+      toast.success('Default address updated');
+      
+      // Re-sort addresses to show default first
+      fetchAddresses(profile.id);
+    } catch (error) {
+      console.error('Error setting default address:', error);
+      toast.error('Failed to update default address');
+    }
+  };
+
+  // Function to add a new address
+  const saveAddress = async () => {
+    if (!profile?.id) return;
+    
+    try {
+      setSaving(true);
+      
+      if (editingAddressId) {
+        // Update existing address
+        const { error } = await supabase
+          .from('addresses')
+          .update({
+            address_line: newAddress.address_line,
+            city: newAddress.city,
+            state: newAddress.state,
+            zip_code: newAddress.zip_code,
+            access_note: newAddress.access_note
+          })
+          .eq('id', editingAddressId);
+        
+        if (error) throw error;
+        
+        toast.success('Address updated successfully');
+      } else {
+        // Insert new address
+        const { data, error } = await supabase
+          .from('addresses')
+          .insert({
+            profile_id: profile.id,
+            address_line: newAddress.address_line,
+            city: newAddress.city,
+            state: newAddress.state,
+            zip_code: newAddress.zip_code,
+            access_note: newAddress.access_note
+          })
+          .select();
+        
+        if (error) throw error;
+        
+        // If this is the first address, set it as default
+        if (addresses.length === 0 && data && data.length > 0) {
+          await setDefaultAddress(data[0].id);
+        }
+        
+        toast.success('Address added successfully');
+      }
+      
+      // Reset form and state
+      setNewAddress({});
+      setShowAddressForm(false);
+      setEditingAddressId(null);
+      
+      // Refresh addresses list
+      fetchAddresses(profile.id);
+    } catch (error) {
+      console.error('Error saving address:', error);
+      toast.error('Failed to save address');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Function to delete an address
+  const deleteAddress = async (addressId: string) => {
+    if (!profile?.id) return;
+    
+    try {
+      setSaving(true);
+      
+      // Check if this is the default address
+      if (profile.default_address === addressId) {
+        // First, set default_address to null in profile
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({ default_address: null })
+          .eq('id', profile.id);
+        
+        if (profileError) throw profileError;
+        
+        // Update local state for profile
+        setProfile(prev => prev ? { ...prev, default_address: null } : null);
+        setEditedProfile(prev => prev ? { ...prev, default_address: null } : null);
+      }
+      
+      // Now delete the address
+      const { error } = await supabase
+        .from('addresses')
+        .delete()
+        .eq('id', addressId);
+      
+      if (error) throw error;
+      
+      toast.success('Address deleted successfully');
+      
+      // Refresh addresses list
+      fetchAddresses(profile.id);
+    } catch (error) {
+      console.error('Error deleting address:', error);
+      toast.error('Failed to delete address');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Function to start editing an address
+  const editAddress = (address: Address) => {
+    setNewAddress(address);
+    setEditingAddressId(address.id);
+    setShowAddressForm(true);
+  };
+
+  // Address list section
+  const renderAddressSection = () => {
+    return (
+      <div className="bg-white rounded-lg p-6 space-y-4">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Your Addresses</h2>
+          <button
+            onClick={() => {
+              setNewAddress({});
+              setEditingAddressId(null);
+              setShowAddressForm(!showAddressForm);
+            }}
+            className="flex items-center gap-2 text-navy hover:text-navy-light"
+          >
+            {showAddressForm ? 'Cancel' : <><Plus size={16} /> Add New Address</>}
+          </button>
+        </div>
+
+        {showAddressForm ? (
+          <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+            <h3 className="text-lg font-medium mb-4">
+              {editingAddressId ? 'Edit Address' : 'Add New Address'}
+            </h3>
+            <AddressForm
+              initialValues={newAddress}
+              onChange={setNewAddress}
+              onSubmit={saveAddress}
+              onCancel={() => {
+                setShowAddressForm(false);
+                setEditingAddressId(null);
+                setNewAddress({});
+              }}
+              disabled={saving}
+              submitButtonText={editingAddressId ? 'Update Address' : 'Add Address'}
+            />
+          </div>
+        ) : addresses.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <div className="mb-4 rounded-full bg-gray-100 p-4">
+              <MapPin className="h-10 w-10 text-gray-400" />
+            </div>
+            <p className="text-gray-600 mb-4">You don't have any saved addresses yet.</p>
+            <button
+              onClick={() => setShowAddressForm(true)}
+              className="bg-navy text-white px-4 py-2 rounded hover:bg-navy-light transition-colors"
+            >
+              Add Your First Address
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {/* Sort addresses to show default first */}
+            {addresses
+              .sort((a, b) => {
+                if (a.id === profile?.default_address) return -1;
+                if (b.id === profile?.default_address) return 1;
+                return 0;
+              })
+              .map(address => (
+                <div 
+                  key={address.id} 
+                  className={`rounded-lg border p-4 relative 
+                    ${address.id === profile?.default_address ? 'bg-blue-100 bg-opacity-5 border-navy-light' : 'border-gray-200'}`}
+                >
+                  {address.id === profile?.default_address && (
+                    <div className="flex justify-end text-navy text-xs pb-4 rounded-full items-center">
+                      Default
+                    </div>
+                  )}
+                  <div className="mt-2">
+                    <div className="space-y-1">
+                      <p className="font-medium">{address.address_line}</p>
+                      <p className="text-gray-600">{address.city}, {address.state} {address.zip_code}</p>
+                      {address.access_note && (
+                        <p className="text-gray-500 text-sm mt-2">
+                          <span className="font-medium">Access note:</span> {address.access_note}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex justify-between items-end space-x-2 mt-5">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => editAddress(address)}
+                          className="text-navy hover:text-navy-light text-sm border-navy border rounded-lg px-2 py-1"
+                        >
+                          Edit
+                        </button>
+                        {address.id !== profile?.default_address && (
+                        <button
+                          onClick={() => setDefaultAddress(address.id)}
+                          className="text-gray-600 hover:text-navy text-sm flex items-center border-navy border rounded-lg px-2 py-1"
+                        >
+                          Set as Default
+                        </button>
+                      )}
+                      </div>
+                      <button
+                        onClick={() => deleteAddress(address.id)}
+                        className="text-red-500 hover:text-red-700 text-sm border-red-500 border rounded-lg px-2 py-1"
+                      >
+                        Delete
+                      </button>                      
+                    </div>
+                  </div>
+                </div>
+              ))}
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -698,6 +1002,9 @@ const ProfilePage = () => {
                           onTagsChange={handleDietaryTagsChange}
                         />
                       </div>
+                      
+                      {/* Address Section - New */}
+                      {renderAddressSection()}
                       
                       {/* Payment Method Section */}
                       {renderPaymentMethod()}
@@ -809,6 +1116,34 @@ const ProfilePage = () => {
                           onTagsChange={handleDietaryTagsChange}
                         />
                       </div>
+                      {isEditing && (
+                        <div className="flex justify-end space-x-3 pt-4">
+                          <button
+                            onClick={handleEditToggle}
+                            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors duration-200"
+                            disabled={saving}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={handleSave}
+                            className="px-4 py-2 bg-navy hover:bg-navy-light text-white rounded-lg transition-colors duration-200 flex items-center"
+                            disabled={saving}
+                          >
+                            {saving ? (
+                              <>
+                                <span className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></span>
+                                Saving...
+                              </>
+                            ) : (
+                              'Save Changes'
+                            )}
+                          </button>
+                        </div>
+                      )}
+                      
+                      {/* Address Section - New */}
+                      {renderAddressSection()}
                       
                       {/* Payment Method Section */}
                       {renderPaymentMethod()}
@@ -817,31 +1152,6 @@ const ProfilePage = () => {
                 </>
               )}
 
-              {isEditing && (
-                <div className="flex justify-end space-x-3 pt-4">
-                  <button
-                    onClick={handleEditToggle}
-                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors duration-200"
-                    disabled={saving}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSave}
-                    className="px-4 py-2 bg-navy hover:bg-navy-light text-white rounded-lg transition-colors duration-200 flex items-center"
-                    disabled={saving}
-                  >
-                    {saving ? (
-                      <>
-                        <span className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></span>
-                        Saving...
-                      </>
-                    ) : (
-                      'Save Changes'
-                    )}
-                  </button>
-                </div>
-              )}
             </div>
           )}
         </motion.div>

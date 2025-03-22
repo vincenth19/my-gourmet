@@ -3,17 +3,35 @@ CREATE TYPE public.app_role AS ENUM ('customer', 'chef', 'admin');
 CREATE TYPE public.order_status AS ENUM ('pending', 'accepted', 'completed', 'rejected');
 CREATE TYPE public.payment_status AS ENUM ('unpaid', 'paid', 'refunded');
 
--- Create profiles table
+-- Create profiles table without the foreign key constraint initially
 CREATE TABLE public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   display_name VARCHAR NOT NULL,
   email VARCHAR UNIQUE NOT NULL,
   contact_number VARCHAR,
   preferences TEXT,
+  default_address UUID,
   role public.app_role NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE
 );
+
+-- Create addresses table
+CREATE TABLE public.addresses (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  profile_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
+  address_line VARCHAR NOT NULL,
+  city VARCHAR NOT NULL,
+  state VARCHAR NOT NULL,
+  zip_code VARCHAR NOT NULL,
+  access_note TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Now add the foreign key constraint to profiles table
+ALTER TABLE public.profiles
+ADD CONSTRAINT profiles_default_address_fkey
+FOREIGN KEY (default_address) REFERENCES public.addresses(id) ON DELETE SET NULL;
 
 -- Create dietary_tags table
 CREATE TABLE public.dietary_tags (
@@ -27,17 +45,6 @@ CREATE TABLE public.profile_dietary_tags (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   profile_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
   dietary_tag_id UUID REFERENCES public.dietary_tags(id)
-);
-
--- Create addresses table
-CREATE TABLE public.addresses (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  profile_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
-  address_line VARCHAR NOT NULL,
-  city VARCHAR NOT NULL,
-  state VARCHAR NOT NULL,
-  zip_code VARCHAR NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- Create payment_methods table

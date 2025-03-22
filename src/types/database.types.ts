@@ -9,6 +9,7 @@ export interface Profile {
   contact_number?: string;
   preferences?: string;
   avatar_url?: string;
+  default_address?: string | null;
   role: ProfileRole;
   created_at: string;
   updated_at?: string;
@@ -33,6 +34,7 @@ export interface Address {
   city: string;
   state: string;
   zip_code: string;
+  access_note?: string;
   created_at: string;
 }
 
