@@ -239,10 +239,6 @@ const UserHomePage = () => {
                         (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300x450?text=Chef';
                       }}
                     />
-                    {/* "Start Here" badge */}
-                    <div className="absolute top-0 right-0 bg-navy text-white text-xs font-bold px-2 py-1 m-2">
-                      STEP 1
-                    </div>
                   </div>
                   
                   <div className="p-4">

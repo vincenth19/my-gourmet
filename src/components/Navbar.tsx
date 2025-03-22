@@ -1,6 +1,8 @@
-import { Link } from 'react-router';
+import { Link} from "react-router";
 import { useAuth } from '../contexts/AuthContext';
 import logoBnw from '../assets/logo-w-text-bnw.svg';
+import { ShoppingCart } from "lucide-react";
+
 interface NavbarProps {
   activePage?: 'home' | 'profile' | 'orders' | 'dishes' | 'cart';
 }
@@ -56,8 +58,9 @@ const Navbar = ({ activePage = 'home' }: NavbarProps) => {
                 <button 
                   className={`${activePage === 'cart' 
                     ? 'text-navy border-b border-navy pb-1' 
-                    : 'text-gray-600 hover:text-navy'} font-light transition-colors duration-200`}
+                    : 'text-gray-600 hover:text-navy'} font-light transition-colors duration-200 flex items-center`}
                 >
+                  <ShoppingCart size={18} className="mr-1" />
                   Cart
                 </button>
               </Link>

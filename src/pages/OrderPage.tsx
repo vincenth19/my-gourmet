@@ -20,6 +20,11 @@ const OrderPage = () => {
   const [selectedCustomizations, setSelectedCustomizations] = useState<string[]>([]);
   const [dishNote, setDishNote] = useState('');
   
+  // Add new states for cart restriction functionality
+  const [showChefConflictModal, setShowChefConflictModal] = useState(false);
+  const [existingChefName, setExistingChefName] = useState('');
+  const [pendingCartItem, setPendingCartItem] = useState<any>(null);
+  
   // Fetch chef and dishes data
   useEffect(() => {
     const fetchData = async () => {
@@ -123,6 +128,175 @@ const OrderPage = () => {
       setSelectedCustomizations([]);
       setDishNote('');
     }, 200); // Clear selected dish after modal close animation
+  };
+  
+  // Add to cart functionality
+  const addToCart = async () => {
+    if (!user || !selectedDish || !chef) return;
+    
+    try {
+      // First, check if user has a cart
+      const { data: cartData, error: cartError } = await supabase
+        .from('carts')
+        .select('id')
+        .eq('profile_id', user.id)
+        .single();
+      
+      if (cartError && cartError.code !== 'PGRST116') { // PGRST116 means no rows returned
+        throw cartError;
+      }
+      
+      let cartId;
+      
+      if (!cartData) {
+        // Create a new cart
+        const { data: newCart, error: newCartError } = await supabase
+          .from('carts')
+          .insert({ profile_id: user.id })
+          .select('id')
+          .single();
+        
+        if (newCartError) throw newCartError;
+        cartId = newCart.id;
+      } else {
+        cartId = cartData.id;
+        
+        // Check if cart already has items from a different chef
+        const { data: existingItems, error: itemsError } = await supabase
+          .from('cart_items')
+          .select('dish_id')
+          .eq('cart_id', cartId);
+          
+        if (itemsError) throw itemsError;
+        
+        if (existingItems && existingItems.length > 0) {
+          // Get first dish to check its chef
+          const { data: firstDish, error: dishError } = await supabase
+            .from('dishes')
+            .select('chef_id')
+            .eq('id', existingItems[0].dish_id)
+            .single();
+            
+          if (dishError) throw dishError;
+          
+          // If dish exists and belongs to a different chef
+          if (firstDish && firstDish.chef_id !== chef.id) {
+            // Get chef name
+            const { data: chefData } = await supabase
+              .from('profiles')
+              .select('display_name')
+              .eq('id', firstDish.chef_id)
+              .single();
+              
+            // Store current item details for later use if user confirms
+            setExistingChefName(chefData?.display_name || 'another chef');
+            
+            // Prepare customization_options in the correct format
+            const customizationOptions = selectedCustomizations.length > 0 
+              ? { option: selectedCustomizations }
+              : null;
+              
+            // Store pending item data
+            setPendingCartItem({
+              cart_id: cartId,
+              dish_id: selectedDish.id,
+              dish_name: selectedDish.name,
+              dish_price: selectedDish.price,
+              quantity: quantity,
+              customization_options: customizationOptions,
+              dish_note: dishNote.trim() || null,
+              dietary_tags: selectedDish.dietary_tags ? { tags: selectedDish.dietary_tags.map(tag => tag.label) } : null,
+            });
+            
+            // Show conflict modal
+            setShowChefConflictModal(true);
+            return;
+          }
+        }
+      }
+      
+      // If we reach here, either cart was empty or already had items from the same chef
+      await addItemToCart(cartId);
+      
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      alert('Failed to add item to cart. Please try again.');
+    }
+  };
+  
+  // Helper function to add item to cart
+  const addItemToCart = async (cartId: string) => {
+    if (!selectedDish) return;
+    
+    try {
+      // Prepare customization_options in the correct format
+      const customizationOptions = selectedCustomizations.length > 0 
+        ? { option: selectedCustomizations }
+        : null;
+      
+      // Create cart item entry
+      const { error: itemError } = await supabase
+        .from('cart_items')
+        .insert({
+          cart_id: cartId,
+          dish_id: selectedDish.id,
+          dish_name: selectedDish.name,
+          dish_price: selectedDish.price,
+          quantity: quantity,
+          customization_options: customizationOptions,
+          dish_note: dishNote.trim() || null,
+          dietary_tags: selectedDish.dietary_tags ? { tags: selectedDish.dietary_tags.map(tag => tag.label) } : null,
+        });
+      
+      if (itemError) throw itemError;
+      
+      // Close modal and reset
+      closeDishModal();
+      
+      // Show success message or notification
+      alert("Item added to your cart!");
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      alert('Failed to add item to cart. Please try again.');
+    }
+  };
+  
+  // Clear cart and add new item
+  const clearCartAndAddItem = async () => {
+    if (!user || !pendingCartItem) return;
+    
+    try {
+      // Clear existing cart items
+      const { error: deleteError } = await supabase
+        .from('cart_items')
+        .delete()
+        .eq('cart_id', pendingCartItem.cart_id);
+        
+      if (deleteError) throw deleteError;
+      
+      // Add new item
+      const { error: insertError } = await supabase
+        .from('cart_items')
+        .insert(pendingCartItem);
+        
+      if (insertError) throw insertError;
+      
+      // Close modals and reset
+      setShowChefConflictModal(false);
+      closeDishModal();
+      
+      // Show success message
+      alert("Cart updated with your new item!");
+    } catch (error) {
+      console.error('Error updating cart:', error);
+      alert('Failed to update cart. Please try again.');
+    }
+  };
+  
+  // Cancel adding item
+  const cancelAddItem = () => {
+    setShowChefConflictModal(false);
+    setPendingCartItem(null);
   };
   
   const incrementQuantity = () => {
@@ -377,15 +551,47 @@ const OrderPage = () => {
                         </div>
                         <div className="mt-auto pt-4 border-t border-gray-300">
                           <button
+                            onClick={addToCart}
                             className="w-full bg-navy text-white py-3 rounded-lg hover:bg-navy-light transition-colors"
                           >
                             Add to Order ({quantity} {quantity === 1 ? 'item' : 'items'})
                           </button>
                           <p className="text-xs text-gray-500 mt-2 text-center">
-                            Functionality coming soon
+                            Items are added to your cart for checkout
                           </p>
                         </div>
                       </div>
+                    </div>
+                  </motion.div>
+                </div>
+              )}
+
+              {/* Chef Conflict Modal */}
+              {showChefConflictModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="bg-white rounded-lg p-6 max-w-md mx-4 shadow-xl"
+                  >
+                    <h3 className="text-xl font-bold text-gray-900 mb-4">Different Chef in Cart</h3>
+                    <p className="text-gray-600 mb-6">
+                      You already have items from <span className="font-semibold">{existingChefName}</span> in your cart. 
+                      Since our chefs come to your home to cook, you can only order from one chef at a time.
+                    </p>
+                    <div className="flex flex-col space-y-3">
+                      <button
+                        onClick={clearCartAndAddItem}
+                        className="bg-navy text-white py-2 px-4 rounded hover:bg-navy-light transition-colors"
+                      >
+                        Clear current cart and add this item
+                      </button>
+                      <button
+                        onClick={cancelAddItem}
+                        className="border border-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-50 transition-colors"
+                      >
+                        Keep current cart (cancel this addition)
+                      </button>
                     </div>
                   </motion.div>
                 </div>
