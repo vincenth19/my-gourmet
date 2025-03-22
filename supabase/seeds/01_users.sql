@@ -11,6 +11,7 @@ DECLARE
     chef_aussie_id UUID := '33333333-3333-3333-3333-333333333333';
     customer1_id UUID := 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
     customer2_id UUID := 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+    admin_id UUID := 'dddddddd-dddd-dddd-dddd-dddddddddddd';
 BEGIN
 
 -- CHEFS and CUSTOMERS - auth.users
@@ -127,6 +128,25 @@ VALUES
         '',
         '',
         ''
+    ),
+    -- Admin
+    (
+        '00000000-0000-0000-0000-000000000000',
+        admin_id,
+        'authenticated',
+        'authenticated',
+        'admin@gourmet.com',
+        crypt('admin123', gen_salt('bf')),
+        current_timestamp,
+        current_timestamp,
+        '{"provider":"email","providers":["email"]}',
+        '{"full_name":"System Admin","contact_number":"555-3001","role":"admin"}',
+        current_timestamp,
+        current_timestamp,
+        '',
+        '',
+        '',
+        ''
     );
 
 -- Create identity records for each user
@@ -195,6 +215,17 @@ VALUES
         current_timestamp,
         current_timestamp,
         current_timestamp
+    ),
+    -- Admin
+    (
+        uuid_generate_v4(),
+        admin_id,
+        format('{"sub":"%s","email":"%s"}', admin_id::text, 'admin@gourmet.com')::jsonb,
+        'email',
+        admin_id::text,
+        current_timestamp,
+        current_timestamp,
+        current_timestamp
     );
 
 -- Create profiles for each user (this will trigger the handle_new_user function)
@@ -204,7 +235,7 @@ VALUES
 -- Update Western Chef's profile
 UPDATE public.profiles
 SET 
-    display_name = 'Chef Gordon',
+    display_name = 'Gordon Willian',
     contact_number = '0111111111',
     preferences = 'I believe that extraordinary cuisine begins with impeccable ingredients. After training under Michelin-starred mentors in Paris and Florence, I''ve dedicated my career to elevating classic French and Italian techniques with contemporary elegance. My passion lies in creating unforgettable dining experiences that honor tradition while embracing innovation. Each dish tells a story—my story—of culinary excellence forged through two decades of relentless pursuit of perfection.',
     avatar_url = 'https://images.unsplash.com/photo-1643834776503-891726ed42c6?q=80&w=3024'
@@ -213,7 +244,7 @@ WHERE id = chef_western_id;
 -- Update Asian Chef's profile
 UPDATE public.profiles
 SET 
-    display_name = 'Chef Ming',
+    display_name = 'Ming Chen',
     contact_number = '0222222222',
     preferences = 'My culinary journey began in the bustling kitchens of Hong Kong and took me through Tokyo, Bangkok, and Singapore, where I mastered the subtle art of balancing flavors across Asian traditions. I source rare ingredients directly from small producers across Asia to create truly authentic experiences. My philosophy embraces the heritage of Asian cuisine while reimagining possibilities with modern techniques. Every dish I create is a harmonious blend of respect for tradition and boundless creativity.',
     avatar_url = 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?q=80&w=768'
@@ -222,7 +253,7 @@ WHERE id = chef_asian_id;
 -- Update Australian Fusion Chef's profile
 UPDATE public.profiles
 SET 
-    display_name = 'Chef Sydney',
+    display_name = 'Sydney Wilson',
     contact_number = '0333333333',
     preferences = 'As a sixth-generation Australian with deep respect for our indigenous food culture, I''ve made it my mission to showcase Australia''s unique native ingredients in extraordinary ways. I personally forage for rare bush tucker and work directly with Aboriginal communities to source ethical, sustainable produce. My cuisine represents the true essence of modern Australia—bold, innovative, and respectful of our diverse cultural heritage. Each plate celebrates the remarkable flavors found nowhere else on Earth.',
     avatar_url = 'https://images.unsplash.com/photo-1662126988549-a5ba05ff73c8?q=80&w=3087'
@@ -241,6 +272,14 @@ SET
     display_name = 'John Doe',
     contact_number = '0987654321'
 WHERE id = customer2_id;
+
+-- Update Admin's profile
+UPDATE public.profiles
+SET 
+    display_name = 'System Admin',
+    contact_number = '0444444444',
+    role = 'admin'
+WHERE id = admin_id;
 
 -- Add addresses for customers
 INSERT INTO public.addresses (id, profile_id, address_line, city, state, zip_code, access_note, created_at)

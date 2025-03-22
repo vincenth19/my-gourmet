@@ -13,6 +13,7 @@ import ChefHomePage from "./pages/ChefHomePage.tsx";
 import UserHomePage from "./pages/UserHomePage.tsx";
 import MyDishes from "./pages/chef/MyDishes.tsx";
 import DishForm from "./pages/chef/DishForm.tsx";
+import OrderPage from "./pages/OrderPage.tsx";
 import { AuthProvider } from "./contexts/AuthContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
@@ -32,6 +33,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/chef/dishes/new" element={<DishForm />} />
             <Route path="/chef/dishes/edit/:id" element={<DishForm />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/order/:chefId" element={<OrderPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

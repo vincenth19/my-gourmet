@@ -86,7 +86,11 @@ export interface CartItem {
   custom_dish_name?: string;
   custom_description?: string;
   custom_price?: number;
-  customizations?: string;
+  customization_options?: {
+    option: string[];
+  };
+  dietary_tags?: string[] | Record<string, string | number | boolean>;
+  dish_note?: string;
   created_at: string;
   updated_at?: string;
 }
@@ -122,10 +126,9 @@ export interface Order {
 export interface OrderDish {
   id: string;
   order_id: string;
-  dish_id?: string;
   dish_name: string;
   quantity: number;
-  price_at_order: number;
+  dish_price: number;
   custom_dish_name?: string;
   custom_description?: string;
   custom_price?: number;
@@ -133,6 +136,9 @@ export interface OrderDish {
     option: string[];
   };
   dietary_tags?: string[] | Record<string, string | number | boolean>;
+  dish_note?: string;
+  created_at: string;
+  updated_at?: string;
 }
 
 export interface Database {

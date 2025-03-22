@@ -100,7 +100,9 @@ CREATE TABLE public.cart_items (
   custom_dish_name VARCHAR NULL,
   custom_description TEXT NULL,
   custom_price DECIMAL(10, 2) NULL,
-  customizations TEXT NULL,
+  customization_options JSONB NULL,
+  dietary_tags JSONB NULL,
+  dish_note TEXT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE
 );
@@ -139,12 +141,15 @@ CREATE TABLE public.order_dishes (
   order_id UUID REFERENCES public.orders(id),
   dish_name VARCHAR NOT NULL,
   quantity INTEGER NOT NULL,
-  price_at_order DECIMAL(10, 2) NOT NULL,
+  dish_price DECIMAL(10, 2) NOT NULL,
   custom_dish_name VARCHAR NULL,
   custom_description TEXT NULL,
   custom_price DECIMAL(10, 2) NULL,
-  customization_options JSONB,
-  dietary_tags JSONB
+  customization_options JSONB NULL,
+  dietary_tags JSONB NULL,
+  dish_note TEXT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE
 );
 
 -- Add triggers for updated_at timestamps
@@ -178,6 +183,11 @@ EXECUTE FUNCTION public.trigger_set_timestamp();
 
 CREATE TRIGGER set_timestamp_orders
 BEFORE UPDATE ON public.orders
+FOR EACH ROW
+EXECUTE FUNCTION public.trigger_set_timestamp();
+
+CREATE TRIGGER set_timestamp_order_dishes
+BEFORE UPDATE ON public.order_dishes
 FOR EACH ROW
 EXECUTE FUNCTION public.trigger_set_timestamp();
 
