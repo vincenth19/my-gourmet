@@ -90,7 +90,7 @@ const ForgotPasswordPage = () => {
             </button>
           </form>
           <div className="mt-4 text-center">
-            <Link to="/login" className="text-sm text-orange-500 hover:text-orange-600">
+            <Link to="/sign-in" className="text-sm text-orange-500 hover:text-orange-600">
               Back to Login
             </Link>
           </div>

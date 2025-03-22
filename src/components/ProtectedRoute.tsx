@@ -41,7 +41,7 @@ const ProtectedRoute = ({ children, redirectPath }: ProtectedRouteProps) => {
   }
 
   if (!session) {
-    return <Navigate to={redirectPath ?? "/login"} replace />;
+    return <Navigate to={redirectPath ?? "/sign-in"} replace />;
   }
 
   return children;

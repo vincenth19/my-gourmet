@@ -2,7 +2,7 @@ import { useState, useEffect, ChangeEvent, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { supabase } from '../../lib/supabase';
 import { Dish, DietaryTag } from '../../types/database.types';
-import { ArrowLeft, Upload, X } from 'lucide-react';
+import { ArrowLeft, Upload, X, Plus, Trash2 } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -16,11 +16,13 @@ const DishForm = () => {
   
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   
   const [dietaryTags, setDietaryTags] = useState<DietaryTag[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  
+  // New state for customization options
+  const [customizationOptions, setCustomizationOptions] = useState<string[]>(['']);
   
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
@@ -78,6 +80,11 @@ const DishForm = () => {
         
         // Set form data
         setFormData(dish);
+        
+        // Load customization options if they exist
+        if (dish.customization_options && dish.customization_options.option) {
+          setCustomizationOptions(dish.customization_options.option);
+        }
         
         // Set image preview if exists
         if (dish.image_url) {
@@ -157,14 +164,53 @@ const DishForm = () => {
     const { name, value } = e.target;
     
     if (name === 'price') {
+      // Special handling for the price field
+      if (value === '' || value === '0.') {
+        // If empty or just "0.", set to 0
+        setFormData(prev => ({ ...prev, [name]: 0 }));
+        return;
+      }
+      
+      // Remove leading zeros for whole numbers (but keep decimal parts intact)
+      let formattedValue = value;
+      if (value.startsWith('0') && value.length > 1 && value[1] !== '.') {
+        formattedValue = value.replace(/^0+/, '');
+      }
+      
       // Make sure price is a positive number
-      const numValue = parseFloat(value);
+      const numValue = parseFloat(formattedValue);
       if (isNaN(numValue) || numValue < 0) return;
       
+      // Update both the numeric value in the form data and set the formatted string value
       setFormData(prev => ({ ...prev, [name]: numValue }));
+      
+      // Update the input field directly to remove leading zeros
+      if (formattedValue !== value) {
+        e.target.value = formattedValue;
+      }
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
+  };
+
+  // Handle customization option changes
+  const handleCustomizationChange = (index: number, value: string) => {
+    const updatedOptions = [...customizationOptions];
+    updatedOptions[index] = value;
+    setCustomizationOptions(updatedOptions);
+  };
+
+  // Add a new customization option field
+  const addCustomizationOption = () => {
+    setCustomizationOptions([...customizationOptions, '']);
+  };
+
+  // Remove a customization option field
+  const removeCustomizationOption = (index: number) => {
+    if (customizationOptions.length <= 1) return;
+    const updatedOptions = [...customizationOptions];
+    updatedOptions.splice(index, 1);
+    setCustomizationOptions(updatedOptions);
   };
 
   // Handle dietary tag selection
@@ -234,7 +280,7 @@ const DishForm = () => {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        navigate('/login');
+        navigate('/sign-in');
         return;
       }
       
@@ -242,6 +288,11 @@ const DishForm = () => {
       
       // Prepare dish data
       const dishData = { ...formData };
+      
+      // Add customization options
+      // Filter out empty options before saving
+      const filteredOptions = customizationOptions.filter(option => option.trim() !== '');
+      dishData.customization_options = { option: filteredOptions };
       
       // If new image was uploaded, handle it
       if (imageFile) {
@@ -263,6 +314,7 @@ const DishForm = () => {
             price: dishData.price,
             description: dishData.description,
             image_url: dishData.image_url || formData.image_url, // Keep old image URL if no new image
+            customization_options: dishData.customization_options,
             updated_at: new Date().toISOString()
           })
           .eq('id', id);
@@ -288,6 +340,7 @@ const DishForm = () => {
             price: dishData.price,
             description: dishData.description,
             image_url: dishData.image_url,
+            customization_options: dishData.customization_options,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           })
@@ -330,7 +383,7 @@ const DishForm = () => {
   if (loadingData) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-navy-accent"></div>
       </div>
     );
   }
@@ -388,7 +441,7 @@ const DishForm = () => {
               <div 
                 {...getRootProps()} 
                 className={`border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer h-48 bg-gray-50 
-                  ${isDragActive ? 'border-orange-500 bg-orange-50' : 'border-gray-300 hover:border-orange-400'}`}
+                  ${isDragActive ? 'border-navy-gold bg-blue-300' : 'border-gray-300 hover:border-gold'}`}
               >
                 <input {...getInputProps()} />
                 <Upload size={24} className="text-gray-400 mb-2" />
@@ -453,6 +506,48 @@ const DishForm = () => {
               placeholder="Enter dish description"
               disabled={loading}
             />
+          </div>
+
+          {/* Customization Options */}
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Customization Options
+              </label>
+              <button
+                type="button"
+                onClick={addCustomizationOption}
+                className="flex items-center text-sm text-orange-500 hover:text-orange-600 transition-colors"
+              >
+                <Plus size={16} className="mr-1" />
+                Add Option
+              </button>
+            </div>
+            <div className="space-y-2">
+              {customizationOptions.map((option, index) => (
+                <div key={index} className="flex items-center">
+                  <input
+                    type="text"
+                    value={option}
+                    onChange={(e) => handleCustomizationChange(index, e.target.value)}
+                    className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors duration-200"
+                    placeholder="e.g. Extra cheese, No onions"
+                    disabled={loading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeCustomizationOption(index)}
+                    className={`ml-2 p-2 text-red-500 hover:text-red-600 transition-colors ${customizationOptions.length <= 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={customizationOptions.length <= 1 || loading}
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <p className="mt-1 text-xs text-gray-500">
+              Add customization options for your dish that customers can select when ordering.
+            </p>
           </div>
 
           {/* Dietary Tags */}

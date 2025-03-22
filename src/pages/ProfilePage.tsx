@@ -38,7 +38,7 @@ const ProfilePage = () => {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
-        navigate('/login');
+        navigate('/sign-in');
         return;
       }
       
@@ -121,7 +121,7 @@ const ProfilePage = () => {
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
-      navigate('/login');
+      navigate('/sign-in');
     } catch (error) {
       console.error('Error logging out:', error);
     }
@@ -451,7 +451,7 @@ const ProfilePage = () => {
               {!isEditing && (
                 <button
                   onClick={handleEditToggle}
-                  className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors duration-200"
+                  className="flex items-center gap-2 px-4 py-2 bg-navy hover:bg-navy-light text-white rounded-lg transition-colors duration-200"
                 >
                  <Pencil className="w-4 h-4" /> Edit
                 </button>
@@ -474,7 +474,7 @@ const ProfilePage = () => {
 
           {loading ? (
             <div className="py-12 text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500 mx-auto"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-navy mx-auto"></div>
               <p className="mt-4 text-gray-500">Loading profile information...</p>
             </div>
           ) : !profile ? (
@@ -492,31 +492,31 @@ const ProfilePage = () => {
                       <img 
                         src={profileImagePreview || ''}
                         alt={`${profile.display_name}'s profile`}
-                        className="w-32 h-32 rounded-full object-cover border-4 border-orange-200"
+                        className="w-32 h-32 rounded-full object-cover border-4 border-navy-light"
                       />
                     ) : (
-                      <div className="w-32 h-32 rounded-full bg-orange-100 flex items-center justify-center text-orange-500 border-4 border-orange-200">
+                      <div className="w-32 h-32 rounded-full bg-white bg-opacity-20 flex items-center justify-center text-navy border-4 border-navy-light">
                         <User size={48} />
                       </div>
                     )}
                   </div>
                   
-                  <div className="bg-orange-50 rounded-lg p-6">
+                  <div className="bg-blue-50 bg-opacity-5 rounded-lg p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <h2 className="text-sm font-medium text-gray-500 mb-1">Name</h2>
+                        <h2 className="text-sm font-medium mb-1">Name</h2>
                         <p className="text-lg font-medium text-gray-900">{profile.display_name}</p>
                       </div>
                       <div>
-                        <h2 className="text-sm font-medium text-gray-500 mb-1">Email</h2>
+                        <h2 className="text-sm font-medium mb-1">Email</h2>
                         <p className="text-lg font-medium text-gray-900">{profile.email}</p>
                       </div>
                       <div>
-                        <h2 className="text-sm font-medium text-gray-500 mb-1">Contact Number</h2>
+                        <h2 className="text-sm font-medium mb-1">Contact Number</h2>
                         <p className="text-lg font-medium text-gray-900">{profile.contact_number || 'Not provided'}</p>
                       </div>
                       <div>
-                        <h2 className="text-sm font-medium text-gray-500 mb-1">Member Since</h2>
+                        <h2 className="text-sm font-medium mb-1">Member Since</h2>
                         <p className="text-lg font-medium text-gray-900">{formatDate(profile.created_at)}</p>
                       </div>
                     </div>
@@ -575,7 +575,7 @@ const ProfilePage = () => {
                         <img 
                           src={profileImagePreview}
                           alt="Profile preview" 
-                          className="w-32 h-32 rounded-full object-cover border-4 border-orange-200"
+                          className="w-32 h-32 rounded-full object-cover border-4 border-navy-light"
                         />
                         <button
                           type="button"
@@ -589,7 +589,7 @@ const ProfilePage = () => {
                       <div 
                         {...getRootProps()} 
                         className={`w-32 h-32 rounded-full border-4 border-dashed flex flex-col items-center justify-center cursor-pointer 
-                          ${isDragActive ? 'border-orange-500 bg-orange-50' : 'border-gray-300 hover:border-orange-400 bg-gray-50'}`}
+                          ${isDragActive ? 'border-navy bg-opacity-10' : 'border-gray-300 hover:border-navy-light bg-gray-50'}`}
                       >
                         <input {...getInputProps()} />
                         <Upload size={24} className="text-gray-400 mb-2" />
@@ -600,7 +600,7 @@ const ProfilePage = () => {
                     )}
                   </div>
                 
-                  <div className="bg-orange-50 rounded-lg p-6">
+                  <div className="bg-blue-50 bg-opacity-5 rounded-lg p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
                         <label htmlFor="display_name" className="block text-sm font-medium text-gray-500 mb-1">
@@ -612,7 +612,7 @@ const ProfilePage = () => {
                           name="display_name"
                           value={editedProfile?.display_name || ''}
                           onChange={handleChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent"
                         />
                       </div>
                       
@@ -632,7 +632,7 @@ const ProfilePage = () => {
                           name="contact_number"
                           value={editedProfile?.contact_number || ''}
                           onChange={handleChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent"
                           placeholder="Enter your contact number"
                         />
                       </div>
@@ -656,7 +656,7 @@ const ProfilePage = () => {
                           name="preferences"
                           value={editedProfile?.preferences || ''}
                           onChange={handleChange}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent h-32"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent h-32"
                           placeholder="Enter your food preferences, dietary restrictions, etc."
                         />
                       </div>
@@ -685,7 +685,7 @@ const ProfilePage = () => {
                               type="text"
                               value={editedPaymentMethod?.card_number || ''}
                               onChange={handlePaymentMethodChange}
-                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent"
                               placeholder="XXXX XXXX XXXX XXXX"
                             />
                           </div>
@@ -701,7 +701,7 @@ const ProfilePage = () => {
                                 type="text"
                                 value={editedPaymentMethod?.expiry_date || ''}
                                 onChange={handlePaymentMethodChange}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent"
                                 placeholder="MM/YY"
                               />
                             </div>
@@ -716,7 +716,7 @@ const ProfilePage = () => {
                                 type="text"
                                 value={editedPaymentMethod?.cvv || ''}
                                 onChange={handlePaymentMethodChange}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent"
                                 placeholder="123"
                               />
                             </div>
@@ -739,7 +739,7 @@ const ProfilePage = () => {
                   </button>
                   <button
                     onClick={handleSave}
-                    className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors duration-200 flex items-center"
+                    className="px-4 py-2 bg-navy hover:bg-navy-light text-white rounded-lg transition-colors duration-200 flex items-center"
                     disabled={saving}
                   >
                     {saving ? (
@@ -759,7 +759,7 @@ const ProfilePage = () => {
         <div className="mt-8 flex justify-center w-full">
           <button
             onClick={handleLogout}
-            className="px-4 py-2 w-full bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-200"
+            className="px-4 py-2 w-full border border-red-500 bg-transparent hover:bg-red-500 text-red-500 hover:text-white rounded-lg transition-colors duration-200"
           >
             Logout
           </button>

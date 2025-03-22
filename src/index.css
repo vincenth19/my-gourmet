@@ -1,1 +1,125 @@
 @import "tailwindcss";
+
+/* Tailwind layers below */
+@layer base {
+  html {
+    font-family: 'Montserrat', sans-serif;
+  }
+}
+
+/* Regular CSS for fonts */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Domine', serif !important;
+}
+
+body {
+  font-family: 'Montserrat', sans-serif;
+}
+
+/* Luxury gold color theme for luxury design */
+@layer utilities {
+  .text-navy {
+    color: #2d4059;
+  }
+  
+  .bg-navy {
+    background-color: #2d4059;
+  }
+  
+  .border-navy {
+    border-color: #2d4059;
+  }
+  
+  .hover\:text-navy:hover {
+    color: #2d4059;
+  }
+  
+  .hover\:bg-navy:hover {
+    background-color: #2d4059;
+  }
+  
+  .hover\:border-navy:hover {
+    border-color: #2d4059;
+  }
+  
+  .text-navy-light {
+    color: #3e587b;
+  }
+  
+  .bg-navy-light {
+    background-color: #3e587b;
+  }
+  
+  .border-navy-light {
+    border-color: #3e587b;
+  }
+  
+  .hover\:text-navy-light:hover {
+    color: #3e587b;
+  }
+  
+  .hover\:bg-navy-light:hover {
+    background-color: #3e587b;
+  }
+  
+  .text-navy-accent {
+    color: #3e587b;
+  }
+  
+  .bg-navy-accent {
+    background-color: #3e587b;
+  }
+  
+  .border-navy-accent {
+    border-color: #3e587b;
+  }
+  
+  /* New gold utility classes */
+  .text-gold {
+    color: #ffd460;
+  }
+  
+  .bg-gold {
+    background-color: #ffc62d;
+  }
+  
+  .border-gold {
+    border-color: #ffc62d;
+  }
+  
+  .text-gold-light {
+    color: #ffc62d;
+  }
+  
+  .bg-gold-light {
+    background-color: #ffc62d;
+  }
+  
+  .border-gold-light {
+    border-color: #ffc62d;
+  }
+  
+  .text-gold-dark {
+    color: #B8860B;
+  }
+  
+  .bg-gold-dark {
+    background-color: #B8860B;
+  }
+  
+  .border-gold-dark {
+    border-color: #B8860B;
+  }
+  
+  .hover\:text-gold:hover {
+    color: #ffc62d;
+  }
+  
+  .hover\:bg-gold:hover {
+    background-color: #ffc62d;
+  }
+  
+  .hover\:border-gold:hover {
+    border-color: #ffc62d;
+  }
+}

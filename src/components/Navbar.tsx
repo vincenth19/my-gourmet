@@ -1,11 +1,11 @@
-import { Link, useNavigate } from 'react-router';
+import { Link } from 'react-router';
 import { useAuth } from '../contexts/AuthContext';
+import logoBnw from '../assets/logo-w-text-bnw.svg';
 interface NavbarProps {
   activePage?: 'home' | 'profile' | 'orders' | 'dishes' | 'cart';
 }
 
 const Navbar = ({ activePage = 'home' }: NavbarProps) => {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const userRole = user?.user_metadata.role;
 
@@ -14,21 +14,17 @@ const Navbar = ({ activePage = 'home' }: NavbarProps) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <span 
-              className="text-2xl font-bold text-orange-600" 
-              onClick={() => navigate(userRole === 'chef' ? '/chef/home' : '/home')} 
-              style={{ cursor: 'pointer' }}
-            >
-              MyGourmet
-            </span>
+            <Link to={userRole === 'chef' ? '/chef/home' : '/home'}>
+              <img src={logoBnw} width={150} alt="MyGourmet Logo" />
+            </Link>
           </div>
           <div className="flex items-center space-x-4">
             {/* Profile link - available for all roles */}
             <Link to="/profile">
             <button 
               className={`${activePage === 'profile' 
-                ? 'text-orange-600 border-b-2 border-orange-600 pb-1' 
-                : 'text-gray-600 hover:text-orange-600'}`}
+                ? 'text-navy border-b border-navy pb-1' 
+                : 'text-gray-600 hover:text-navy'} font-light transition-colors duration-200`}
             >
               Profile
             </button>
@@ -38,8 +34,8 @@ const Navbar = ({ activePage = 'home' }: NavbarProps) => {
             <Link to="/orders">
               <button 
                 className={`${activePage === 'orders' 
-                  ? 'text-orange-600 border-b-2 border-orange-600 pb-1' 
-                  : 'text-gray-600 hover:text-orange-600'}`}
+                  ? 'text-navy border-b border-navy pb-1' 
+                  : 'text-gray-600 hover:text-navy'} font-light transition-colors duration-200`}
               >
                 Orders
               </button>
@@ -49,8 +45,8 @@ const Navbar = ({ activePage = 'home' }: NavbarProps) => {
               <Link to="/chef/dishes">
               <button 
                 className={`${activePage === 'dishes' 
-                  ? 'text-orange-600 border-b-2 border-orange-600 pb-1' 
-                  : 'text-gray-600 hover:text-orange-600'}`}
+                  ? 'text-navy border-b border-navy pb-1' 
+                  : 'text-gray-600 hover:text-navy'} font-light transition-colors duration-200`}
               >
                 My Dishes
               </button>
@@ -59,8 +55,8 @@ const Navbar = ({ activePage = 'home' }: NavbarProps) => {
               <Link to="/cart">
                 <button 
                   className={`${activePage === 'cart' 
-                    ? 'text-orange-600 border-b-2 border-orange-600 pb-1' 
-                    : 'text-gray-600 hover:text-orange-600'}`}
+                    ? 'text-navy border-b border-navy pb-1' 
+                    : 'text-gray-600 hover:text-navy'} font-light transition-colors duration-200`}
                 >
                   Cart
                 </button>

@@ -58,6 +58,7 @@ CREATE TABLE public.dishes (
   name VARCHAR NOT NULL,
   price DECIMAL(10, 2) NOT NULL,
   description TEXT,
+  customization_options JSONB,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE
 );
@@ -99,7 +100,6 @@ CREATE TABLE public.orders (
   profile_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NULL,
   profile_email VARCHAR NOT NULL,
   profile_contact_number VARCHAR NOT NULL,
-  chef_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NULL,
   chef_name VARCHAR NOT NULL,
   
   -- Address details at time of order
@@ -126,24 +126,15 @@ CREATE TABLE public.orders (
 CREATE TABLE public.order_dishes (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   order_id UUID REFERENCES public.orders(id),
-  dish_id UUID REFERENCES public.dishes(id) NULL,
   dish_name VARCHAR NOT NULL,
   quantity INTEGER NOT NULL,
   price_at_order DECIMAL(10, 2) NOT NULL,
   custom_dish_name VARCHAR NULL,
   custom_description TEXT NULL,
   custom_price DECIMAL(10, 2) NULL,
-  customizations TEXT,
+  customization_options JSONB,
   dietary_tags JSONB
 );
-
--- Add indexes for performance
-CREATE INDEX idx_profiles_email ON public.profiles(email);
-CREATE INDEX idx_dishes_chef_id ON public.dishes(chef_id);
-CREATE INDEX idx_cart_items_cart_id ON public.cart_items(cart_id);
-CREATE INDEX idx_orders_profile_id ON public.orders(profile_id);
-CREATE INDEX idx_orders_chef_id ON public.orders(chef_id);
-CREATE INDEX idx_order_dishes_order_id ON public.order_dishes(order_id);
 
 -- Add triggers for updated_at timestamps
 CREATE OR REPLACE FUNCTION public.trigger_set_timestamp()

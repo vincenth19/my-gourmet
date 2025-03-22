@@ -65,7 +65,7 @@ const ResetPasswordPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b from-navy-light/10 to-white flex flex-col">
       {/* Navigation */}
       <nav className="bg-white/80 backdrop-blur-sm fixed w-full z-10 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -94,7 +94,7 @@ const ResetPasswordPage = () => {
                 required
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-navy focus:border-navy"
               />
             </div>
             <div className="mb-4">
@@ -107,7 +107,7 @@ const ResetPasswordPage = () => {
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-navy focus:border-navy"
               />
             </div>
             {error && <div className="mb-4 text-red-600">{error}</div>}
@@ -115,13 +115,13 @@ const ResetPasswordPage = () => {
             <button
               type="submit"
               disabled={isPasswordMismatch || loading}
-              className="w-full px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors duration-200"
+              className="w-full px-4 py-2 bg-navy hover:bg-navy-light text-white rounded-lg transition-colors duration-200"
             >
               {loading ? 'Updating...' : 'Reset Password'}
             </button>
           </form>
           <div className="mt-4 text-center">
-            <Link to="/login" className="text-sm text-orange-500 hover:text-orange-600">
+            <Link to="/sign-in" className="text-sm text-navy hover:text-navy-light">
               Back to Login
             </Link>
           </div>

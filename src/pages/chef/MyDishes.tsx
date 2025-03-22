@@ -24,7 +24,7 @@ const MyDishes = () => {
         // Check if user is authenticated and is a chef
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
-          navigate('/login');
+          navigate('/sign-in');
           return;
         }
 
@@ -148,7 +148,7 @@ const MyDishes = () => {
         <h1 className="text-2xl font-bold text-gray-900">My Dishes</h1>
         <Link 
           to="/chef/dishes/new" 
-          className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors duration-200"
+          className="flex items-center gap-2 px-4 py-2 bg-transparent text-gray-900 border border-navy hover:bg-navy hover:text-white transition-colors duration-200"
         >
           <Plus size={18} /> Add New Dish
         </Link>
@@ -162,22 +162,22 @@ const MyDishes = () => {
 
       {loading ? (
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-navy"></div>
         </div>
       ) : dishes.length === 0 ? (
-        <div className="bg-gray-50 rounded-lg p-8 text-center">
+        <div className="bg-gray-50 border border-gray-200 p-8 text-center">
           <p className="text-gray-600 mb-4">You haven't created any dishes yet.</p>
           <Link 
             to="/chef/dishes/new" 
-            className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors duration-200"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-transparent text-gray-900 border border-navy hover:bg-navy hover:text-white transition-colors duration-200"
           >
             <Plus size={18} /> Create Your First Dish
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {dishes.map(dish => (
-            <div key={dish.id} className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+            <div key={dish.id} className="bg-white border border-gold overflow-hidden">
               <div className="aspect-w-16 aspect-h-9 bg-gray-100">
                 <img 
                   src={getImageUrl(dish)} 
@@ -188,10 +188,10 @@ const MyDishes = () => {
                   }}
                 />
               </div>
-              <div className="p-4">
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">{dish.name}</h2>
-                <p className="text-orange-600 font-medium mb-2">{formatPrice(dish.price)}</p>
-                <p className="text-gray-600 text-sm mb-3 line-clamp-2">{dish.description}</p>
+              <div className="p-6">
+                <h2 className="text-xl text-gray-900 mb-2">{dish.name}</h2>
+                <p className="text-navy font-medium mb-2">{formatPrice(dish.price)}</p>
+                <p className="text-gray-600 text-sm mb-4 line-clamp-2 font-light">{dish.description}</p>
                 
                 {dish.dietary_tags && dish.dietary_tags.length > 0 && (
                   <div className="mb-4">
@@ -199,7 +199,7 @@ const MyDishes = () => {
                       {dish.dietary_tags.map(tag => (
                         <span 
                           key={tag.id} 
-                          className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full"
+                          className="inline-block bg-blue-100 text-gray-800 text-xs px-2 py-1"
                         >
                           {tag.label}
                         </span>
@@ -208,16 +208,16 @@ const MyDishes = () => {
                   </div>
                 )}
                 
-                <div className="flex justify-end gap-2 mt-2">
+                <div className="flex justify-end gap-2 mt-4 pt-4 border-t border-gray-100">
                   <Link
                     to={`/chef/dishes/edit/${dish.id}`}
-                    className="p-2 text-blue-600 hover:bg-blue-50 rounded"
+                    className="p-2 text-gray-600 hover:text-navy transition-colors duration-200"
                   >
                     <Edit size={18} />
                   </Link>
                   <button
                     onClick={() => handleDeleteDish(dish.id)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded"
+                    className="p-2 text-gray-600 hover:text-red-600 transition-colors duration-200"
                   >
                     <Trash size={18} />
                   </button>
@@ -226,7 +226,7 @@ const MyDishes = () => {
             </div>
           ))}
         </div>
-      )}
+      )}    
     </div>
   );
 };

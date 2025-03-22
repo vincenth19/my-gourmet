@@ -53,6 +53,9 @@ export interface Dish {
   price: number;
   description?: string;
   image_url?: string;
+  customization_options?: {
+    option: string[];
+  };
   created_at: string;
   updated_at?: string;
 }
@@ -123,7 +126,9 @@ export interface OrderDish {
   custom_dish_name?: string;
   custom_description?: string;
   custom_price?: number;
-  customizations?: string;
+  customization_options?: {
+    option: string[];
+  };
   dietary_tags?: string[] | Record<string, string | number | boolean>;
 }
 

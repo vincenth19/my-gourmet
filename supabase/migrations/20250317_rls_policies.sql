@@ -126,7 +126,7 @@ CREATE POLICY "Clients can view their own orders"
 CREATE POLICY "Chefs can view orders assigned to them"
   ON public.orders FOR SELECT
   TO authenticated
-  USING (chef_id = auth.uid());
+  USING (chef_name = (SELECT display_name FROM public.profiles WHERE id = auth.uid()));
 
 CREATE POLICY "Clients can insert their own orders"
   ON public.orders FOR INSERT
@@ -141,7 +141,7 @@ CREATE POLICY "Clients can update their own orders"
 CREATE POLICY "Chefs can update orders assigned to them"
   ON public.orders FOR UPDATE
   TO authenticated
-  USING (chef_id = auth.uid());
+  USING (chef_name = (SELECT display_name FROM public.profiles WHERE id = auth.uid()));
 
 -- Create policies for order_dishes table
 CREATE POLICY "Clients can view dishes in their orders"
@@ -152,7 +152,7 @@ CREATE POLICY "Clients can view dishes in their orders"
 CREATE POLICY "Chefs can view dishes in orders assigned to them"
   ON public.order_dishes FOR SELECT
   TO authenticated
-  USING (order_id IN (SELECT id FROM public.orders WHERE chef_id = auth.uid()));
+  USING (order_id IN (SELECT id FROM public.orders WHERE chef_name = (SELECT display_name FROM public.profiles WHERE id = auth.uid())));
 
 CREATE POLICY "Clients can insert dishes to their orders"
   ON public.order_dishes FOR INSERT
