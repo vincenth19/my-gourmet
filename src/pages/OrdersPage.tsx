@@ -70,6 +70,8 @@ const OrdersPage = () => {
         return 'bg-green-100 text-green-800';
       case 'rejected':
         return 'bg-red-100 text-red-800';
+      case 'cancelled':
+        return 'bg-purple-100 text-purple-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -192,7 +194,16 @@ const OrdersPage = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{formatCurrency(order.total_amount)}</div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {order.cancellation_fee && order.original_amount ? (
+                            <div>
+                              <span className="line-through text-gray-500">{formatCurrency(order.original_amount)}</span>
+                              <span className="ml-2 text-purple-700">{formatCurrency(order.cancellation_fee)}</span>
+                            </div>
+                          ) : (
+                            formatCurrency(order.total_amount)
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center text-sm text-gray-900">

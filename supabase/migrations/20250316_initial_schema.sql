@@ -1,6 +1,6 @@
 -- Create enum types
 CREATE TYPE public.app_role AS ENUM ('customer', 'chef', 'admin');
-CREATE TYPE public.order_status AS ENUM ('pending', 'accepted', 'completed', 'rejected');
+CREATE TYPE public.order_status AS ENUM ('pending', 'accepted', 'completed', 'rejected', 'cancelled');
 CREATE TYPE public.payment_status AS ENUM ('unpaid', 'paid', 'refunded');
 
 -- Create profiles table without the foreign key constraint initially
@@ -132,6 +132,8 @@ CREATE TABLE public.orders (
   total_amount DECIMAL(10, 2) NOT NULL,
   is_asap BOOLEAN NOT NULL,
   requested_time TIMESTAMP WITH TIME ZONE NULL,
+  cancellation_fee DECIMAL(10, 2) NULL,
+  original_amount DECIMAL(10, 2) NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE
 );

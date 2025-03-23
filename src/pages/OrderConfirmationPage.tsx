@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router';
 import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { CheckCircle, ArrowLeft, Calendar, MapPin, ChefHat } from 'lucide-react';
+import { CheckCircle, ArrowLeft, Calendar, MapPin, ChefHat, AlertCircle, X } from 'lucide-react';
 import { format } from 'date-fns';
 
 const OrderConfirmationPage = () => {
@@ -14,6 +14,9 @@ const OrderConfirmationPage = () => {
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancellingOrder, setCancellingOrder] = useState(false);
+  const [cancellationMessage, setCancellationMessage] = useState<string | null>(null);
   
   useEffect(() => {
     const fetchOrderDetails = async () => {
@@ -73,6 +76,79 @@ const OrderConfirmationPage = () => {
       currency: 'AUD'
     }).format(amount);
   };
+  
+  // Cancel order
+  const handleCancelOrder = async () => {
+    if (!user || !orderId || !order) return;
+    
+    setCancellingOrder(true);
+    
+    try {
+      // Calculate cancellation fee based on order status
+      const cancellationFee = order.order_status === 'accepted' ? 50 : 0;
+      // Always store the original amount
+      const originalAmount = order.total_amount;
+      // Set new total: $50 fee for accepted orders, $0 for pending orders
+      const newTotal = order.order_status === 'accepted' ? cancellationFee : 0;
+      
+      // Update order status directly
+      const { error: updateError } = await supabase
+        .from('orders')
+        .update({
+          order_status: 'cancelled',
+          cancellation_fee: cancellationFee > 0 ? cancellationFee : null,
+          original_amount: originalAmount, // Always store original amount
+          total_amount: newTotal,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', orderId)
+        .eq('profile_id', user.id);  // Ensure user owns this order
+        
+      if (updateError) throw updateError;
+      
+      // Fetch updated order data
+      const { data: orderData, error: fetchError } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('id', orderId)
+        .single();
+        
+      if (fetchError) throw fetchError;
+      
+      // Fetch order dishes separately 
+      const { data: orderDishes, error: dishesError } = await supabase
+        .from('order_dishes')
+        .select('*')
+        .eq('order_id', orderId);
+        
+      if (dishesError) throw dishesError;
+      
+      // Combine the data
+      const updatedOrder = {
+        ...orderData,
+        items: orderDishes || []
+      };
+      
+      // Update local state
+      setOrder(updatedOrder);
+      
+      // Show success message based on cancellation type
+      setCancellationMessage(
+        order.order_status === 'accepted'
+          ? `Your order has been cancelled. A $${cancellationFee.toFixed(2)} cancellation fee has been applied.`
+          : 'Your order has been cancelled with no charge.'
+      );
+    } catch (error: any) {
+      console.error('Error cancelling order:', error);
+      setError(`Failed to cancel order: ${error.message || 'Unknown error'}`);
+    } finally {
+      setCancellingOrder(false);
+      setShowCancelModal(false);
+    }
+  };
+  
+  // Check if order can be cancelled
+  const canCancel = order && ['pending', 'accepted'].includes(order.order_status);
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -221,15 +297,55 @@ const OrderConfirmationPage = () => {
                   <div className="border-t border-gray-200 pt-6">
                     <div className="flex justify-between mb-2">
                       <span className="text-gray-600">Subtotal</span>
-                      <span className="font-medium">{formatCurrency(order.total_amount)}</span>
+                      {order.order_status === 'cancelled' ? (
+                        <span className="font-medium line-through text-gray-500">
+                          {formatCurrency(order.original_amount)}
+                        </span>
+                      ) : (
+                        <span className="font-medium">{formatCurrency(order.total_amount)}</span>
+                      )}
                     </div>
+                    
+                    {order.order_status === 'cancelled' && (
+                      <div className="flex justify-between mb-2">
+                        {order.cancellation_fee ? (
+                          <>
+                            <span className="text-red-600">Cancellation Fee</span>
+                            <span className="font-medium text-red-600">{formatCurrency(order.cancellation_fee)}</span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="text-green-600">Cancellation Fee</span>
+                            <span className="font-medium text-green-600">{formatCurrency(0)}</span>
+                          </>
+                        )}
+                      </div>
+                    )}
+                    
                     <div className="flex justify-between font-medium text-lg">
                       <span>Total</span>
-                      <span className="text-navy">{formatCurrency(order.total_amount)}</span>
+                      <span className={`${order.order_status === 'cancelled' ? (order.cancellation_fee ? 'text-red-600' : 'text-green-600') : 'text-navy'}`}>
+                        {formatCurrency(order.total_amount)}
+                      </span>
                     </div>
                   </div>
                   
+                  {cancellationMessage && (
+                    <div className="mt-4 p-3 bg-yellow-50 border border-yellow-100 rounded-lg">
+                      <p className="text-yellow-800 text-sm">{cancellationMessage}</p>
+                    </div>
+                  )}
+                  
                   <div className="mt-8 text-center">
+                    {canCancel && (
+                      <button
+                        onClick={() => setShowCancelModal(true)}
+                        className="mb-4 w-full bg-red-500 text-white px-8 py-3 rounded-lg hover:bg-red-600 transition-colors"
+                      >
+                        Cancel Order
+                      </button>
+                    )}
+                    
                     <button
                       onClick={() => navigate('/home')}
                       className="bg-navy text-white px-8 py-3 rounded-lg hover:bg-navy-light transition-colors"
@@ -248,6 +364,63 @@ const OrderConfirmationPage = () => {
             </div>
           </motion.div>
         ) : null}
+        
+        {/* Cancellation Confirmation Modal */}
+        {showCancelModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg max-w-md w-full p-6">
+              <div className="flex justify-between items-start mb-4">
+                <div className="flex items-center">
+                  <AlertCircle className="h-6 w-6 text-red-500 mr-2" />
+                  <h3 className="text-lg font-medium text-gray-900">Cancel Order</h3>
+                </div>
+                <button 
+                  onClick={() => setShowCancelModal(false)}
+                  className="text-gray-400 hover:text-gray-500"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              
+              <div className="mb-6">
+                <p className="text-gray-700 mb-4">
+                  Are you sure you want to cancel this order?
+                </p>
+                
+                {order?.order_status === 'accepted' && (
+                  <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
+                    <div className="flex">
+                      <div className="ml-3">
+                        <p className="text-sm text-red-700 font-medium">
+                          Cancellation Fee Applies
+                        </p>
+                        <p className="text-sm text-red-700 mt-1">
+                          This order has already been accepted by the chef. A $50 cancellation fee will be charged.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowCancelModal(false)}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                >
+                  No, Keep Order
+                </button>
+                <button
+                  onClick={handleCancelOrder}
+                  disabled={cancellingOrder}
+                  className="px-4 py-2 bg-red-600 rounded-md text-white hover:bg-red-700 disabled:opacity-50"
+                >
+                  {cancellingOrder ? 'Cancelling...' : 'Yes, Cancel Order'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
