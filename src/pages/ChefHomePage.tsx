@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { format } from 'date-fns';
 import { Clock, ChevronRight, TrendingUp, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import Footer from '../components/Footer';
 
 // Type for order data
 interface Order {
@@ -356,13 +357,7 @@ const ChefHomePage = () => {
         </motion.div>
       </main>
 
-      <footer className="bg-white border-t mt-8">
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <div className="text-center text-gray-500">
-            <p>&copy; 2025 MyGourmet. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

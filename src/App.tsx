@@ -2,6 +2,7 @@ import { Link } from 'react-router';
 import { motion } from 'framer-motion';
 import logo from './assets/logo-w-text.svg';
 import logoOnly from './assets/logo.svg';
+import Footer from './components/Footer';
 
 const App = () => {
   return (
@@ -252,13 +253,7 @@ const App = () => {
         </div>
       </main>
 
-      <footer className="bg-gray-900 border-t border-gray-800">
-        <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-          <div className="text-center text-gray-400">
-            <p className="font-light">&copy; 2025 MyGourmet. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer isDark={true} />
     </div>
   );
 };

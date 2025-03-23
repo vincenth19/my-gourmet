@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase';
 import logoBnw from '../assets/logo-w-text-bnw.svg';
 import PaymentMethodForm from '../components/PaymentMethodForm';
 import { PaymentMethod } from '../types/database.types';
+import Footer from '../components/Footer';
 
 const SignUpPage = () => {
   // Track the current step of the signup flow
@@ -366,14 +367,7 @@ const SignUpPage = () => {
         </motion.div>
       </div>
 
-      {/* Footer */}
-      <footer className="bg-white border-t border-gray-100">
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <div className="text-center text-gray-500 text-sm">
-            <p>&copy; 2025 MyGourmet. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

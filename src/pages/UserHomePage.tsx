@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { Clock, ChevronRight, TrendingUp, Award } from 'lucide-react';
+import Footer from '../components/Footer';
 
 // Type for order data
 interface Order {
@@ -257,13 +258,7 @@ const UserHomePage = () => {
         </motion.section>
       </main>
 
-      <footer className="bg-white border-t mt-8">
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <div className="text-center text-gray-500">
-            <p>&copy; 2025 MyGourmet. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };
