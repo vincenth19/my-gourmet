@@ -4,7 +4,8 @@ import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { CartItem, Profile, DietaryTag } from '../types/database.types';
-import { Trash2, Plus, Minus, ShoppingBag, ChevronLeft, AlertCircle } from 'lucide-react';
+import { Trash2, Plus, Minus, ShoppingBag, ChevronLeft, AlertCircle, Edit } from 'lucide-react';
+import CustomDishForm from '../components/CustomDishForm';
 
 const CartPage = () => {
   const navigate = useNavigate();
@@ -16,6 +17,10 @@ const CartPage = () => {
   const [chefs, setChefs] = useState<Record<string, Partial<Profile>>>({});
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // New state for editing custom dishes
+  const [editingItem, setEditingItem] = useState<CartItem | null>(null);
+  const [showCustomDishForm, setShowCustomDishForm] = useState(false);
   
   // Fetch cart data
   useEffect(() => {
@@ -29,18 +34,17 @@ const CartPage = () => {
       setError(null);
       
       try {
-        // Find or create cart
-        const { data: cartData, error: cartError } = await supabase
+        // Find all carts for this user
+        const { data: userCarts, error: cartsError } = await supabase
           .from('carts')
           .select('*')
           .eq('profile_id', user.id)
-          .single();
+          .order('created_at', { ascending: false });
         
-        if (cartError && cartError.code !== 'PGRST116') { // PGRST116 means no rows returned
-          throw cartError;
-        }
+        if (cartsError) throw cartsError;
         
-        if (!cartData) {
+        // Check if we have any carts
+        if (!userCarts || userCarts.length === 0) {
           // Create new cart
           const { data: newCart, error: newCartError } = await supabase
             .from('carts')
@@ -55,13 +59,21 @@ const CartPage = () => {
           return;
         }
         
-        setCartId(cartData.id);
+        // Use the most recent cart
+        const mostRecentCart = userCarts[0];
+        setCartId(mostRecentCart.id);
         
-        // Fetch cart items
+        // If we have multiple carts, clean them up
+        if (userCarts.length > 1) {
+          console.warn(`User has ${userCarts.length} carts. Using the most recent one.`);
+          cleanupOldCarts(userCarts, mostRecentCart.id);
+        }
+        
+        // Fetch cart items for the most recent cart
         const { data: items, error: itemsError } = await supabase
           .from('cart_items')
           .select('*')
-          .eq('cart_id', cartData.id);
+          .eq('cart_id', mostRecentCart.id);
         
         if (itemsError) throw itemsError;
         
@@ -239,16 +251,22 @@ const CartPage = () => {
     const grouped: Record<string, (CartItem & { dietary_tags?: DietaryTag[] })[]> = {};
     
     cartItems.forEach(item => {
-      if (item.dish_id) {
-        // Find the chef for this dish
+      // For items with dish_id, use the existing chef mapping
+      if (item.dish_id && (item as any).chef_id) {
         const chefId = (item as any).chef_id;
-        
-        if (chefId) {
-          if (!grouped[chefId]) {
-            grouped[chefId] = [];
-          }
-          grouped[chefId].push(item);
+        if (!grouped[chefId]) {
+          grouped[chefId] = [];
         }
+        grouped[chefId].push(item);
+      } 
+      // For custom dishes (no dish_id) or dishes without chef_id
+      else {
+        // Create a "custom" group if this is the first custom item
+        const customGroupId = 'custom';
+        if (!grouped[customGroupId]) {
+          grouped[customGroupId] = [];
+        }
+        grouped[customGroupId].push(item);
       }
     });
     
@@ -269,8 +287,124 @@ const CartPage = () => {
     return chefs[chefId]?.display_name || 'Chef';
   };
   
+  // Add a new function to update custom dish
+  const updateCustomDish = async (itemId: string, updateData: {
+    custom_dish_name: string;
+    custom_description: string;
+    dish_note?: string;
+    quantity: number;
+  }) => {
+    if (!cartId) return;
+    
+    setUpdating(true);
+    
+    try {
+      const { error: updateError } = await supabase
+        .from('cart_items')
+        .update({
+          custom_dish_name: updateData.custom_dish_name,
+          custom_description: updateData.custom_description,
+          dish_note: updateData.dish_note || null,
+          quantity: updateData.quantity
+        })
+        .eq('id', itemId);
+      
+      if (updateError) throw updateError;
+      
+      // Update local state with type-safe approach
+      setCartItems(prevItems => 
+        prevItems.map(item => {
+          if (item.id === itemId) {
+            return {
+              ...item,
+              custom_dish_name: updateData.custom_dish_name,
+              custom_description: updateData.custom_description,
+              dish_note: updateData.dish_note,
+              quantity: updateData.quantity
+            };
+          }
+          return item;
+        })
+      );
+      
+      // Close form
+      setEditingItem(null);
+      setShowCustomDishForm(false);
+      
+    } catch (error: any) {
+      console.error('Error updating custom dish:', error);
+      setError('Failed to update custom dish. Please try again.');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  // Function to handle edit button click
+  const handleEditCustomDish = (item: CartItem) => {
+    setEditingItem(item);
+    setShowCustomDishForm(true);
+  };
+
+  // Function to handle form submission
+  const handleCustomDishUpdate = (values: {
+    custom_dish_name: string;
+    custom_description: string;
+    dish_note?: string;
+    quantity: number;
+  }) => {
+    if (editingItem) {
+      updateCustomDish(editingItem.id, values);
+    }
+  };
+
+  // Function to close the form
+  const closeCustomDishForm = () => {
+    setEditingItem(null);
+    setShowCustomDishForm(false);
+  };
+  
   const subtotal = calculateSubtotal();
   const itemsByChef = getItemsByChef();
+  
+  // Function to clean up old carts
+  const cleanupOldCarts = async (carts: any[], keepCartId: string) => {
+    try {
+      // Get IDs of carts to delete (all except the one we're keeping)
+      const cartIdsToDelete = carts
+        .filter(cart => cart.id !== keepCartId)
+        .map(cart => cart.id);
+      
+      if (cartIdsToDelete.length === 0) return;
+      
+      console.log(`Cleaning up ${cartIdsToDelete.length} old carts...`);
+      
+      // Delete old cart items first
+      const { error: itemsError } = await supabase
+        .from('cart_items')
+        .delete()
+        .in('cart_id', cartIdsToDelete);
+      
+      if (itemsError) {
+        console.error('Error deleting old cart items:', itemsError);
+        return;
+      }
+      
+      // Then delete the old carts
+      const { error: cartsError } = await supabase
+        .from('carts')
+        .delete()
+        .in('id', cartIdsToDelete);
+      
+      if (cartsError) {
+        console.error('Error deleting old carts:', cartsError);
+        return;
+      }
+      
+      console.log(`Successfully cleaned up ${cartIdsToDelete.length} old carts`);
+    } catch (error) {
+      console.error('Error in cleanupOldCarts:', error);
+    }
+  };
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -342,22 +476,26 @@ const CartPage = () => {
                     <div key={chefId} className="border-b border-gray-200 last:border-0">
                       <div className="bg-gray-50 p-4 flex items-center">
                         <div className="flex items-center">
-                          {chefs[chefId]?.avatar_url && (
+                          {chefId !== 'custom' && chefs[chefId]?.avatar_url && (
                             <img 
                               src={chefs[chefId].avatar_url}
                               alt={chefs[chefId].display_name}
                               className="h-8 w-8 rounded-full object-cover mr-3"
                             />
                           )}
-                          <h3 className="font-medium text-gray-900">{getChefName(chefId)}</h3>
+                          <h3 className="font-medium text-gray-900">
+                            {chefId === 'custom' ? 'Custom Dish Requests' : getChefName(chefId)}
+                          </h3>
                         </div>
                         <div className="ml-auto">
-                          <button
-                            onClick={() => navigate(`/order/${chefId}`)}
-                            className="text-sm text-navy hover:text-navy-light"
-                          >
-                            Add More Items
-                          </button>
+                          {chefId !== 'custom' && (
+                            <button
+                              onClick={() => navigate(`/order/${chefId}`)}
+                              className="text-sm text-navy hover:text-navy-light"
+                            >
+                              Add More Items
+                            </button>
+                          )}
                         </div>
                       </div>
                       
@@ -365,9 +503,21 @@ const CartPage = () => {
                         <div key={item.id} className="p-4 border-b border-gray-100 last:border-0">
                           <div className="flex items-start">
                             <div className="flex-1">
-                              <h4 className="font-medium text-gray-900">
-                                {item.custom_dish_name || item.dish_name}
-                              </h4>
+                              <div className="flex items-center">
+                                <h4 className="font-medium text-gray-900">
+                                  {item.custom_dish_name || item.dish_name}
+                                </h4>
+                                {/* Add edit button for custom dishes */}
+                                {item.custom_dish_name && (
+                                  <button
+                                    onClick={() => handleEditCustomDish(item)}
+                                    className="ml-2 text-navy hover:text-navy-light transition-colors"
+                                    aria-label="Edit custom dish"
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </button>
+                                )}
+                              </div>
                               
                               {item.custom_description && (
                                 <p className="text-sm text-gray-600 mt-1">
@@ -391,7 +541,7 @@ const CartPage = () => {
                               )}
                               
                               {item.dish_note && (
-                                <div className="mt-2">
+                                <div className="mt-6">
                                   <h5 className="text-xs font-medium text-gray-700 mb-1">Special Instructions:</h5>
                                   <p className="text-xs text-gray-600 italic">
                                     "{item.dish_note}"
@@ -434,6 +584,13 @@ const CartPage = () => {
                               </div>
                             </div>
                           </div>
+
+                          {/* Custom dish note if price is zero */}
+                          {item.custom_dish_name && item.dish_price === 0 && (
+                            <div className="mt-3 bg-blue-50 border border-blue-100 rounded p-2 text-xs text-blue-800">
+                              <p>Pricing for this custom dish will be provided by the chef after reviewing your request.</p>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -488,6 +645,25 @@ const CartPage = () => {
                 </div>
               </motion.div>
             </div>
+
+            {/* Custom Dish Edit Form Modal */}
+            {showCustomDishForm && editingItem && (
+              <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                <div className="w-full max-w-md p-2">
+                  <CustomDishForm 
+                    initialValues={{
+                      custom_dish_name: editingItem.custom_dish_name,
+                      custom_description: editingItem.custom_description,
+                      dish_note: editingItem.dish_note,
+                      quantity: editingItem.quantity
+                    }}
+                    onSubmit={handleCustomDishUpdate}
+                    onCancel={closeCustomDishForm}
+                    submitButtonText="Update Custom Dish"
+                  />
+                </div>
+              </div>
+            )}
           </div>
         )}
       </main>

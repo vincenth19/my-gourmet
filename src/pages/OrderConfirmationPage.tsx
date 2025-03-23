@@ -29,11 +29,7 @@ const OrderConfirmationPage = () => {
         // Fetch order details
         const { data: orderData, error: orderError } = await supabase
           .from('orders')
-          .select(`
-            *,
-            chef:profiles!chef_id(display_name, avatar_url),
-            address:addresses!address_id(*)
-          `)
+          .select('*')
           .eq('id', orderId)
           .eq('profile_id', user.id)
           .single();
@@ -44,7 +40,21 @@ const OrderConfirmationPage = () => {
           return;
         }
         
-        setOrder(orderData);
+        // Fetch order dishes separately
+        const { data: orderDishes, error: dishesError } = await supabase
+          .from('order_dishes')
+          .select('*')
+          .eq('order_id', orderId);
+          
+        if (dishesError) throw dishesError;
+        
+        // Combine the data
+        const orderWithItems = {
+          ...orderData,
+          items: orderDishes || []
+        };
+        
+        setOrder(orderWithItems);
       } catch (error: any) {
         console.error('Error fetching order details:', error);
         setError('Failed to load order details. Please try again.');
@@ -126,7 +136,7 @@ const OrderConfirmationPage = () => {
                       </div>
                       <div>
                         <p className="text-gray-500">Status</p>
-                        <p className="font-medium capitalize">{order.status}</p>
+                        <p className="font-medium capitalize">{order.order_status}</p>
                       </div>
                       <div>
                         <p className="text-gray-500">Total</p>
@@ -141,8 +151,8 @@ const OrderConfirmationPage = () => {
                       <h2 className="text-lg font-medium text-gray-900">Scheduled Time</h2>
                     </div>
                     <p className="text-gray-700">
-                      {format(new Date(order.scheduled_for), 'EEEE, MMMM d, yyyy')} at{' '}
-                      {format(new Date(order.scheduled_for), 'h:mm a')}
+                      {format(new Date(order.requested_time), 'EEEE, MMMM d, yyyy')} at{' '}
+                      {format(new Date(order.requested_time), 'h:mm a')}
                     </p>
                     <p className="text-sm text-gray-500 mt-1">
                       Your chef will arrive approximately 1-2 hours before this time.
@@ -155,14 +165,7 @@ const OrderConfirmationPage = () => {
                       <h2 className="text-lg font-medium text-gray-900">Your Chef</h2>
                     </div>
                     <div className="flex items-center">
-                      {order.chef?.avatar_url && (
-                        <img 
-                          src={order.chef.avatar_url}
-                          alt={order.chef.display_name}
-                          className="h-10 w-10 rounded-full object-cover mr-3"
-                        />
-                      )}
-                      <p className="text-gray-700 font-medium">{order.chef?.display_name}</p>
+                      <p className="text-gray-700 font-medium">{order.chef_name}</p>
                     </div>
                   </div>
                   
@@ -171,18 +174,11 @@ const OrderConfirmationPage = () => {
                       <MapPin className="h-5 w-5 text-navy mr-2" />
                       <h2 className="text-lg font-medium text-gray-900">Delivery Location</h2>
                     </div>
-                    {order.address && (
-                      <div>
-                        <p className="text-gray-700">
-                          {order.address.address_line}, {order.address.city}, {order.address.state} {order.address.zip_code}
-                        </p>
-                        {order.address.access_note && (
-                          <p className="text-sm text-gray-600 mt-1">
-                            Access Instructions: {order.address.access_note}
-                          </p>
-                        )}
-                      </div>
-                    )}
+                    <div>
+                      <p className="text-gray-700">
+                        {order.address_line}, {order.city}, {order.state} {order.zip_code}
+                      </p>
+                    </div>
                   </div>
                   
                   <div className="border-t border-gray-200 pt-6">
@@ -213,7 +209,7 @@ const OrderConfirmationPage = () => {
                             )}
                           </div>
                           <div className="text-right font-medium text-gray-900">
-                            {formatCurrency((item.price) * item.quantity)}
+                            {formatCurrency((item.dish_price) * item.quantity)}
                           </div>
                         </div>
                       ))}

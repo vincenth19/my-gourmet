@@ -452,7 +452,7 @@ const CheckoutPage = () => {
                       <img 
                         src={chef.avatar_url}
                         alt={chef.display_name}
-                        className="h-12 w-12 rounded-full object-cover mr-4"
+                        className="h-30 w-30 object-cover mr-4"
                       />
                     )}
                     <div>
@@ -606,7 +606,7 @@ const CheckoutPage = () => {
                           {format(selectedDate, 'EEEE, MMMM d, yyyy')} at {format(setHours(setMinutes(new Date(), Number(selectedTime.split(':')[1])), Number(selectedTime.split(':')[0])), 'h:mm a')}
                         </p>
                         <p className="text-xs text-blue-600 mt-2">
-                          Your chef will arrive approximately 1-2 hours before this time to prepare your meal.
+                          Your chef will arrive approximately 2-3 hours before this time to prepare your meal.
                         </p>
                       </div>
                     </div>
