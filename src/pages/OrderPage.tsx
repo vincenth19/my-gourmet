@@ -212,6 +212,7 @@ const OrderPage = () => {
               customization_options: customizationOptions,
               dish_note: dishNote.trim() || null,
               dietary_tags: selectedDish.dietary_tags ? { tags: selectedDish.dietary_tags.map(tag => tag.label) } : null,
+              dish_types: selectedDish.dish_types || null,
             });
             
             // Show conflict modal
@@ -252,6 +253,7 @@ const OrderPage = () => {
           customization_options: customizationOptions,
           dish_note: dishNote.trim() || null,
           dietary_tags: selectedDish.dietary_tags ? { tags: selectedDish.dietary_tags.map(tag => tag.label) } : null,
+          dish_types: selectedDish.dish_types || null,
         });
       
       if (itemError) throw itemError;
@@ -344,6 +346,7 @@ const OrderPage = () => {
               custom_dish_name: customDishData.custom_dish_name,
               custom_description: customDishData.custom_description,
               dish_note: customDishData.dish_note,
+              dish_types: { types: [] }, // Initialize empty dish_types for custom dishes
             });
             
             // Show conflict modal
@@ -365,6 +368,7 @@ const OrderPage = () => {
           custom_dish_name: customDishData.custom_dish_name,
           custom_description: customDishData.custom_description,
           dish_note: customDishData.dish_note,
+          dish_types: { types: [] }, // Initialize empty dish_types for custom dishes
         });
       
       if (itemError) throw itemError;
@@ -606,7 +610,7 @@ const OrderPage = () => {
                           ))}
                         </div>
                       )}
-                      <div className='md:overflow-auto h-[58%]'>
+                      <div className='md:overflow-auto h-[45%]'>
                         <div className="mb-6">
                           <p className="text-gray-600">
                             {selectedDish.description || "No description available for this dish."}
@@ -615,12 +619,12 @@ const OrderPage = () => {
                         
                         {/* Customization Options */}
                         {selectedDish.customization_options && 
-                        selectedDish.customization_options.option && 
-                        selectedDish.customization_options.option.length > 0 && (
+                        selectedDish.customization_options.options && 
+                        selectedDish.customization_options.options.length > 0 && (
                           <div className="mb-6">
                             <h3 className="text-sm font-medium text-gray-700 mb-3">Customization Options</h3>
                             <div className="space-y-2">
-                              {selectedDish.customization_options.option.map((option, index) => (
+                              {selectedDish.customization_options.options.map((option, index) => (
                                 <div key={index} className="flex items-center">
                                   <input
                                     id={`option-${index}`}
@@ -644,7 +648,7 @@ const OrderPage = () => {
                           <div className="flex items-center">
                             <button
                               onClick={decrementQuantity}
-                              className="bg-gray-100 text-gray-600 p-2 rounded-l hover:bg-gray-200"
+                              className="border-gray-200 border-1 text-gray-600 p-1 rounded-l hover:bg-gray-200"
                             >
                               <Minus size={16} />
                             </button>
@@ -658,7 +662,7 @@ const OrderPage = () => {
                             />
                             <button
                               onClick={incrementQuantity}
-                              className="bg-gray-100 text-gray-600 p-2 rounded-r hover:bg-gray-200"
+                              className="border-gray-200 border-1 text-gray-600 p-1 rounded-r hover:bg-gray-200"
                               >
                               <Plus size={16} />
                             </button>

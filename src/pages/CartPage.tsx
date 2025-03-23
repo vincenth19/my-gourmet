@@ -457,7 +457,8 @@ const CartPage = () => {
                         custom_dish_name: data.custom_dish_name,
                         custom_description: data.custom_description,
                         dish_note: data.dish_note,
-                        quantity: data.quantity
+                        quantity: data.quantity,
+                        dish_types: editingItem.dish_types || { types: [] },
                       })
                       .eq('id', editingItem.id);
                       

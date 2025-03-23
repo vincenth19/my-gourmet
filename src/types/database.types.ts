@@ -57,7 +57,10 @@ export interface Dish {
   description?: string;
   image_url?: string;
   customization_options?: {
-    option: string[];
+    options: string[];
+  };
+  dish_types?: {
+    types: string[];
   };
   created_at: string;
   updated_at?: string;
@@ -88,6 +91,9 @@ export interface CartItem {
   custom_price?: number;
   customization_options?: {
     option: string[];
+  };
+  dish_types?: {
+    types: string[];
   };
   dietary_tags?: string[] | Record<string, string | number | boolean>;
   dish_note?: string;
@@ -134,6 +140,9 @@ export interface OrderDish {
   custom_price?: number;
   customization_options?: {
     option: string[];
+  };
+  dish_types?: {
+    types: string[];
   };
   dietary_tags?: string[] | Record<string, string | number | boolean>;
   dish_note?: string;

@@ -365,7 +365,8 @@ const CheckoutPage = () => {
         custom_price: item.custom_price,
         customization_options: item.customization_options,
         dietary_tags: item.dietary_tags,
-        dish_note: item.dish_note
+        dish_note: item.dish_note,
+        dish_types: item.dish_types
       }));
       
       const { error: orderDishesError } = await supabase

@@ -56,7 +56,7 @@ const Navbar = ({ activePage: propActivePage }: NavbarProps) => {
                     ? 'text-navy border-b-2 border-navy' 
                     : 'text-gray-600 hover:text-navy'} font-light transition-colors duration-200 px-2 py-1`}
                 >
-                  Orders
+                  My Orders
                 </button>
               </Link>
             )}

@@ -292,7 +292,7 @@ const DishForm = () => {
       // Add customization options
       // Filter out empty options before saving
       const filteredOptions = customizationOptions.filter(option => option.trim() !== '');
-      dishData.customization_options = { option: filteredOptions };
+      dishData.customization_options = { options: filteredOptions };
       
       // If new image was uploaded, handle it
       if (imageFile) {
