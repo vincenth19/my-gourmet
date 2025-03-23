@@ -159,6 +159,17 @@ CREATE POLICY "Clients can insert dishes to their orders"
   TO authenticated
   WITH CHECK (order_id IN (SELECT id FROM public.orders WHERE profile_id = auth.uid()));
 
+-- Add policy to allow chefs to update dishes for their orders
+CREATE POLICY "Chefs can update dishes in orders assigned to them"
+  ON public.order_dishes FOR UPDATE
+  TO authenticated
+  USING (order_id IN (
+    SELECT id FROM public.orders 
+    WHERE chef_id = auth.uid() OR chef_name = (
+      SELECT display_name FROM public.profiles WHERE id = auth.uid()
+    )
+  ));
+
 -- For a school project, we'll add a special policy for admins
 -- This assumes you have a function to check if a user is an admin
 CREATE OR REPLACE FUNCTION public.is_admin()

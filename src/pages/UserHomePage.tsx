@@ -129,8 +129,8 @@ const UserHomePage = () => {
               {recentOrders.map((order) => (
                 <div 
                   key={order.id}
-                  className="bg-white rounded-lg shadow-sm p-5 hover:shadow-md transition-shadow duration-200"
-                  onClick={() => navigate(`/orders/${order.id}`)}
+                  className="bg-white border-gray-200 border p-5 hover:shadow-md transition-shadow duration-200"
+                  onClick={() => navigate(`/order-confirmation/${order.id}`)}
                 >
                   <div className="flex justify-between mb-2">
                     <span className="text-sm font-medium text-gray-500">{formatDate(order.order_date)}</span>

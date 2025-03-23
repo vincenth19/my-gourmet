@@ -116,11 +116,13 @@ const OrderConfirmationPage = () => {
               </div>
               
               <div className="p-6 md:p-8">
+                {/* 
                 <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-6">
                   <p className="text-emerald-800 text-center">
                     We have sent a confirmation email to your registered email address.
                   </p>
                 </div>
+                */}
                 
                 <div className="space-y-6">
                   <div>
@@ -209,7 +211,7 @@ const OrderConfirmationPage = () => {
                             )}
                           </div>
                           <div className="text-right font-medium text-gray-900">
-                            {formatCurrency((item.dish_price) * item.quantity)}
+                            {formatCurrency((item.custom_dish_name ? (item.custom_price || 0) : item.dish_price) * item.quantity)}
                           </div>
                         </div>
                       ))}
@@ -233,6 +235,12 @@ const OrderConfirmationPage = () => {
                       className="bg-navy text-white px-8 py-3 rounded-lg hover:bg-navy-light transition-colors"
                     >
                       Back to Home
+                    </button>
+                    <button
+                      onClick={() => navigate('/orders')}
+                      className="ml-4 bg-white border border-navy text-navy px-8 py-3 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      View All Orders
                     </button>
                   </div>
                 </div>

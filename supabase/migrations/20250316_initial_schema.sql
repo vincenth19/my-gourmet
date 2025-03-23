@@ -114,6 +114,7 @@ CREATE TABLE public.orders (
   profile_email VARCHAR NOT NULL,
   profile_contact_number VARCHAR NOT NULL,
   chef_name VARCHAR NOT NULL,
+  chef_id UUID NULL,
   
   -- Address details at time of order
   address_line VARCHAR NOT NULL,

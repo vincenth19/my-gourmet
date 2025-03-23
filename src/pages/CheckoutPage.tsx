@@ -330,6 +330,7 @@ const CheckoutPage = () => {
           profile_email: profileData.email,
           profile_contact_number: profileData.contact_number || '',
           chef_name: chef.display_name || '',
+          chef_id: chef.id,
           
           // Address details
           address_line: addressData.address_line,
