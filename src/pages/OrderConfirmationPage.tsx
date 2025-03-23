@@ -184,7 +184,7 @@ const OrderConfirmationPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div className="bg-white border border-gray-200 overflow-hidden">
               <div className="bg-navy text-white px-6 py-8 text-center">
                 <CheckCircle className="h-16 w-16 mx-auto mb-4" />
                 <h1 className="text-2xl font-bold mb-2">Order Confirmed!</h1>
