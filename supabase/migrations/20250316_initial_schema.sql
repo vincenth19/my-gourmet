@@ -138,7 +138,7 @@ CREATE TABLE public.orders (
 -- Create order_dishes table
 CREATE TABLE public.order_dishes (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  order_id UUID REFERENCES public.orders(id),
+  order_id UUID REFERENCES public.orders(id) ON DELETE CASCADE,
   dish_name VARCHAR NOT NULL,
   quantity INTEGER NOT NULL,
   dish_price DECIMAL(10, 2) NOT NULL,

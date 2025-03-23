@@ -15,6 +15,8 @@ import MyDishes from "./pages/chef/MyDishes.tsx";
 import DishForm from "./pages/chef/DishForm.tsx";
 import OrderPage from "./pages/OrderPage.tsx";
 import CartPage from "./pages/CartPage.tsx";
+import CheckoutPage from "./pages/CheckoutPage.tsx";
+import OrderConfirmationPage from "./pages/OrderConfirmationPage.tsx";
 import { AuthProvider } from "./contexts/AuthContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
@@ -36,6 +38,8 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/order/:chefId" element={<OrderPage />} />
             <Route path="/cart" element={<CartPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/order-confirmation/:orderId" element={<OrderConfirmationPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
