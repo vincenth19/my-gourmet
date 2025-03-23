@@ -904,7 +904,7 @@ const ProfilePage = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="bg-white rounded-lg shadow-md p-8"
+          className="bg-white border-2 border-gray-200 p-8"
         >
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
@@ -912,7 +912,7 @@ const ProfilePage = () => {
               {!isEditing && (
                 <button
                   onClick={handleEditToggle}
-                  className="flex items-center gap-2 px-4 py-2 bg-navy hover:bg-navy-light text-white rounded-lg transition-colors duration-200"
+                  className="flex items-center gap-2 px-4 py-2 bg-navy-light hover:bg-navy text-white transition-colors duration-200"
                 >
                  <Pencil className="w-4 h-4" /> Edit
                 </button>
@@ -1089,24 +1089,23 @@ const ProfilePage = () => {
                       </div>
                     </div>
                   </div>
-
+                  
+                  <div className="bg-gray-50 rounded-lg p-6">
+                    <label htmlFor="preferences" className="block text-lg font-medium text-gray-900 mb-4">
+                      {profile.role === 'chef' ? 'About Me' : 'Preferences'}
+                    </label>
+                    <textarea
+                      id="preferences"
+                      name="preferences"
+                      value={editedProfile?.preferences || ''}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent h-32"
+                      placeholder={profile.role === 'chef' ? 'Enter your culinary background, cooking style, etc.' : 'Enter your food preferences, dietary restrictions, etc.'}
+                    />
+                  </div>
                   {/* Only show preferences editing section for non-chef users */}
                   {profile.role !== 'chef' && (
                     <>
-                      <div className="bg-gray-50 rounded-lg p-6">
-                        <label htmlFor="preferences" className="block text-lg font-medium text-gray-900 mb-4">
-                          Preferences
-                        </label>
-                        <textarea
-                          id="preferences"
-                          name="preferences"
-                          value={editedProfile?.preferences || ''}
-                          onChange={handleChange}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent h-32"
-                          placeholder="Enter your food preferences, dietary restrictions, etc."
-                        />
-                      </div>
-                      
                       {/* Dietary Preferences Section */}
                       <div className="bg-gray-50 rounded-lg p-6">
                         <DietaryPreferences 
@@ -1116,31 +1115,6 @@ const ProfilePage = () => {
                           onTagsChange={handleDietaryTagsChange}
                         />
                       </div>
-                      {isEditing && (
-                        <div className="flex justify-end space-x-3 pt-4">
-                          <button
-                            onClick={handleEditToggle}
-                            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors duration-200"
-                            disabled={saving}
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            onClick={handleSave}
-                            className="px-4 py-2 bg-navy hover:bg-navy-light text-white rounded-lg transition-colors duration-200 flex items-center"
-                            disabled={saving}
-                          >
-                            {saving ? (
-                              <>
-                                <span className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></span>
-                                Saving...
-                              </>
-                            ) : (
-                              'Save Changes'
-                            )}
-                          </button>
-                        </div>
-                      )}
                       
                       {/* Address Section - New */}
                       {renderAddressSection()}
@@ -1148,6 +1122,31 @@ const ProfilePage = () => {
                       {/* Payment Method Section */}
                       {renderPaymentMethod()}
                     </>
+                  )}
+                  {isEditing && (
+                    <div className="flex justify-end space-x-3 pt-4">
+                      <button
+                        onClick={handleEditToggle}
+                        className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors duration-200"
+                        disabled={saving}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleSave}
+                        className="px-4 py-2 bg-navy hover:bg-navy-light text-white rounded-lg transition-colors duration-200 flex items-center"
+                        disabled={saving}
+                      >
+                        {saving ? (
+                          <>
+                            <span className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></span>
+                            Saving...
+                          </>
+                        ) : (
+                          'Save Changes'
+                        )}
+                      </button>
+                    </div>
                   )}
                 </>
               )}

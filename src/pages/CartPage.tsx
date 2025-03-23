@@ -302,6 +302,19 @@ const CartPage = () => {
                                 <p className="text-sm text-gray-600 mt-1">{item.custom_description}</p>
                               )}
                               
+                              
+                              {/* Show selected dish type */}
+                              {item.dish_types && item.dish_types.types && item.dish_types.types.length > 0 && (
+                                <div className="mt-2">
+                                  <p className="text-xs text-gray-500">Cooking Preference:</p>
+                                  <div className="flex flex-wrap mt-1">
+                                    <span className="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded-full mr-2 mb-2">
+                                      {item.dish_types.types[0]}
+                                    </span>
+                                  </div>
+                                </div>
+                              )}
+                              
                               {/* Show customization options */}
                               {item.customization_options && item.customization_options.option && item.customization_options.option.length > 0 && (
                                 <div className="mt-2">
@@ -315,7 +328,7 @@ const CartPage = () => {
                                   </div>
                                 </div>
                               )}
-                              
+
                               {/* Show dish note */}
                               {item.dish_note && (
                                 <div className="mt-2">
@@ -483,8 +496,6 @@ const CartPage = () => {
           />
         )}
       </main>
-      
-      <Footer />
     </div>
   );
 };

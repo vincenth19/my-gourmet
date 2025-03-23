@@ -736,6 +736,13 @@ const CheckoutPage = () => {
                               }
                             </div>
                           )}
+                          {item.dish_types && item.dish_types.types && item.dish_types.types.length > 0 && (
+                            <div className="ml-6 mt-1">
+                              <span className="text-xs font-medium text-amber-700 block">
+                                Cooking: {item.dish_types.types.join(', ')}
+                              </span>
+                            </div>
+                          )}
                         </div>
                         <div className="text-right text-gray-800 whitespace-nowrap">
                           {formatCurrency((item.custom_price || item.dish_price) * item.quantity)}

@@ -180,7 +180,7 @@ BEGIN
         2,
         36.50,
         '{"option": ["Extra pancetta", "Al dente", "Extra cheese"]}',
-        '{"types": ["Pasta", "Italian", "Main Course", "Pork"]}'
+        '{"types": ["Al dente"]}'
     );
     
     -- Add a custom dish to the completed order (with chef-assigned price)
@@ -194,7 +194,7 @@ BEGIN
         'Seafood Risotto Special',
         'A creamy risotto with mixed seafood, especially scallops and prawns.',
         65.00,
-        '{"types": ["Seafood", "Italian", "Rice"]}'
+        '{"types": []}'
     );
     
     -- 3. COMPLETED order with chef_sydney
@@ -418,7 +418,7 @@ BEGIN
         1,
         49.50,
         '{"option": ["Extra lobster", "Truffle shavings"]}',
-        '{"types": ["Seafood", "Italian", "Rice", "Premium"]}'
+        '{"types": []}'
     ),
     (
         customer2_completed1_id,
@@ -426,7 +426,7 @@ BEGIN
         1,
         42.75,
         '{"option": ["Substitute white meat", "Extra sauce"]}',
-        '{"types": ["Chicken", "French", "Main Course", "Classic"]}'
+        '{"types": []}'
     ),
     (
         customer2_completed1_id,
@@ -434,7 +434,7 @@ BEGIN
         1,
         24.99,
         '{"option": ["Lavender infusion", "Extra berries"]}',
-        '{"types": ["Dessert", "French", "Custard", "Elegant"]}'
+        '{"types": []}'
     );
     
     -- 3. COMPLETED order with chef_western

@@ -24,6 +24,9 @@ const DishForm = () => {
   // New state for customization options
   const [customizationOptions, setCustomizationOptions] = useState<string[]>(['']);
   
+  // New state for dish types (cooking preferences)
+  const [dishTypes, setDishTypes] = useState<string[]>(['']);
+  
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -82,8 +85,13 @@ const DishForm = () => {
         setFormData(dish);
         
         // Load customization options if they exist
-        if (dish.customization_options && dish.customization_options.option) {
-          setCustomizationOptions(dish.customization_options.option);
+        if (dish.customization_options && dish.customization_options.options) {
+          setCustomizationOptions(dish.customization_options.options);
+        }
+        
+        // Load dish types if they exist
+        if (dish.dish_types && dish.dish_types.types) {
+          setDishTypes(dish.dish_types.types);
         }
         
         // Set image preview if exists
@@ -202,6 +210,7 @@ const DishForm = () => {
 
   // Add a new customization option field
   const addCustomizationOption = () => {
+    if (customizationOptions.length >= 10) return; // Limit to 10 options
     setCustomizationOptions([...customizationOptions, '']);
   };
 
@@ -211,6 +220,27 @@ const DishForm = () => {
     const updatedOptions = [...customizationOptions];
     updatedOptions.splice(index, 1);
     setCustomizationOptions(updatedOptions);
+  };
+  
+  // Handle dish type changes
+  const handleDishTypeChange = (index: number, value: string) => {
+    const updatedTypes = [...dishTypes];
+    updatedTypes[index] = value;
+    setDishTypes(updatedTypes);
+  };
+
+  // Add a new dish type field
+  const addDishType = () => {
+    if (dishTypes.length >= 5) return; // Limit to 5 types
+    setDishTypes([...dishTypes, '']);
+  };
+
+  // Remove a dish type field
+  const removeDishType = (index: number) => {
+    if (dishTypes.length <= 1) return;
+    const updatedTypes = [...dishTypes];
+    updatedTypes.splice(index, 1);
+    setDishTypes(updatedTypes);
   };
 
   // Handle dietary tag selection
@@ -246,7 +276,7 @@ const DishForm = () => {
         .from('dish_images')
         .upload(filePath, imageFile, {
           cacheControl: '3600',
-          upsert: false
+          upsert: true
         });
         
       if (error) throw error;
@@ -294,6 +324,10 @@ const DishForm = () => {
       const filteredOptions = customizationOptions.filter(option => option.trim() !== '');
       dishData.customization_options = { options: filteredOptions };
       
+      // Add dish types (cooking preferences)
+      const filteredTypes = dishTypes.filter(type => type.trim() !== '');
+      dishData.dish_types = { types: filteredTypes };
+      
       // If new image was uploaded, handle it
       if (imageFile) {
         // For new dishes, use a temporary UUID
@@ -315,6 +349,7 @@ const DishForm = () => {
             description: dishData.description,
             image_url: dishData.image_url || formData.image_url, // Keep old image URL if no new image
             customization_options: dishData.customization_options,
+            dish_types: dishData.dish_types,
             updated_at: new Date().toISOString()
           })
           .eq('id', id);
@@ -341,6 +376,7 @@ const DishForm = () => {
             description: dishData.description,
             image_url: dishData.image_url,
             customization_options: dishData.customization_options,
+            dish_types: dishData.dish_types,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
           })
@@ -404,7 +440,7 @@ const DishForm = () => {
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6">
+          <div className="bg-navy-50 border border-navy-200 text-navy-light px-4 py-3 rounded-lg mb-6">
             {error}
           </div>
         )}
@@ -432,16 +468,16 @@ const DishForm = () => {
                 <button
                   type="button"
                   onClick={handleRemoveImage}
-                  className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-md hover:bg-red-50 focus:outline-none"
+                  className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-md hover:bg-navy-50 focus:outline-none"
                 >
-                  <X size={16} className="text-red-500" />
+                  <X size={16} className="text-navy" />
                 </button>
               </div>
             ) : (
               <div 
                 {...getRootProps()} 
                 className={`border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer h-48 bg-gray-50 
-                  ${isDragActive ? 'border-navy-gold bg-blue-300' : 'border-gray-300 hover:border-gold'}`}
+                  ${isDragActive ? 'border-navy bg-navy-50' : 'border-gray-300 hover:border-navy'}`}
               >
                 <input {...getInputProps()} />
                 <Upload size={24} className="text-gray-400 mb-2" />
@@ -465,7 +501,7 @@ const DishForm = () => {
               required
               value={formData.name}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors duration-200"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent transition-colors duration-200"
               placeholder="Enter dish name"
               disabled={loading}
             />
@@ -485,7 +521,7 @@ const DishForm = () => {
               required
               value={formData.price}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors duration-200"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent transition-colors duration-200"
               placeholder="0.00"
               disabled={loading}
             />
@@ -502,12 +538,58 @@ const DishForm = () => {
               rows={4}
               value={formData.description || ''}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors duration-200"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent transition-colors duration-200"
               placeholder="Enter dish description"
               disabled={loading}
             />
           </div>
 
+          
+          {/* Cooking Preferences (Dish Types) */}
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Cooking Preferences
+              </label>
+              <button
+                type="button"
+                onClick={addDishType}
+                disabled={dishTypes.length >= 5}
+                className={`flex items-center text-sm text-navy hover:text-navy-light transition-colors ${
+                  dishTypes.length >= 5 ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                <Plus size={16} className="mr-1" />
+                Add Preference
+              </button>
+            </div>
+            <div className="space-y-2">
+              {dishTypes.map((type, index) => (
+                <div key={index} className="flex items-center">
+                  <input
+                    type="text"
+                    value={type}
+                    onChange={(e) => handleDishTypeChange(index, e.target.value)}
+                    className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent transition-colors duration-200"
+                    placeholder="e.g. Medium Rare, Well Done, Al Dente"
+                    disabled={loading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeDishType(index)}
+                    className={`ml-2 p-2 text-navy hover:text-navy-light transition-colors ${dishTypes.length <= 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={dishTypes.length <= 1 || loading}
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <p className="mt-1 text-xs text-gray-500">
+              Add cooking preferences that customers can select (e.g., temperature, cooking style) (max 5).
+            </p>
+          </div>
+          
           {/* Customization Options */}
           <div>
             <div className="flex justify-between items-center mb-2">
@@ -517,7 +599,10 @@ const DishForm = () => {
               <button
                 type="button"
                 onClick={addCustomizationOption}
-                className="flex items-center text-sm text-orange-500 hover:text-orange-600 transition-colors"
+                disabled={customizationOptions.length >= 10}
+                className={`flex items-center text-sm text-navy hover:text-navy-light transition-colors ${
+                  customizationOptions.length >= 10 ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
                 <Plus size={16} className="mr-1" />
                 Add Option
@@ -530,14 +615,14 @@ const DishForm = () => {
                     type="text"
                     value={option}
                     onChange={(e) => handleCustomizationChange(index, e.target.value)}
-                    className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors duration-200"
+                    className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent transition-colors duration-200"
                     placeholder="e.g. Extra cheese, No onions"
                     disabled={loading}
                   />
                   <button
                     type="button"
                     onClick={() => removeCustomizationOption(index)}
-                    className={`ml-2 p-2 text-red-500 hover:text-red-600 transition-colors ${customizationOptions.length <= 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`ml-2 p-2 text-navy hover:text-navy-light transition-colors ${customizationOptions.length <= 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
                     disabled={customizationOptions.length <= 1 || loading}
                   >
                     <Trash2 size={18} />
@@ -546,7 +631,7 @@ const DishForm = () => {
               ))}
             </div>
             <p className="mt-1 text-xs text-gray-500">
-              Add customization options for your dish that customers can select when ordering.
+              Add customization options for your dish that customers can select when ordering (max 10).
             </p>
           </div>
 
@@ -563,7 +648,7 @@ const DishForm = () => {
                     id={`tag-${tag.id}`}
                     checked={selectedTags.includes(tag.id)}
                     onChange={() => handleTagChange(tag.id)}
-                    className="h-4 w-4 text-orange-500 focus:ring-orange-500 rounded"
+                    className="h-4 w-4 text-navy focus:ring-navy rounded"
                     disabled={loading}
                   />
                   <label htmlFor={`tag-${tag.id}`} className="ml-2 text-sm text-gray-700">
@@ -579,7 +664,7 @@ const DishForm = () => {
             <button
               type="submit"
               disabled={loading || isUploading}
-              className="w-full flex items-center justify-center px-4 py-3 border border-transparent rounded-lg text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center px-4 py-3 border border-transparent rounded-lg text-white bg-navy hover:bg-navy-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-navy transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading || isUploading ? (
                 <>

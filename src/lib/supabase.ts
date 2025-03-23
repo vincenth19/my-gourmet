@@ -9,9 +9,6 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
   },
   global: {
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
-    }
+    headers: { 'x-application-name': 'mygourmet' }
   }
 }); 

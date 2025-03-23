@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router';
+import { useParams } from 'react-router';
 import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { Dish, Profile, DietaryTag } from '../types/database.types';
-import { X, Minus, Plus, FilePlus } from 'lucide-react';
+import { FilePlus } from 'lucide-react';
 import CustomDishForm from '../components/CustomDishForm';
+import DishModal from '../components/DishModal';
 import { useCart } from '../contexts/CartContext';
 
 const OrderPage = () => {
   const { chefId } = useParams<{ chefId: string }>();
-  const navigate = useNavigate();
   const { user } = useAuth();
   const { refreshCart } = useCart();
   
@@ -22,6 +22,7 @@ const OrderPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [selectedCustomizations, setSelectedCustomizations] = useState<string[]>([]);
   const [dishNote, setDishNote] = useState('');
+  const [selectedDishType, setSelectedDishType] = useState<string | undefined>(undefined);
   
   // Add new states for cart restriction functionality
   const [showChefConflictModal, setShowChefConflictModal] = useState(false);
@@ -118,11 +119,29 @@ const OrderPage = () => {
     }).format(amount);
   };
   
+  // Add this function after formatCurrency
+  const getImageUrl = (imageUrl: string | null) => {
+    if (!imageUrl) return 'https://via.placeholder.com/400x400?text=No+Image';
+    
+    // If it's already a full URL, return it
+    if (imageUrl.startsWith('http')) {
+      return imageUrl;
+    }
+    
+    // Otherwise, get the public URL from Supabase storage
+    const { data } = supabase.storage
+      .from('dish_images')
+      .getPublicUrl(imageUrl);
+    
+    return data.publicUrl || 'https://via.placeholder.com/400x400?text=No+Image';
+  };
+  
   const openDishModal = (dish: (Dish & { dietary_tags?: DietaryTag[] })) => {
     setSelectedDish(dish);
     setQuantity(1);
     setSelectedCustomizations([]);
     setDishNote('');
+    setSelectedDishType(undefined);
     setModalOpen(true);
   };
   
@@ -130,14 +149,42 @@ const OrderPage = () => {
     setModalOpen(false);
     setTimeout(() => {
       setSelectedDish(null);
-      setQuantity(1);
-      setSelectedCustomizations([]);
-      setDishNote('');
     }, 200); // Clear selected dish after modal close animation
+  };
+  
+  // Handlers for DishModal state
+  const modalQuantityChange = (value: number) => {
+    setQuantity(value);
+  };
+
+  const handleCustomizationToggle = (option: string) => {
+    setSelectedCustomizations(prev => {
+      if (prev.includes(option)) {
+        return prev.filter(item => item !== option);
+      } else {
+        return [...prev, option];
+      }
+    });
+  };
+
+  const handleDishNoteChange = (note: string) => {
+    setDishNote(note);
+  };
+
+  const handleDishTypeChange = (type: string) => {
+    setSelectedDishType(type);
   };
   
   // Add to cart functionality
   const addToCart = async () => {
+    console.log("addToCart - Starting with values:", {
+      dishName: selectedDish?.name,
+      quantity,
+      selectedCustomizations,
+      dishNote,
+      selectedDishType
+    });
+    
     if (!user || !selectedDish || !chef) return;
     
     try {
@@ -202,6 +249,10 @@ const OrderPage = () => {
               ? { option: selectedCustomizations }
               : null;
               
+            console.log("OrderPage - Creating pending item - selectedDishType:", selectedDishType);
+            const pendingDishTypesValue = selectedDishType ? { types: [selectedDishType] } : { types: [] };
+            console.log("OrderPage - pending dish_types being stored:", pendingDishTypesValue);
+            
             // Store pending item data
             setPendingCartItem({
               cart_id: cartId,
@@ -212,7 +263,7 @@ const OrderPage = () => {
               customization_options: customizationOptions,
               dish_note: dishNote.trim() || null,
               dietary_tags: selectedDish.dietary_tags ? { tags: selectedDish.dietary_tags.map(tag => tag.label) } : null,
-              dish_types: selectedDish.dish_types || null,
+              dish_types: pendingDishTypesValue,
             });
             
             // Show conflict modal
@@ -235,11 +286,16 @@ const OrderPage = () => {
   const addItemToCart = async (cartId: string) => {
     if (!selectedDish) return;
     
+    console.log("OrderPage - Before saving to cart - selectedDishType:", selectedDishType);
+    
     try {
       // Prepare customization_options in the correct format
       const customizationOptions = selectedCustomizations.length > 0 
         ? { option: selectedCustomizations }
         : null;
+      
+      const dishTypesValue = selectedDishType ? { types: [selectedDishType] } : { types: [] };
+      console.log("OrderPage - dish_types being stored:", dishTypesValue);
       
       // Create cart item entry
       const { error: itemError } = await supabase
@@ -253,7 +309,7 @@ const OrderPage = () => {
           customization_options: customizationOptions,
           dish_note: dishNote.trim() || null,
           dietary_tags: selectedDish.dietary_tags ? { tags: selectedDish.dietary_tags.map(tag => tag.label) } : null,
-          dish_types: selectedDish.dish_types || null,
+          dish_types: dishTypesValue,
         });
       
       if (itemError) throw itemError;
@@ -435,31 +491,6 @@ const OrderPage = () => {
     setPendingCartItem(null);
   };
   
-  const incrementQuantity = () => {
-    setQuantity(prev => Math.min(prev + 1, 50));
-  };
-  
-  const decrementQuantity = () => {
-    setQuantity(prev => Math.max(prev - 1, 1));
-  };
-  
-  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value);
-    if (!isNaN(value)) {
-      setQuantity(Math.min(Math.max(value, 1), 50));
-    }
-  };
-  
-  const toggleCustomization = (option: string) => {
-    setSelectedCustomizations(prev => {
-      if (prev.includes(option)) {
-        return prev.filter(item => item !== option);
-      } else {
-        return [...prev, option];
-      }
-    });
-  };
-  
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -521,11 +552,12 @@ const OrderPage = () => {
                         <div className="aspect-square overflow-hidden bg-gray-100">
                           {dish.image_url ? (
                             <img 
-                              src={dish.image_url}
+                              src={getImageUrl(dish.image_url)}
                               alt={dish.name}
                               className="w-full h-full object-cover"
                               onError={(e) => {
                                 // Fallback for broken image links
+                                (e.target as HTMLImageElement).onerror = null;
                                 (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x400?text=No+Image';
                               }}
                             />
@@ -562,142 +594,28 @@ const OrderPage = () => {
               </div>
             </motion.div>
             
-            {/* Dish Detail Modal */}
-            {modalOpen && selectedDish && (
-              <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                  className="bg-white shadow-lg overflow-hidden max-w-4xl w-full max-h-[90vh] flex flex-col"
-                > 
-                  <div className="flex-1 overflow-auto md:overflow-visible p-0 md:flex">
-                    <div className="md:w-1/2 h-64 md:h-auto md:aspect-square">
-                      <img 
-                        src={selectedDish.image_url || 'https://via.placeholder.com/600x600?text=No+Image'}
-                        alt={selectedDish.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x600?text=No+Image';
-                        }}
-                      />
-                    </div>
-                    
-                    <div className="md:w-1/2 p-6">
-                      <div className="flex justify-end mb-4">
-                        <button 
-                          onClick={closeDishModal}
-                          className="text-gray-500 hover:text-gray-700"
-                        >
-                          <X className="h-6 w-6" />
-                        </button>
-                      </div>
-                      <div className="flex justify-between items-start mb-4">
-                        <h2 className="text-2xl font-bold text-gray-900">{selectedDish.name}</h2>
-                        <span className="text-xl font-bold text-navy">{formatCurrency(selectedDish.price)}</span>
-                      </div>
-                      
-                      {selectedDish.dietary_tags && selectedDish.dietary_tags.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mb-6">
-                          {selectedDish.dietary_tags.map((tag, index) => (
-                            <span 
-                              key={index} 
-                              className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-gray-800"
-                            >
-                              {tag.label}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                      <div className='md:overflow-auto h-[45%]'>
-                        <div className="mb-6">
-                          <p className="text-gray-600">
-                            {selectedDish.description || "No description available for this dish."}
-                          </p>
-                        </div>
-                        
-                        {/* Customization Options */}
-                        {selectedDish.customization_options && 
-                        selectedDish.customization_options.options && 
-                        selectedDish.customization_options.options.length > 0 && (
-                          <div className="mb-6">
-                            <h3 className="text-sm font-medium text-gray-700 mb-3">Customization Options</h3>
-                            <div className="space-y-2">
-                              {selectedDish.customization_options.options.map((option, index) => (
-                                <div key={index} className="flex items-center">
-                                  <input
-                                    id={`option-${index}`}
-                                    type="checkbox"
-                                    checked={selectedCustomizations.includes(option)}
-                                    onChange={() => toggleCustomization(option)}
-                                    className="h-4 w-4 text-navy focus:ring-navy border-gray-300 rounded"
-                                    />
-                                  <label htmlFor={`option-${index}`} className="ml-2 block text-sm text-gray-700">
-                                    {option}
-                                  </label>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        
-                        {/* Quantity Selector */}
-                        <div className="mb-6">
-                          <h3 className="text-sm font-medium text-gray-700 mb-3">Quantity</h3>
-                          <div className="flex items-center">
-                            <button
-                              onClick={decrementQuantity}
-                              className="border-gray-200 border-1 text-gray-600 p-1 rounded-l hover:bg-gray-200"
-                            >
-                              <Minus size={16} />
-                            </button>
-                            <input
-                              type="number"
-                              min="1"
-                              max="50"
-                              value={quantity}
-                              onChange={handleQuantityChange}
-                              className="w-16 text-center border-gray-200 border-y focus:ring-navy focus:border-navy"
-                            />
-                            <button
-                              onClick={incrementQuantity}
-                              className="border-gray-200 border-1 text-gray-600 p-1 rounded-r hover:bg-gray-200"
-                              >
-                              <Plus size={16} />
-                            </button>
-                            <span className="ml-3 text-sm text-gray-500">(Max 50)</span>
-                          </div>
-                        </div>
-                        
-                        {/* Special Instructions / Dish Note */}
-                        <div className="mb-6">
-                          <h3 className="text-sm font-medium text-gray-700 mb-3">Special Instructions</h3>
-                          <textarea
-                            value={dishNote}
-                            onChange={(e) => setDishNote(e.target.value)}
-                            placeholder="Add any special requests or instructions for this dish..."
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-navy focus:border-navy"
-                            rows={3}
-                            />
-                        </div>
-
-                      </div>
-                      <div className="mt-auto pt-4 border-t border-gray-300">
-                        <button
-                          onClick={addToCart}
-                          className="w-full bg-navy text-white py-3 rounded-lg hover:bg-navy-light transition-colors"
-                        >
-                          Add to Order ({quantity} {quantity === 1 ? 'item' : 'items'})
-                        </button>
-                        <p className="text-xs text-gray-500 mt-2 text-center">
-                          Items are added to your cart for checkout
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              </div>
+            {/* Use the DishModal component */}
+            {selectedDish && (
+              <DishModal 
+                dish={selectedDish}
+                isOpen={modalOpen}
+                onClose={closeDishModal}
+                
+                // Pass all state values
+                quantity={quantity}
+                selectedCustomizations={selectedCustomizations}
+                dishNote={dishNote}
+                selectedDishType={selectedDishType}
+                
+                // Pass state handlers
+                onQuantityChange={modalQuantityChange}
+                onCustomizationToggle={handleCustomizationToggle}
+                onDishNoteChange={handleDishNoteChange}
+                onDishTypeChange={handleDishTypeChange}
+                
+                // Pass add to cart handler
+                onAddToCart={addToCart}
+              />
             )}
 
             {/* Chef Conflict Modal - Updated to handle both regular and custom dishes */}

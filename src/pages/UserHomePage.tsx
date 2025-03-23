@@ -257,8 +257,6 @@ const UserHomePage = () => {
           </div>
         </motion.section>
       </main>
-
-      <Footer />
     </div>
   );
 };

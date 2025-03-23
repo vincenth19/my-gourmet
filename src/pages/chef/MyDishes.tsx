@@ -134,7 +134,6 @@ const MyDishes = () => {
       const { data } = supabase.storage
         .from('dish_images')
         .getPublicUrl(dish.image_url);
-      
       return data.publicUrl;
     } catch (error) {
       console.error('Error getting image URL:', error);
@@ -184,7 +183,11 @@ const MyDishes = () => {
                   alt={dish.name} 
                   className="object-cover w-full h-48"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = '/placeholder-dish.jpg';
+                    console.log('Error loading image:', e);
+                    // Remove the error handler to prevent infinite loops
+                    (e.target as HTMLImageElement).onerror = null;
+                    // Set a data URI for a transparent 1x1 pixel
+                    (e.target as HTMLImageElement).src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
                   }}
                 />
               </div>
