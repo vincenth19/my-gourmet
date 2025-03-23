@@ -88,23 +88,14 @@ const DishModal = ({
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.2 }}
-        className="bg-white shadow-lg overflow-hidden max-w-4xl w-full max-h-[90vh] flex flex-col"
+        className="bg-white shadow-lg max-w-4xl w-full h-[90vh] md:max-h-[90vh] flex flex-col overflow-hidden"
       > 
-        <div className="flex-1 overflow-auto md:overflow-visible p-0 md:flex">
-          <div className="md:w-1/2 h-64 md:h-auto md:aspect-square">
-            <img 
-              src={getImageUrl(dish.image_url)}
-              alt={dish.name}
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                (e.target as HTMLImageElement).onerror = null;
-                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x600?text=No+Image';
-              }}
-            />
-          </div>
-          
-          <div className="md:w-1/2 p-6">
-            <div className="flex justify-end mb-4">
+        {/* Mobile view: Stacked layout with sticky header and footer */}
+        <div className="md:hidden flex flex-col h-full">
+          {/* Sticky header for mobile */}
+          <div className="sticky top-0 bg-white z-10 p-4 border-b border-gray-200">
+            <div className="flex justify-between items-start">
+              <h2 className="text-xl font-bold text-gray-900">{dish.name}</h2>
               <button 
                 onClick={onClose}
                 className="text-gray-500 hover:text-gray-700"
@@ -112,25 +103,40 @@ const DishModal = ({
                 <X className="h-6 w-6" />
               </button>
             </div>
-            <div className="flex justify-between items-start mb-4">
-              <h2 className="text-2xl font-bold text-gray-900">{dish.name}</h2>
-              <span className="text-xl font-bold text-navy">{formatCurrency(dish.price)}</span>
+            <span className="text-lg font-bold text-navy block mt-1">{formatCurrency(dish.price)}</span>
+          </div>
+          
+          {/* Scrollable content for mobile - with image included */}
+          <div className="flex-1 overflow-y-auto">
+            {/* Image for mobile - now part of scrollable content */}
+            <div className="h-48 relative">
+              <img 
+                src={getImageUrl(dish.image_url)}
+                alt={dish.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).onerror = null;
+                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x600?text=No+Image';
+                }}
+              />
             </div>
             
-            {dish.dietary_tags && dish.dietary_tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-6">
-                {dish.dietary_tags.map((tag, index) => (
-                  <span 
-                    key={index} 
-                    className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-gray-800"
-                  >
-                    {tag.label}
-                  </span>
-                ))}
-              </div>
-            )}
-            <div className='md:overflow-auto max-h-[42%] md:pr-3'>
-              <div className="mb-6">
+            {/* Rest of scrollable content */}
+            <div className="p-4 space-y-6">
+              {dish.dietary_tags && dish.dietary_tags.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {dish.dietary_tags.map((tag, index) => (
+                    <span 
+                      key={index} 
+                      className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-gray-800"
+                    >
+                      {tag.label}
+                    </span>
+                  ))}
+                </div>
+              )}
+              
+              <div>
                 <p className="text-gray-600">
                   {dish.description || "No description available for this dish."}
                 </p>
@@ -138,20 +144,20 @@ const DishModal = ({
               
               {/* Dish Types */}
               {dish.dish_types && dish.dish_types.types && dish.dish_types.types.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="text-sm font-medium text-gray-700 mb-3">Select Cooking Preference</h3>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">Select Cooking Preference</h3>
                   <div className="space-y-2">
                     {dish.dish_types.types.map((type, index) => (
                       <div key={index} className="flex items-center">
                         <input
-                          id={`dish-type-${index}`}
+                          id={`dish-type-mobile-${index}`}
                           type="radio"
-                          name="dish-type"
+                          name="dish-type-mobile"
                           checked={selectedDishType === type}
                           onChange={() => onDishTypeChange(type)}
                           className="h-4 w-4 text-navy focus:ring-navy border-gray-300"
                         />
-                        <label htmlFor={`dish-type-${index}`} className="ml-2 block text-sm text-gray-700">
+                        <label htmlFor={`dish-type-mobile-${index}`} className="ml-2 block text-sm text-gray-700">
                           {type}
                         </label>
                       </div>
@@ -164,19 +170,19 @@ const DishModal = ({
               {dish.customization_options && 
               dish.customization_options.options && 
               dish.customization_options.options.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="text-sm font-medium text-gray-700 mb-3">Customization Options</h3>
+                <div>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">Customization Options</h3>
                   <div className="space-y-2">
                     {dish.customization_options.options.map((option, index) => (
                       <div key={index} className="flex items-center">
                         <input
-                          id={`option-${index}`}
+                          id={`option-mobile-${index}`}
                           type="checkbox"
                           checked={selectedCustomizations.includes(option)}
                           onChange={() => onCustomizationToggle(option)}
                           className="h-4 w-4 text-navy focus:ring-navy border-gray-300 rounded"
                           />
-                        <label htmlFor={`option-${index}`} className="ml-2 block text-sm text-gray-700">
+                        <label htmlFor={`option-mobile-${index}`} className="ml-2 block text-sm text-gray-700">
                           {option}
                         </label>
                       </div>
@@ -186,12 +192,12 @@ const DishModal = ({
               )}
               
               {/* Quantity Selector */}
-              <div className="mb-6">
-                <h3 className="text-sm font-medium text-gray-700 mb-3">Quantity</h3>
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 mb-2">Quantity</h3>
                 <div className="flex items-center">
                   <button
                     onClick={decrementQuantity}
-                    className="border-gray-200 border-1 text-gray-600 p-1 rounded-l hover:bg-gray-200"
+                    className="border border-gray-200 text-gray-600 p-1 rounded-l hover:bg-gray-200"
                   >
                     <Minus size={16} />
                   </button>
@@ -205,7 +211,7 @@ const DishModal = ({
                   />
                   <button
                     onClick={incrementQuantity}
-                    className="border-gray-200 border-1 text-gray-600 p-1 rounded-r hover:bg-gray-200"
+                    className="border border-gray-200 text-gray-600 p-1 rounded-r hover:bg-gray-200"
                     >
                     <Plus size={16} />
                   </button>
@@ -214,7 +220,164 @@ const DishModal = ({
               </div>
               
               {/* Special Instructions / Dish Note */}
-              <div className="mb-6">
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 mb-2">Special Instructions</h3>
+                <textarea
+                  value={dishNote}
+                  onChange={(e) => onDishNoteChange(e.target.value)}
+                  placeholder="Add any special requests or instructions for this dish..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-navy focus:border-navy"
+                  rows={3}
+                  />
+              </div>
+              
+              {/* Add padding at the bottom to ensure scrolling can reveal all content */}
+              <div className="pb-20"></div>
+            </div>
+          </div>
+          
+          {/* Sticky footer for mobile */}
+          <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 shadow-md">
+            <button
+              onClick={onAddToCart}
+              className="w-full bg-navy text-white py-3 rounded-lg hover:bg-navy-light transition-colors"
+            >
+              Add to Order ({quantity} {quantity === 1 ? 'item' : 'items'})
+            </button>
+          </div>
+        </div>
+
+        {/* Desktop view: Side-by-side layout */}
+        <div className="hidden md:flex flex-1 overflow-hidden p-0 h-full max-h-[90vh]">
+          {/* Image section */}
+          <div className="w-1/2 h-auto relative">
+            <img 
+              src={getImageUrl(dish.image_url)}
+              alt={dish.name}
+              className="w-full h-full object-cover absolute inset-0"
+              onError={(e) => {
+                (e.target as HTMLImageElement).onerror = null;
+                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x600?text=No+Image';
+              }}
+            />
+          </div>
+          
+          {/* Content section - using flex column layout with fixed header & footer */}
+          <div className="w-1/2 flex flex-col h-full overflow-hidden">
+            {/* Fixed header */}
+            <div className="flex-shrink-0 p-6 pb-2">
+              <div className="flex justify-between items-start">
+                <h2 className="text-2xl font-bold text-gray-900">{dish.name}</h2>
+                <button 
+                  onClick={onClose}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+              <span className="text-xl font-bold text-navy">{formatCurrency(dish.price)}</span>
+              
+              {dish.dietary_tags && dish.dietary_tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {dish.dietary_tags.map((tag, index) => (
+                    <span 
+                      key={index} 
+                      className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-gray-800"
+                    >
+                      {tag.label}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Scrollable content */}
+            <div className="flex-1 overflow-y-auto px-6 py-2 space-y-6">
+              <div>
+                <p className="text-gray-600">
+                  {dish.description || "No description available for this dish."}
+                </p>
+              </div>
+              
+              {/* Dish Types */}
+              {dish.dish_types && dish.dish_types.types && dish.dish_types.types.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-medium text-gray-700 mb-3">Select Cooking Preference</h3>
+                  <div className="space-y-2">
+                    {dish.dish_types.types.map((type, index) => (
+                      <div key={index} className="flex items-center">
+                        <input
+                          id={`dish-type-desktop-${index}`}
+                          type="radio"
+                          name="dish-type-desktop"
+                          checked={selectedDishType === type}
+                          onChange={() => onDishTypeChange(type)}
+                          className="h-4 w-4 text-navy focus:ring-navy border-gray-300"
+                        />
+                        <label htmlFor={`dish-type-desktop-${index}`} className="ml-2 block text-sm text-gray-700">
+                          {type}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Customization Options */}
+              {dish.customization_options && 
+              dish.customization_options.options && 
+              dish.customization_options.options.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-medium text-gray-700 mb-3">Customization Options</h3>
+                  <div className="space-y-2">
+                    {dish.customization_options.options.map((option, index) => (
+                      <div key={index} className="flex items-center">
+                        <input
+                          id={`option-desktop-${index}`}
+                          type="checkbox"
+                          checked={selectedCustomizations.includes(option)}
+                          onChange={() => onCustomizationToggle(option)}
+                          className="h-4 w-4 text-navy focus:ring-navy border-gray-300 rounded"
+                          />
+                        <label htmlFor={`option-desktop-${index}`} className="ml-2 block text-sm text-gray-700">
+                          {option}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Quantity Selector */}
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 mb-3">Quantity</h3>
+                <div className="flex items-center">
+                  <button
+                    onClick={decrementQuantity}
+                    className="border border-gray-200 text-gray-600 p-1 rounded-l hover:bg-gray-200"
+                  >
+                    <Minus size={16} />
+                  </button>
+                  <input
+                    type="number"
+                    min="1"
+                    max="50"
+                    value={quantity}
+                    onChange={handleQuantityChange}
+                    className="w-16 text-center border-gray-200 border-y focus:ring-navy focus:border-navy"
+                  />
+                  <button
+                    onClick={incrementQuantity}
+                    className="border border-gray-200 text-gray-600 p-1 rounded-r hover:bg-gray-200"
+                    >
+                    <Plus size={16} />
+                  </button>
+                  <span className="ml-3 text-sm text-gray-500">(Max 50)</span>
+                </div>
+              </div>
+              
+              {/* Special Instructions / Dish Note */}
+              <div>
                 <h3 className="text-sm font-medium text-gray-700 mb-3">Special Instructions</h3>
                 <textarea
                   value={dishNote}
@@ -224,9 +387,10 @@ const DishModal = ({
                   rows={3}
                   />
               </div>
-
             </div>
-            <div className="mt-auto pt-4 border-t border-gray-300">
+
+            {/* Fixed footer */}
+            <div className="flex-shrink-0 p-6 pt-4 border-t border-gray-300">
               <button
                 onClick={onAddToCart}
                 className="w-full bg-navy text-white py-3 rounded-lg hover:bg-navy-light transition-colors"

@@ -356,8 +356,6 @@ const ChefHomePage = () => {
           )}
         </motion.div>
       </main>
-
-      <Footer />
     </div>
   );
 };
