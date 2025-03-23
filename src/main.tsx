@@ -20,33 +20,36 @@ import OrderConfirmationPage from "./pages/OrderConfirmationPage.tsx";
 import OrdersPage from "./pages/OrdersPage.tsx";
 import ChefOrderDetailPage from "./pages/chef/ChefOrderDetailPage.tsx";
 import { AuthProvider } from "./contexts/AuthContext.tsx";
+import { CartProvider } from "./contexts/CartContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<App />} />
-          <Route path="/sign-in" element={<LoginPage />} />
-          <Route path="/sign-up" element={<SignUpPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
-          <Route element={<AppLayout />}>
-            <Route path="/home" element={<UserHomePage />} />
-            <Route path="/chef/home" element={<ChefHomePage />} />
-            <Route path="/chef/dishes" element={<MyDishes />} />
-            <Route path="/chef/dishes/new" element={<DishForm />} />
-            <Route path="/chef/dishes/edit/:id" element={<DishForm />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/order/:chefId" element={<OrderPage />} />
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/order-confirmation/:orderId" element={<OrderConfirmationPage />} />
-            <Route path="/orders" element={<OrdersPage />} />
-            <Route path="/chef/order/:orderId" element={<ChefOrderDetailPage />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <CartProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<App />} />
+            <Route path="/sign-in" element={<LoginPage />} />
+            <Route path="/sign-up" element={<SignUpPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route element={<AppLayout />}>
+              <Route path="/home" element={<UserHomePage />} />
+              <Route path="/chef/home" element={<ChefHomePage />} />
+              <Route path="/chef/dishes" element={<MyDishes />} />
+              <Route path="/chef/dishes/new" element={<DishForm />} />
+              <Route path="/chef/dishes/edit/:id" element={<DishForm />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/order/:chefId" element={<OrderPage />} />
+              <Route path="/cart" element={<CartPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/order-confirmation/:orderId" element={<OrderConfirmationPage />} />
+              <Route path="/orders" element={<OrdersPage />} />
+              <Route path="/chef/order/:orderId" element={<ChefOrderDetailPage />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </CartProvider>
     </AuthProvider>
   </StrictMode>
 );

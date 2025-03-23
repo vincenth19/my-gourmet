@@ -6,11 +6,13 @@ import { useAuth } from '../contexts/AuthContext';
 import { Dish, Profile, DietaryTag } from '../types/database.types';
 import { X, Minus, Plus, FilePlus } from 'lucide-react';
 import CustomDishForm from '../components/CustomDishForm';
+import { useCart } from '../contexts/CartContext';
 
 const OrderPage = () => {
   const { chefId } = useParams<{ chefId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { refreshCart } = useCart();
   
   const [loading, setLoading] = useState(true);
   const [chef, setChef] = useState<Profile | null>(null);
@@ -254,6 +256,9 @@ const OrderPage = () => {
       
       if (itemError) throw itemError;
       
+      // Refresh cart data to update cart counter
+      await refreshCart();
+      
       // Close modal and reset
       closeDishModal();
       
@@ -364,6 +369,9 @@ const OrderPage = () => {
       
       if (itemError) throw itemError;
       
+      // Refresh cart data to update cart counter
+      await refreshCart();
+      
       // Close form and show success message
       setShowCustomDishForm(false);
       alert("Custom dish request added to your cart!");
@@ -395,6 +403,9 @@ const OrderPage = () => {
         .insert(pendingCartItem);
         
       if (addError) throw addError;
+      
+      // Refresh cart data to update cart counter
+      await refreshCart();
       
       // Reset pending item
       setPendingCartItem(null);
