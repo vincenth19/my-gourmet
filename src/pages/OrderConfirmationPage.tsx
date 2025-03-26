@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router';
+import { useParams, useNavigate, useLocation } from 'react-router';
 import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -9,14 +9,28 @@ import { format } from 'date-fns';
 const OrderConfirmationPage = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   
   const [loading, setLoading] = useState(true);
   const [order, setOrder] = useState<any>(null);
+  const [orderDishes, setOrderDishes] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancellingOrder, setCancellingOrder] = useState(false);
   const [cancellationMessage, setCancellationMessage] = useState<string | null>(null);
+  
+  // Get the back-link from URL params
+  const queryParams = new URLSearchParams(location.search);
+  const backLink = queryParams.get('back-link') || '/home';
+  
+  // Update the back button text based on the back-link
+  const getBackButtonText = () => {
+    if (backLink === '/home') return 'Back to Home';
+    if (backLink === '/orders') return 'Back to Orders';
+    if (backLink === '/notifications') return 'Back to Notifications';
+    return 'Back';
+  };
   
   useEffect(() => {
     const fetchOrderDetails = async () => {
@@ -44,7 +58,7 @@ const OrderConfirmationPage = () => {
         }
         
         // Fetch order dishes separately
-        const { data: orderDishes, error: dishesError } = await supabase
+        const { data: orderDishesData, error: dishesError } = await supabase
           .from('order_dishes')
           .select('*')
           .eq('order_id', orderId);
@@ -54,7 +68,7 @@ const OrderConfirmationPage = () => {
         // Combine the data
         const orderWithItems = {
           ...orderData,
-          items: orderDishes || []
+          items: orderDishesData || []
         };
         
         setOrder(orderWithItems);
@@ -116,7 +130,7 @@ const OrderConfirmationPage = () => {
       if (fetchError) throw fetchError;
       
       // Fetch order dishes separately 
-      const { data: orderDishes, error: dishesError } = await supabase
+      const { data: orderDishesData, error: dishesError } = await supabase
         .from('order_dishes')
         .select('*')
         .eq('order_id', orderId);
@@ -126,7 +140,7 @@ const OrderConfirmationPage = () => {
       // Combine the data
       const updatedOrder = {
         ...orderData,
-        items: orderDishes || []
+        items: orderDishesData || []
       };
       
       // Update local state
@@ -155,11 +169,11 @@ const OrderConfirmationPage = () => {
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex items-center mb-6">
           <button 
-            onClick={() => navigate('/home')} 
+            onClick={() => navigate(backLink)} 
             className="flex items-center text-navy hover:text-navy/80"
           >
             <ArrowLeft className="h-5 w-5 mr-1" />
-            Back to Home
+            {getBackButtonText()}
           </button>
         </div>
         
@@ -172,10 +186,10 @@ const OrderConfirmationPage = () => {
           <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
             <p className="text-red-800">{error}</p>
             <button
-              onClick={() => navigate('/home')}
+              onClick={() => navigate(backLink)}
               className="mt-4 bg-navy text-white px-6 py-2 rounded-lg hover:bg-navy-light transition-colors"
             >
-              Return to Home
+              {getBackButtonText()}
             </button>
           </div>
         ) : order ? (
@@ -347,16 +361,10 @@ const OrderConfirmationPage = () => {
                     )}
                     
                     <button
-                      onClick={() => navigate('/home')}
+                      onClick={() => navigate(backLink)}
                       className="bg-navy text-white px-8 py-3 rounded-lg hover:bg-navy-light transition-colors"
                     >
-                      Back to Home
-                    </button>
-                    <button
-                      onClick={() => navigate('/orders')}
-                      className="ml-4 bg-white border border-navy text-navy px-8 py-3 rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                      View All Orders
+                      {getBackButtonText()}
                     </button>
                   </div>
                 </div>

@@ -171,7 +171,7 @@ const OrdersPage = () => {
                     <tr 
                       key={order.id} 
                       className="hover:bg-gray-50 cursor-pointer transition-colors"
-                      onClick={() => navigate(`/order-confirmation/${order.id}`)}
+                      onClick={() => navigate(`/order-confirmation/${order.id}?back-link=${encodeURIComponent('/orders')}`)}
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">

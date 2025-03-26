@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router';
+import { useParams, useNavigate, useLocation } from 'react-router';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { format } from 'date-fns';
@@ -23,6 +23,7 @@ interface OrderDish {
 const ChefOrderDetailPage = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   
   const [loading, setLoading] = useState(true);
@@ -36,10 +37,22 @@ const ChefOrderDetailPage = () => {
   const [editingPrices, setEditingPrices] = useState<{[key: string]: number}>({});
   const [savingPrices, setSavingPrices] = useState(false);
   
+  // Get the back-link from URL params
+  const queryParams = new URLSearchParams(location.search);
+  const backLink = queryParams.get('back-link') || '/chef/home';
+  
+  // Update the back button text based on the back-link
+  const getBackButtonText = () => {
+    if (backLink === '/chef/home') return 'Back to Dashboard';
+    if (backLink.includes('/chef/orders')) return 'Back to Orders';
+    if (backLink === '/notifications') return 'Back to Notifications';
+    return 'Back';
+  };
+  
   useEffect(() => {
     const fetchOrderDetails = async () => {
       if (!user || !orderId) {
-        navigate('/chef/home');
+        navigate(backLink);
         return;
       }
       
@@ -349,10 +362,10 @@ const ChefOrderDetailPage = () => {
         <div className="max-w-md w-full bg-white rounded-lg shadow-sm p-6 text-center">
           <p className="text-red-600 mb-4">{error}</p>
           <button
-            onClick={() => navigate('/chef/home')}
+            onClick={() => navigate(backLink)}
             className="bg-navy text-white py-2 px-4 rounded hover:bg-navy-light transition-colors"
           >
-            Return to Dashboard
+            {getBackButtonText()}
           </button>
         </div>
       </div>
@@ -365,10 +378,10 @@ const ChefOrderDetailPage = () => {
         <div className="max-w-md w-full bg-white rounded-lg shadow-sm p-6 text-center">
           <p className="text-gray-600 mb-4">Order not found</p>
           <button
-            onClick={() => navigate('/chef/home')}
+            onClick={() => navigate(backLink)}
             className="bg-navy text-white py-2 px-4 rounded hover:bg-navy-light transition-colors"
           >
-            Return to Dashboard
+            {getBackButtonText()}
           </button>
         </div>
       </div>
@@ -380,11 +393,11 @@ const ChefOrderDetailPage = () => {
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center mb-6">
           <button 
-            onClick={() => navigate('/chef/home')} 
+            onClick={() => navigate(backLink)} 
             className="flex items-center text-navy hover:text-navy-light"
           >
             <ArrowLeft className="h-5 w-5 mr-1" />
-            Back to Dashboard
+            {getBackButtonText()}
           </button>
         </div>
         

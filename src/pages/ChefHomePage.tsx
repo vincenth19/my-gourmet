@@ -316,7 +316,7 @@ const ChefHomePage = () => {
                       className={`hover:bg-gray-50 cursor-pointer transition-colors ${
                         order.order_status === 'pending' ? 'bg-yellow-50' : ''
                       }`}
-                      onClick={() => navigate(`/chef/order/${order.id}`)}
+                      onClick={() => navigate(`/chef/order/${order.id}?back-link=${encodeURIComponent('/chef/home')}`)}
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">
