@@ -145,7 +145,7 @@ const SignUpPage = () => {
               required
               value={formData.firstName}
               onChange={handleChange}
-              className="appearance-none relative block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent transition-colors duration-200"
+              className="appearance-none relative block w-full px-4 py-3 bg-gray-50 border border-gray-200  text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent transition-colors duration-200"
               placeholder="First name"
               disabled={loading}
             />
@@ -161,7 +161,7 @@ const SignUpPage = () => {
               required
               value={formData.lastName}
               onChange={handleChange}
-              className="appearance-none relative block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent transition-colors duration-200"
+              className="appearance-none relative block w-full px-4 py-3 bg-gray-50 border border-gray-200  text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent transition-colors duration-200"
               placeholder="Last name"
               disabled={loading}
             />
@@ -180,7 +180,7 @@ const SignUpPage = () => {
             required
             value={formData.email}
             onChange={handleChange}
-            className="appearance-none relative block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent transition-colors duration-200"
+            className="appearance-none relative block w-full px-4 py-3 bg-gray-50 border border-gray-200  text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent transition-colors duration-200"
             placeholder="Enter your email"
             disabled={loading}
           />
@@ -195,7 +195,7 @@ const SignUpPage = () => {
             name="userType"
             value={formData.userType}
             onChange={handleChange}
-            className="appearance-none relative block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent transition-colors duration-200"
+            className="appearance-none relative block w-full px-4 py-3 bg-gray-50 border border-gray-200  text-gray-900 focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent transition-colors duration-200"
             disabled={loading}
           >
             <option value="customer">Book Private Chefs</option>
@@ -214,7 +214,7 @@ const SignUpPage = () => {
             required
             value={formData.password}
             onChange={handleChange}
-            className="appearance-none relative block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent transition-colors duration-200"
+            className="appearance-none relative block w-full px-4 py-3 bg-gray-50 border border-gray-200  text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent transition-colors duration-200"
             placeholder="Create a password"
             disabled={loading}
           />
@@ -231,7 +231,7 @@ const SignUpPage = () => {
             required
             value={formData.confirmPassword}
             onChange={handleChange}
-            className="appearance-none relative block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent transition-colors duration-200"
+            className="appearance-none relative block w-full px-4 py-3 bg-gray-50 border border-gray-200  text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent transition-colors duration-200"
             placeholder="Confirm your password"
             disabled={loading}
           />
@@ -248,7 +248,7 @@ const SignUpPage = () => {
             required
             value={formData.phoneNumber}
             onChange={handleChange}
-            className="appearance-none relative block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent transition-colors duration-200"
+            className="appearance-none relative block w-full px-4 py-3 bg-gray-50 border border-gray-200  text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent transition-colors duration-200"
             placeholder="Enter your phone number"
             disabled={loading}
           />
@@ -258,7 +258,7 @@ const SignUpPage = () => {
       <div>
         <button
           type="submit"
-          className="group relative w-full flex justify-center py-3 px-4 border border-transparent rounded-lg text-white bg-navy hover:bg-navy-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-navy transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="group relative w-full flex justify-center py-3 px-4 border border-transparent  text-white bg-navy hover:bg-navy-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-navy transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={loading}
         >
           {formData.userType === 'chef' ? 'Create Account' : 'Continue'}
@@ -272,7 +272,7 @@ const SignUpPage = () => {
     <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
       <div className="space-y-6">
         {/* Payment Method */}
-        <div className="bg-gray-50 rounded-lg p-6">
+        <div className="bg-gray-50  p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Payment Method</h3>
           <PaymentMethodForm
             initialValues={paymentDetails}
@@ -285,7 +285,7 @@ const SignUpPage = () => {
       <div className="flex flex-col space-y-3">
         <button
           type="submit"
-          className="group relative w-full flex justify-center py-3 px-4 border border-transparent rounded-lg text-white bg-navy hover:bg-navy-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-navy transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="group relative w-full flex justify-center py-3 px-4 border border-transparent  text-white bg-navy hover:bg-navy-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-navy transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={loading}
         >
           {loading ? 'Creating account...' : 'Create Account'}
@@ -294,7 +294,7 @@ const SignUpPage = () => {
         <button
           type="button"
           onClick={handleBack}
-          className="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-navy transition-colors duration-200"
+          className="w-full flex justify-center py-3 px-4 border border-gray-300  text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-navy transition-colors duration-200"
           disabled={loading}
         >
           Back
@@ -342,14 +342,14 @@ const SignUpPage = () => {
             {/* Step Indicator */}
             {formData.userType === 'customer' && (
               <div className="flex items-center justify-center mt-4">
-                <div className={`h-2 w-2 rounded-full ${step === 1 ? 'bg-navy' : 'bg-gray-300'} mx-1`}></div>
-                <div className={`h-2 w-2 rounded-full ${step === 2 ? 'bg-navy' : 'bg-gray-300'} mx-1`}></div>
+                <div className={`h-2 w-2  ${step === 1 ? 'bg-navy' : 'bg-gray-300'} mx-1`}></div>
+                <div className={`h-2 w-2  ${step === 2 ? 'bg-navy' : 'bg-gray-300'} mx-1`}></div>
               </div>
             )}
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3  text-sm">
               {error}
             </div>
           )}

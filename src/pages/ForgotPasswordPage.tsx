@@ -1,6 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router';
 import { supabase } from '../lib/supabase';
+import logoBnw from '../assets/logo-w-text-bnw.svg';
 
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState<string>('');
@@ -39,13 +40,15 @@ const ForgotPasswordPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col">
       {/* Navigation */}
       <nav className="bg-white/80 backdrop-blur-sm fixed w-full z-10 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20">
             <div className="flex items-center">
-              <Link to="/" className="text-2xl font-light tracking-wider text-gray-900">MYGOURMET</Link>
+              <Link to="/" className="text-2xl font-light tracking-wider text-gray-900">
+                <img src={logoBnw} width={150} alt="MyGourmet Logo" />
+              </Link>
             </div>
             <div className="flex items-center space-x-8">
               <Link to="/sign-up" className="text-gray-600 hover:text-gray-900 transition-colors duration-200">Create Account</Link>
@@ -54,9 +57,9 @@ const ForgotPasswordPage = () => {
         </div>
       </nav>
       {/* Main Content */}
-      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-20">
-        <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-md">
-          <h1 className="text-2xl font-bold mb-6 text-gray-900">Forgot Password</h1>
+      <div className="flex-1 flex items-center justify-center border-2 border-gray-200 px-4 sm:px-6 lg:px-8 pt-20">
+        <div className="max-w-md w-full bg-white p-8">
+          <h1 className="text-3xl font-light mb-6 text-center text-gray-900">Forgot Password</h1>
           <form onSubmit={handlePasswordReset}>
             <div className="mb-4">
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -68,7 +71,7 @@ const ForgotPasswordPage = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
             {error && (
@@ -84,14 +87,14 @@ const ForgotPasswordPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors duration-200"
+              className="w-full px-4 py-2 transition-colors duration-200 bg-navy-light hover:bg-navy text-white"
             >
               {loading ? 'Sending...' : 'Reset Password'}
             </button>
           </form>
           <div className="mt-4 text-center">
-            <Link to="/sign-in" className="text-sm text-orange-500 hover:text-orange-600">
-              Back to Login
+            <Link to="/sign-in" className="text-sm text-navy underline">
+              Back to Sign In
             </Link>
           </div>
         </div>
