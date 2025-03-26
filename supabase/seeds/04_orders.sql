@@ -263,8 +263,8 @@ BEGIN
         'card', 
         'Visa ending in 4242',
         CURRENT_DATE - interval '5 days', 
-        'rejected', 
-        'refunded', 
+        'completed', 
+        'paid', 
         68.00, 
         true, 
         CURRENT_TIMESTAMP - interval '5 days'
@@ -495,8 +495,8 @@ BEGIN
         'card', 
         'Visa ending in 4242',
         CURRENT_DATE - interval '7 days', 
-        'rejected', 
-        'refunded', 
+        'completed', 
+        'paid', 
         49.50, 
         false, 
         CURRENT_TIMESTAMP - interval '7 days'

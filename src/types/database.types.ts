@@ -150,6 +150,17 @@ export interface OrderDish {
   updated_at?: string;
 }
 
+export interface Notification {
+  id: string;
+  user_id: string;
+  title: string;
+  message: string;
+  link?: string;
+  is_read: boolean;
+  created_at: string;
+  updated_at?: string;
+}
+
 export interface Database {
   profiles: Profile;
   dietary_tags: DietaryTag;
@@ -162,4 +173,5 @@ export interface Database {
   cart_items: CartItem;
   orders: Order;
   order_dishes: OrderDish;
+  notifications: Notification;
 } 

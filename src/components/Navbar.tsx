@@ -3,9 +3,10 @@ import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import logoBnw from '../assets/logo-w-text-bnw.svg';
 import { ShoppingCart } from "lucide-react";
+import NotificationBell from './NotificationBell';
 
 interface NavbarProps {
-  activePage?: 'home' | 'profile' | 'orders' | 'dishes' | 'cart';
+  activePage?: 'home' | 'profile' | 'orders' | 'dishes' | 'cart' | 'notifications';
 }
 
 const Navbar = ({ activePage: propActivePage }: NavbarProps) => {
@@ -21,6 +22,7 @@ const Navbar = ({ activePage: propActivePage }: NavbarProps) => {
     if (path.includes('/orders')) return 'orders';
     if (path.includes('/chef/dishes')) return 'dishes';
     if (path.includes('/cart')) return 'cart';
+    if (path.includes('/notifications')) return 'notifications';
     return 'home';
   };
   
@@ -89,6 +91,9 @@ const Navbar = ({ activePage: propActivePage }: NavbarProps) => {
                 </button>
               </Link>
             )}
+
+            {/* Notification Bell - available for all roles */}
+            <NotificationBell />
           </div>
         </div>
       </div>

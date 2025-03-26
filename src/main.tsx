@@ -19,6 +19,7 @@ import CheckoutPage from "./pages/CheckoutPage.tsx";
 import OrderConfirmationPage from "./pages/OrderConfirmationPage.tsx";
 import OrdersPage from "./pages/OrdersPage.tsx";
 import ChefOrderDetailPage from "./pages/chef/ChefOrderDetailPage.tsx";
+import NotificationsPage from "./pages/NotificationsPage.tsx";
 import { AuthProvider } from "./contexts/AuthContext.tsx";
 import { CartProvider } from "./contexts/CartContext.tsx";
 
@@ -46,6 +47,7 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/order-confirmation/:orderId" element={<OrderConfirmationPage />} />
               <Route path="/orders" element={<OrdersPage />} />
               <Route path="/chef/order/:orderId" element={<ChefOrderDetailPage />} />
+              <Route path="/notifications" element={<NotificationsPage />} />
             </Route>
           </Routes>
         </BrowserRouter>

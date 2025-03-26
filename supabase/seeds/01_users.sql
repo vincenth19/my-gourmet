@@ -41,7 +41,7 @@ VALUES
         'authenticated',
         'authenticated',
         'chef_western@gmail.com',
-        crypt('password123', gen_salt('bf')),
+  crypt('password123', gen_salt('bf')),
         current_timestamp,
         current_timestamp,
         '{"provider":"email","providers":["email"]}',
@@ -60,7 +60,7 @@ VALUES
         'authenticated',
         'authenticated',
         'chef_asian@gmail.com',
-        crypt('password123', gen_salt('bf')),
+  crypt('password123', gen_salt('bf')),
         current_timestamp,
         current_timestamp,
         '{"provider":"email","providers":["email"]}',
@@ -79,7 +79,7 @@ VALUES
         'authenticated',
         'authenticated',
         'chef_aussie@gmail.com',
-        crypt('password123', gen_salt('bf')),
+  crypt('password123', gen_salt('bf')),
         current_timestamp,
         current_timestamp,
         '{"provider":"email","providers":["email"]}',
@@ -91,7 +91,7 @@ VALUES
         '',
         ''
     ),
-    -- Customer 1
+-- Customer 1
     (
         '00000000-0000-0000-0000-000000000000',
         customer1_id,
@@ -117,7 +117,7 @@ VALUES
         'authenticated',
         'authenticated',
         'customer2@gmail.com',
-        crypt('password123', gen_salt('bf')),
+  crypt('password123', gen_salt('bf')),
         current_timestamp,
         current_timestamp,
         '{"provider":"email","providers":["email"]}',
@@ -342,19 +342,19 @@ INSERT INTO public.payment_methods (profile_id, method_type, card_number, expiry
 VALUES
     (
         customer1_id,
-        'card',
-        '4242424242424242',
-        '10/28',
-        '123',
-        'Jane Smith'
+  'card',
+  '4242424242424242',
+  '10/28',
+  '123',
+  'Jane Smith'
     ),
     (
         customer2_id,
-        'card',
-        '4242424242424242',
-        '10/28',
-        '123',
-        'John Doe'
+  'card',
+  '4242424242424242',
+  '10/28',
+  '123',
+  'John Doe'
     );
 
 END $$;
