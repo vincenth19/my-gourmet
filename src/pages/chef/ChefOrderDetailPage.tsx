@@ -491,7 +491,7 @@ const ChefOrderDetailPage = () => {
           <div className="border-t border-gray-200 pt-6 pb-4">
             <h2 className="text-lg font-medium mb-4">Order Status</h2>
             
-            <div className="grid grid-cols-4 gap-3 mb-6">
+            <div className="grid grid-cols-3 gap-3 mb-6">
               <button
                 className={`px-4 py-2 rounded-lg text-sm font-medium ${
                   newStatus === 'pending' 
@@ -531,6 +531,7 @@ const ChefOrderDetailPage = () => {
               >
                 3. Complete
               </button>
+              {/*
               <button
                 className={`px-4 py-2 rounded-lg text-sm font-medium ${
                   newStatus === 'rejected' 
@@ -542,6 +543,7 @@ const ChefOrderDetailPage = () => {
               >
                 4. Reject
               </button>
+              */}
             </div>
           </div>
           
