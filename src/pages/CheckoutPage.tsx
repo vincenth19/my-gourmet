@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { useCart } from '../contexts/CartContext';
 import { CartItem, Profile, Address, DietaryTag, PaymentMethod } from '../types/database.types';
 import { Calendar, Clock, MapPin, CreditCard, Check, AlertCircle, ChevronLeft, Calendar as CalendarIcon } from 'lucide-react';
 import { format, addDays, setHours, setMinutes} from 'date-fns';
@@ -12,6 +13,7 @@ import PaymentMethodForm from '../components/PaymentMethodForm';
 const CheckoutPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { refreshCart } = useCart();
   
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -410,6 +412,9 @@ const CheckoutPage = () => {
         .eq('cart_id', cartId);
         
       if (clearCartError) throw clearCartError;
+      
+      // Refresh the cart context to update the UI
+      await refreshCart();
       
       // Redirect to confirmation page
       navigate(`/order-confirmation/${orderData.id}`);

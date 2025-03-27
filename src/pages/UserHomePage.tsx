@@ -679,12 +679,15 @@ const UserHomePage = () => {
           onDishClick={handlePopularDishClick} 
         />
         
-        <ChefsSection 
-          chefs={chefs} 
-          loading={loading} 
-          onChefClick={handleChefClick} 
-          onViewProfileClick={handleViewProfileClick}
-        />
+        <div id="chefs-section" className="py-12">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Our Chefs</h2>
+          <ChefsSection 
+            chefs={chefs} 
+            loading={loading} 
+            onChefClick={handleChefClick} 
+            onViewProfileClick={handleViewProfileClick}
+          />
+        </div>
       </main>
 
       {/* Chef Modal */}

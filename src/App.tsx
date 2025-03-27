@@ -209,7 +209,7 @@ const App = () => {
                   <div className="absolute inset-0 border border-gold opacity-50 rounded-none shadow-xl transform transition-all duration-300 group-hover:opacity-100 group-hover:shadow-2xl"></div>
                   <div className="relative p-8 pt-10 text-center">
                     <div className="text-4xl mb-6">🍽️</div>
-                    <h3 className="text-xl font-light mb-4 text-gold text-nowrap">Enjoy Your Experience</h3>
+                    <h3 className="text-xl font-light mb-4 text-gold text-nowrap">Enjoy Your Meal</h3>
                     <p className="text-gray-300 font-light">Sit back and savor an unforgettable private dining experience in your home</p>
                   </div>
                 </motion.div>
