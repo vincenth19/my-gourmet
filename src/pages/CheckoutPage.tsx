@@ -24,7 +24,7 @@ const CheckoutPage = () => {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(null);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date>(addDays(new Date(), 1));
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedTime, setSelectedTime] = useState<string>('18:00'); // Default to 6:00 PM
   const [error, setError] = useState<string | null>(null);
   const [newAddress, setNewAddress] = useState<Partial<Address>>({
@@ -47,6 +47,17 @@ const CheckoutPage = () => {
     '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', 
     '17:00', '17:30', '18:00', '18:30', '19:00', '19:30', '20:00'
   ];
+  
+  // Add a new useEffect to ensure selectedTime is valid when the page loads or date changes
+  useEffect(() => {
+    // Find the first available time slot that isn't disabled
+    const validTimeSlot = timeSlots.find(time => !isTimeSlotDisabled(selectedDate, time));
+    
+    // If the current selectedTime is disabled and we found a valid time slot, update it
+    if (isTimeSlotDisabled(selectedDate, selectedTime) && validTimeSlot) {
+      setSelectedTime(validTimeSlot);
+    }
+  }, [selectedDate]);
   
   // Initial data fetch
   useEffect(() => {
@@ -175,6 +186,21 @@ const CheckoutPage = () => {
       const price = item.custom_price || item.dish_price;
       return total + (price * item.quantity);
     }, 0);
+  };
+  
+  // Check if time slot should be disabled (less than 2 hours from now)
+  const isTimeSlotDisabled = (date: Date, timeSlot: string) => {
+    const now = new Date();
+    const [hours, minutes] = timeSlot.split(':').map(Number);
+    const slotTime = new Date(date);
+    slotTime.setHours(hours, minutes, 0, 0);
+    
+    // Calculate the difference in hours
+    const differenceInMs = slotTime.getTime() - now.getTime();
+    const differenceInHours = differenceInMs / (1000 * 60 * 60);
+    
+    // Disable if the time is in the past or less than 2 hours in the future
+    return differenceInHours < 2;
   };
   
   // Save new address
@@ -409,8 +435,8 @@ const CheckoutPage = () => {
     return `•••• ${lastFour} (${method.method_type})`;
   };
   
-  // Create available dates (next 14 days)
-  const availableDates = Array.from({ length: 14 }, (_, i) => addDays(new Date(), i + 1));
+  // Create available dates (today and next 13 days = 14 days total)
+  const availableDates = Array.from({ length: 14 }, (_, i) => addDays(new Date(), i));
   
   return (
     <div className="min-h-screen bg-gray-50">
@@ -585,19 +611,25 @@ const CheckoutPage = () => {
                       Select Time
                     </label>
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-7 gap-2">
-                      {timeSlots.map((time) => (
-                        <button
-                          key={time}
-                          onClick={() => setSelectedTime(time)}
-                          className={`py-2 px-3 text-sm text-center border rounded-md transition-colors ${
-                            selectedTime === time
-                              ? 'bg-navy text-white border-navy'
-                              : 'border-gray-300 hover:border-gray-400'
-                          }`}
-                        >
-                          {format(setHours(setMinutes(new Date(), Number(time.split(':')[1])), Number(time.split(':')[0])), 'h:mm a')}
-                        </button>
-                      ))}
+                      {timeSlots.map((time) => {
+                        const isDisabled = isTimeSlotDisabled(selectedDate, time);
+                        return (
+                          <button
+                            key={time}
+                            onClick={() => !isDisabled && setSelectedTime(time)}
+                            disabled={isDisabled}
+                            className={`py-2 px-3 text-sm text-center border rounded-md transition-colors ${
+                              selectedTime === time
+                                ? 'bg-navy text-white border-navy'
+                                : isDisabled
+                                  ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                                  : 'border-gray-300 hover:border-gray-400'
+                            }`}
+                          >
+                            {format(setHours(setMinutes(new Date(), Number(time.split(':')[1])), Number(time.split(':')[0])), 'h:mm a')}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                   
@@ -611,6 +643,21 @@ const CheckoutPage = () => {
                         </p>
                         <p className="text-xs text-blue-600 mt-2">
                           Your chef will arrive approximately 2-3 hours before this time to prepare your meal.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-amber-50 border border-amber-200 rounded-md p-4">
+                    <div className="flex items-start">
+                      <Clock className="h-5 w-5 text-amber-500 mt-0.5 mr-2" />
+                      <div>
+                        <h3 className="text-sm font-medium text-amber-800">Important Scheduling Note</h3>
+                        <p className="text-sm text-amber-700 mt-1">
+                          Chefs require at least 2 hours notice to reach your location and prepare your meal.
+                        </p>
+                        <p className="text-xs text-amber-600 mt-2">
+                          Time slots less than 2 hours from now are unavailable for booking.
                         </p>
                       </div>
                     </div>
