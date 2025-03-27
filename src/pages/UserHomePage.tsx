@@ -83,7 +83,7 @@ const formatDate = (dateString: string) => {
 };
 
 const getImageUrl = (imageUrl: string | null) => {
-  if (!imageUrl) return 'https://via.placeholder.com/600x400?text=No+Image';
+  if (!imageUrl) return 'https://placehold.co/600x400?text=No+Image';
   
   // If it's already a full URL, return it
   if (imageUrl.startsWith('http')) {
@@ -95,7 +95,7 @@ const getImageUrl = (imageUrl: string | null) => {
     .from('dish_images')
     .getPublicUrl(imageUrl);
   
-  return data.publicUrl || 'https://via.placeholder.com/600x400?text=No+Image';
+  return data.publicUrl || 'https://placehold.co/600x400?text=No+Image';
 };
 
 // Welcome Banner Component
@@ -215,7 +215,7 @@ const PopularDishesSection = ({
                 className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300"
                 onError={(e) => {
                   (e.target as HTMLImageElement).onerror = null;
-                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x400?text=No+Image';
+                  (e.target as HTMLImageElement).src = 'https://placehold.co/600x400?text=No+Image';
                 }}
               />
             </div>
@@ -243,11 +243,13 @@ const PopularDishesSection = ({
 const ChefsSection = ({
   chefs,
   loading,
-  onChefClick
+  onChefClick,
+  onViewProfileClick
 }: {
   chefs: Chef[],
   loading: boolean,
-  onChefClick: (chef: Chef) => void
+  onChefClick: (chef: Chef) => void,
+  onViewProfileClick: (chef: Chef) => void
 }) => (
   <motion.section
     initial={{ opacity: 0, y: 20 }}
@@ -287,26 +289,27 @@ const ChefsSection = ({
           <div 
             key={chef.id}
             className="flex flex-col cursor-pointer group border border-gray-200 hover:border-navy transition-colors duration-200 overflow-hidden bg-white"
-            onClick={() => onChefClick(chef)}
-          >
+            >
             <div className="relative">
               <img 
-                src={chef.avatar_url}
+                src={chef.avatar_url || 'https://placehold.co/300x450?text=Chef'}
                 alt={chef.display_name}
                 className="w-full aspect-[2/3] object-cover transition-transform duration-300 group-hover:scale-105"
-                onError={(e) => {
-                  // Fallback for broken image links
-                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300x450?text=Chef';
-                }}
+                onClick={() => onChefClick(chef)}
               />
             </div>
             
-            <div className="p-4">
-              <h3 className="font-bold text-lg text-gray-900 mb-1">{chef.display_name}</h3>
-              <p className="text-gray-600 text-sm mb-3 line-clamp-4">
-                {chef.preferences || "No description available"}
-              </p>
-              <div className="bg-navy text-white text-sm font-medium px-3 py-1.5 text-center">
+            <div className="p-4 flex flex-col justify-between h-full">
+              <div>
+                <h3 className="font-bold text-lg text-gray-900 mb-1">{chef.display_name}</h3>
+                <p className="text-gray-600 text-sm mb-3 line-clamp-4">
+                  {chef.preferences || "No description available"}
+                </p>
+              </div>
+              <div 
+                className="bg-navy text-white text-sm font-medium px-3 py-1.5 text-center" 
+                onClick={() => onViewProfileClick(chef)}
+              >
                 View Profile
               </div>
             </div>
@@ -512,6 +515,10 @@ const UserHomePage = () => {
 
   // Handler for chef selection
   const handleChefClick = (chef: Chef) => {
+    navigate(`/order/${chef.id}`); 
+  };
+
+  const handleViewProfileClick = (chef: Chef) => {
     setSelectedChef(chef);
     setIsChefModalOpen(true);
   };
@@ -676,6 +683,7 @@ const UserHomePage = () => {
           chefs={chefs} 
           loading={loading} 
           onChefClick={handleChefClick} 
+          onViewProfileClick={handleViewProfileClick}
         />
       </main>
 

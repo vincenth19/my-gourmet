@@ -121,7 +121,7 @@ const OrderPage = () => {
   
   // Add this function after formatCurrency
   const getImageUrl = (imageUrl: string | null) => {
-    if (!imageUrl) return 'https://via.placeholder.com/400x400?text=No+Image';
+    if (!imageUrl) return 'https://placehold.co/400x400?text=No+Image';
     
     // If it's already a full URL, return it
     if (imageUrl.startsWith('http')) {
@@ -133,7 +133,7 @@ const OrderPage = () => {
       .from('dish_images')
       .getPublicUrl(imageUrl);
     
-    return data.publicUrl || 'https://via.placeholder.com/400x400?text=No+Image';
+    return data.publicUrl || 'https://placehold.co/400x400?text=No+Image';
   };
   
   const openDishModal = (dish: (Dish & { dietary_tags?: DietaryTag[] })) => {
@@ -560,7 +560,7 @@ const OrderPage = () => {
                               onError={(e) => {
                                 // Fallback for broken image links
                                 (e.target as HTMLImageElement).onerror = null;
-                                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x400?text=No+Image';
+                                (e.target as HTMLImageElement).src = 'https://placehold.co/400x400?text=No+Image';
                               }}
                             />
                           ) : (

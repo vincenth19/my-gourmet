@@ -19,7 +19,7 @@ const ChefModal = ({ chef, isOpen, onClose }: ChefModalProps) => {
   
   // Get proper image URL
   const getImageUrl = (imageUrl: string | null | undefined) => {
-    if (!imageUrl) return 'https://via.placeholder.com/600x600?text=No+Image';
+    if (!imageUrl) return 'https://placehold.co/600x600?text=No+Image';
     
     // If it's already a full URL, return it
     if (imageUrl.startsWith('http')) {
@@ -31,7 +31,7 @@ const ChefModal = ({ chef, isOpen, onClose }: ChefModalProps) => {
       .from('avatars')
       .getPublicUrl(imageUrl);
     
-    return data.publicUrl || 'https://via.placeholder.com/600x600?text=No+Image';
+    return data.publicUrl || 'https://placehold.co/600x600?text=No+Image';
   };
 
   const handleStartOrderClick = () => {
@@ -82,7 +82,7 @@ const ChefModal = ({ chef, isOpen, onClose }: ChefModalProps) => {
                 className="w-full h-full object-cover"
                 onError={(e) => {
                   (e.target as HTMLImageElement).onerror = null;
-                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x600?text=No+Image';
+                  (e.target as HTMLImageElement).src = 'https://placehold.co/600x600?text=No+Image';
                 }}
               />
             </div>
@@ -136,7 +136,7 @@ const ChefModal = ({ chef, isOpen, onClose }: ChefModalProps) => {
               className="w-full h-full object-cover absolute inset-0"
               onError={(e) => {
                 (e.target as HTMLImageElement).onerror = null;
-                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x600?text=No+Image';
+                (e.target as HTMLImageElement).src = 'https://placehold.co/600x600?text=No+Image';
               }}
             />
           </div>
