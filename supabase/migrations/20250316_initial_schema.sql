@@ -93,7 +93,8 @@ CREATE TABLE public.carts (
 CREATE TABLE public.cart_items (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   cart_id UUID REFERENCES public.carts(id),
-  dish_id UUID REFERENCES public.dishes(id) NULL,
+  dish_id UUID REFERENCES public.dishes(id) ON DELETE SET NULL,
+  chef_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
   quantity INTEGER DEFAULT 1,
   dish_name VARCHAR NOT NULL,
   dish_price DECIMAL(10, 2) NOT NULL,
@@ -142,6 +143,8 @@ CREATE TABLE public.orders (
 CREATE TABLE public.order_dishes (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   order_id UUID REFERENCES public.orders(id) ON DELETE CASCADE,
+  dish_id UUID REFERENCES public.dishes(id) ON DELETE SET NULL,
+  chef_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
   dish_name VARCHAR NOT NULL,
   quantity INTEGER NOT NULL,
   dish_price DECIMAL(10, 2) NOT NULL,

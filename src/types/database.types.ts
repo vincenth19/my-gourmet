@@ -83,6 +83,7 @@ export interface CartItem {
   id: string;
   cart_id: string;
   dish_id?: string;
+  chef_id?: string;
   quantity: number;
   dish_name: string;
   dish_price: number;
@@ -132,6 +133,8 @@ export interface Order {
 export interface OrderDish {
   id: string;
   order_id: string;
+  dish_id?: string;
+  chef_id?: string;
   dish_name: string;
   quantity: number;
   dish_price: number;

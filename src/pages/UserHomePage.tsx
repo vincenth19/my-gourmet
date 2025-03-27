@@ -93,25 +93,56 @@ const UserHomePage = () => {
           // If the RPC function doesn't exist yet, use a direct query instead
           const { data: fallbackData, error: fallbackError } = await supabase
             .from('order_dishes')
-            .select('dish_name, order_id, dish_price')
+            .select('dish_id, chef_id, dish_name, order_id, dish_price')
             .neq('dish_name', 'Custom Dish Request')
+            .not('dish_id', 'is', null) // Only select dishes with a valid dish_id
+            .not('chef_id', 'is', null) // Only select dishes with a valid chef_id
             .order('created_at', { ascending: false })
             .limit(50);
 
           if (fallbackError) throw fallbackError;
           
+          // Get only the order_dishes from completed orders
+          const orderIds = fallbackData?.map(item => item.order_id) || [];
+          const { data: completedOrdersData, error: completedOrdersError } = await supabase
+            .from('orders')
+            .select('id')
+            .in('id', orderIds)
+            .eq('order_status', 'completed');
+            
+          if (completedOrdersError) throw completedOrdersError;
+          
+          // Create a Set of completed order IDs for faster lookup
+          const completedOrderIds = new Set(completedOrdersData?.map(order => order.id) || []);
+          
+          // Filter order_dishes to only include those from completed orders
+          const completedOrderDishes = fallbackData?.filter(item => 
+            completedOrderIds.has(item.order_id)
+          ) || [];
+          
           // Process the data to count occurrences and get unique dishes
-          const dishCount: Record<string, { count: number, price: number }> = {};
-          fallbackData?.forEach(item => {
+          const dishCount: Record<string, { count: number, price: number, dish_id: string, chef_id: string }> = {};
+          completedOrderDishes.forEach(item => {
             if (!dishCount[item.dish_name]) {
-              dishCount[item.dish_name] = { count: 0, price: item.dish_price };
+              dishCount[item.dish_name] = { 
+                count: 0, 
+                price: item.dish_price,
+                dish_id: item.dish_id,
+                chef_id: item.chef_id
+              };
             }
             dishCount[item.dish_name].count += 1;
           });
           
           // Convert to array and sort by count
           const topDishes = Object.entries(dishCount)
-            .map(([dish_name, { count, price }]) => ({ dish_name, count, price }))
+            .map(([dish_name, { count, price, dish_id, chef_id }]) => ({ 
+              dish_name, 
+              count, 
+              price, 
+              dish_id, 
+              chef_id 
+            }))
             .sort((a, b) => b.count - a.count)
             .slice(0, 8); // Get more dishes to account for possible missing ones
           
@@ -120,37 +151,36 @@ const UserHomePage = () => {
           
           for (const dish of topDishes) {
             try {
-              // Check if dish still exists in dishes table
+              // Check if dish still exists in dishes table using dish_id
               const { data: dishExists, error: dishExistsError } = await supabase
                 .from('dishes')
-                .select('id')
-                .eq('name', dish.dish_name)
-                .limit(1);
+                .select('id, image_url')
+                .eq('id', dish.dish_id)
+                .single();
               
-              if (dishExistsError || !dishExists || dishExists.length === 0) {
+              if (dishExistsError || !dishExists) {
                 // Skip this dish if it doesn't exist anymore
                 continue;
               }
               
-              // Get chef info from an order with this dish
-              const { data: orderData } = await supabase
-                .from('orders')
-                .select('chef_name, chef_id')
-                .eq('id', fallbackData?.find(item => item.dish_name === dish.dish_name)?.order_id)
+              // Check if chef still exists
+              const { data: chefData, error: chefError } = await supabase
+                .from('profiles')
+                .select('display_name')
+                .eq('id', dish.chef_id)
+                .eq('role', 'chef')
                 .single();
-              
-              // Get image from dishes table
-              const { data: dishData } = await supabase
-                .from('dishes')
-                .select('image_url')
-                .eq('name', dish.dish_name)
-                .single();
+                
+              if (chefError || !chefData) {
+                // Skip this dish if the chef doesn't exist anymore
+                continue;
+              }
               
               dishesWithInfo.push({
                 dish_name: dish.dish_name,
-                chef_name: orderData?.chef_name || 'Unknown Chef',
-                chef_id: orderData?.chef_id || '',
-                image_url: dishData?.image_url || null,
+                chef_name: chefData.display_name,
+                chef_id: dish.chef_id,
+                image_url: dishExists.image_url,
                 price: dish.price,
                 order_count: dish.count
               });

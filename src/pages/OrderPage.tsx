@@ -303,6 +303,7 @@ const OrderPage = () => {
         .insert({
           cart_id: cartId,
           dish_id: selectedDish.id,
+          chef_id: chef?.id,
           dish_name: selectedDish.name,
           dish_price: selectedDish.price,
           quantity: quantity,
@@ -418,6 +419,7 @@ const OrderPage = () => {
         .from('cart_items')
         .insert({
           cart_id: cartId,
+          chef_id: chef?.id,
           dish_name: 'Custom Dish Request',
           dish_price: 0, // Price will be set by chef later
           quantity: 1,

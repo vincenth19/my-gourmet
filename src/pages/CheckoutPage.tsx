@@ -357,6 +357,8 @@ const CheckoutPage = () => {
       // Step 1: Create order_dishes entries for each cart item
       const orderDishesData = cartItems.map(item => ({
         order_id: orderData.id,
+        dish_id: item.dish_id || null,
+        chef_id: item.chef_id || chef.id,
         dish_name: item.dish_name,
         quantity: item.quantity,
         dish_price: item.dish_price,

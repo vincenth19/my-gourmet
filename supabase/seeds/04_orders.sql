@@ -122,9 +122,11 @@ BEGIN
     
     -- Add a regular dish to the pending order
     INSERT INTO public.order_dishes (
-        order_id, dish_name, quantity, dish_price, customization_options
+        order_id, dish_id, chef_id, dish_name, quantity, dish_price, customization_options
     ) VALUES (
         customer1_pending_id,
+        (SELECT id FROM public.dishes WHERE name = 'Beef Wellington' AND chef_id = chef_western_id LIMIT 1),
+        chef_western_id,
         'Beef Wellington',
         1,
         58.99,
@@ -133,9 +135,11 @@ BEGIN
     
     -- Add a custom dish to the pending order
     INSERT INTO public.order_dishes (
-        order_id, dish_name, quantity, dish_price, custom_dish_name, custom_description, dish_note
+        order_id, dish_id, chef_id, dish_name, quantity, dish_price, custom_dish_name, custom_description, dish_note
     ) VALUES (
         customer1_pending_id,
+        NULL, -- Custom dish has no dish_id reference
+        chef_western_id,
         'Custom Dish Request',
         1,
         0.00,  -- Price will be set by chef later
@@ -173,9 +177,11 @@ BEGIN
     
     -- Add dishes to the completed order
     INSERT INTO public.order_dishes (
-        order_id, dish_name, quantity, dish_price, customization_options, dish_types
+        order_id, dish_id, chef_id, dish_name, quantity, dish_price, customization_options, dish_types
     ) VALUES (
         customer1_completed1_id,
+        (SELECT id FROM public.dishes WHERE name = 'Spaghetti Carbonara' AND chef_id = chef_western_id LIMIT 1),
+        chef_western_id,
         'Spaghetti Carbonara',
         2,
         36.50,
@@ -185,9 +191,11 @@ BEGIN
     
     -- Add a custom dish to the completed order (with chef-assigned price)
     INSERT INTO public.order_dishes (
-        order_id, dish_name, quantity, dish_price, custom_dish_name, custom_description, custom_price, dish_types
+        order_id, dish_id, chef_id, dish_name, quantity, dish_price, custom_dish_name, custom_description, custom_price, dish_types
     ) VALUES (
         customer1_completed1_id,
+        NULL, -- Custom dish has no dish_id reference
+        chef_western_id,
         'Custom Dish Request',
         1,
         65.00,
@@ -226,10 +234,12 @@ BEGIN
     
     -- Add dishes to the completed order
     INSERT INTO public.order_dishes (
-        order_id, dish_name, quantity, dish_price, customization_options
+        order_id, dish_id, chef_id, dish_name, quantity, dish_price, customization_options
     ) VALUES 
     (
         customer1_completed2_id,
+        (SELECT id FROM public.dishes WHERE name = 'Barramundi with Bush Tucker' AND chef_id = chef_sydney_id LIMIT 1),
+        chef_sydney_id,
         'Barramundi with Bush Tucker',
         1,
         52.50,
@@ -237,6 +247,8 @@ BEGIN
     ),
     (
         customer1_completed2_id,
+        (SELECT id FROM public.dishes WHERE name = 'Emu Burger with Beetroot' AND chef_id = chef_sydney_id LIMIT 1),
+        chef_sydney_id,
         'Emu Burger with Beetroot',
         1,
         38.75,
