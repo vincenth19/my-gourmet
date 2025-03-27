@@ -35,7 +35,7 @@ const LoginPage = () => {
           .single();
 
         // Navigate based on role
-        navigate(profile?.role === 'chef' ? '/chef/home' : '/home');
+        navigate(profile?.role === 'chef' ? '/chef/home' : profile?.role === 'admin' ? '/admin/home' : '/home');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to sign in');

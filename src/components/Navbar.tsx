@@ -1,11 +1,12 @@
-import { Link, useLocation } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import logoBnw from '../assets/logo-w-text-bnw.svg';
-import { ShoppingCart } from "lucide-react";
+import { LogOut, ShoppingCart } from "lucide-react";
 import NotificationBell from './NotificationBell';
 import NotificationSubscription from './NotificationSubscription';
 import { Toaster } from 'react-hot-toast';
+import { supabase } from "../lib/supabase";
 
 interface NavbarProps {
   activePage?: 'home' | 'profile' | 'orders' | 'dishes' | 'cart' | 'notifications';
@@ -16,11 +17,14 @@ const Navbar = ({ activePage: propActivePage }: NavbarProps) => {
   const { getCartItemsCount } = useCart();
   const location = useLocation();
   const userRole = user?.user_metadata.role;
+  const navigate = useNavigate();
   
   // Determine active page from route if not provided as prop
   const getActivePageFromPath = () => {
     const path = location.pathname;
     if (path.includes('/profile')) return 'profile';
+    if (path.includes('/chef/home')) return 'chef-home';
+    if (path.includes('/admin/home')) return 'admin-home';
     if (path.includes('/orders')) return 'orders';
     if (path.includes('/chef/dishes')) return 'dishes';
     if (path.includes('/cart')) return 'cart';
@@ -30,6 +34,15 @@ const Navbar = ({ activePage: propActivePage }: NavbarProps) => {
   
   const activePage = propActivePage || getActivePageFromPath();
   const cartItemsCount = getCartItemsCount();
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      navigate('/sign-in');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
 
   return (
     <>
@@ -42,19 +55,32 @@ const Navbar = ({ activePage: propActivePage }: NavbarProps) => {
               </Link>
             </div>
             <div className="flex items-center space-x-4">
+              {(userRole === "chef" || userRole === "admin") && (
+                <Link to={userRole === 'chef' ? '/chef/home' : '/admin/home'}>
+                  <button 
+                    className={`${activePage === 'chef-home' || activePage === 'admin-home' 
+                      ? 'text-navy border-b-2 border-navy' 
+                      : 'text-gray-600 hover:text-navy'} font-light transition-colors duration-200 px-2 py-1`}
+                  >
+                    My Dashboard
+                  </button>
+                </Link>
+              )}
               {/* Profile link - available for all roles */}
-              <Link to="/profile">
-                <button 
-                  className={`${activePage === 'profile' 
-                    ? 'text-navy border-b-2 border-navy' 
-                    : 'text-gray-600 hover:text-navy'} font-light transition-colors duration-200 px-2 py-1`}
-                >
-                  Profile
-                </button>
-              </Link>
+              {userRole !== 'admin' && (
+                <Link to="/profile">
+                  <button 
+                    className={`${activePage === 'profile' 
+                      ? 'text-navy border-b-2 border-navy' 
+                      : 'text-gray-600 hover:text-navy'} font-light transition-colors duration-200 px-2 py-1`}
+                  >
+                    Profile
+                  </button>
+                </Link>
+              )}
               
               {/* Orders link - only for customers */}
-              {userRole !== 'chef' && (
+              {userRole === 'customer' && (
                 <Link to="/orders">
                   <button 
                     className={`${activePage === 'orders' 
@@ -77,7 +103,10 @@ const Navbar = ({ activePage: propActivePage }: NavbarProps) => {
                     My Dishes
                   </button>
                 </Link>
-              ) : (
+              ) : null}
+              
+              {userRole === "customer" ? (
+                <>
                 <Link to="/cart">
                   <button 
                     className={`${activePage === 'cart' 
@@ -93,10 +122,18 @@ const Navbar = ({ activePage: propActivePage }: NavbarProps) => {
                     )}
                   </button>
                 </Link>
-              )}
+                </>
+              ) : null}
 
               {/* Notification Bell - available for all roles */}
               <NotificationBell />
+
+              <button 
+                  className={`flex items-center space-x-2 border-1 border-red-700 text-red-700 px-2 py-1 hover:bg-red-700 hover:text-white transition-colors duration-200`}
+                  onClick={handleLogout}
+                >
+                <LogOut size={18} className="mr-1"/>{" "}Logout
+              </button>
             </div>
           </div>
         </div>

@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { Notification } from '../types/database.types';
 import { format, isToday, isYesterday, isSameWeek, isSameYear } from 'date-fns';
-import { Bell, Link as LinkIcon, CheckCircle } from 'lucide-react';
+import { Bell, CheckCircle, ArrowUpRight } from 'lucide-react';
 
 // Group notifications by their date
 interface GroupedNotifications {
@@ -327,7 +327,10 @@ const NotificationsPage = () => {
                         </p>
                       </div>
                       {notification.link && (
-                        <LinkIcon className="h-5 w-5 text-gray-400 mt-1 flex-shrink-0" />
+                        <div className="flex items-center gap-2 border-gray-200 border-1 py-1 px-3">
+                          View Order
+                          <ArrowUpRight className="h-5 w-5 text-gray-400 mt-1 flex-shrink-0" />
+                        </div>
                       )}
                     </div>
                   </div>

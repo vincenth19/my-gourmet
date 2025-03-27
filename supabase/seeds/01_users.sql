@@ -135,7 +135,7 @@ VALUES
         admin_id,
         'authenticated',
         'authenticated',
-        'admin@gourmet.com',
+        'admin@mygourmet.com',
         crypt('admin123', gen_salt('bf')),
         current_timestamp,
         current_timestamp,
@@ -220,7 +220,7 @@ VALUES
     (
         uuid_generate_v4(),
         admin_id,
-        format('{"sub":"%s","email":"%s"}', admin_id::text, 'admin@gourmet.com')::jsonb,
+        format('{"sub":"%s","email":"%s"}', admin_id::text, 'admin@mygourmet.com')::jsonb,
         'email',
         admin_id::text,
         current_timestamp,

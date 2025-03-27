@@ -94,11 +94,6 @@ const AdminHomePage = () => {
   
   // Calculate total revenue from completed orders
   const totalRevenue = orders
-    .filter(order => order.order_status === 'completed')
-    .reduce((sum, order) => sum + order.total_amount, 0);
-  
-  // Calculate pending revenue from accepted orders
-  const pendingRevenue = orders
     .filter(order => order.order_status === 'accepted')
     .reduce((sum, order) => sum + order.total_amount, 0);
   
@@ -113,11 +108,6 @@ const AdminHomePage = () => {
   // Format date
   const formatDate = (dateString: string) => {
     return format(new Date(dateString), 'MMM d, yyyy');
-  };
-  
-  // Format time
-  const formatTime = (dateString: string) => {
-    return format(new Date(dateString), 'h:mm a');
   };
   
   // Get status color based on order status
@@ -135,24 +125,6 @@ const AdminHomePage = () => {
         return 'bg-purple-100 text-purple-800';
       default:
         return 'bg-gray-100 text-gray-800';
-    }
-  };
-  
-  // Get status icon based on order status
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return <AlertCircle className="h-4 w-4" />;
-      case 'accepted':
-        return <Clock className="h-4 w-4" />;
-      case 'completed':
-        return <CheckCircle className="h-4 w-4" />;
-      case 'rejected':
-        return <XCircle className="h-4 w-4" />;
-      case 'cancelled':
-        return <XCircle className="h-4 w-4 text-purple-600" />;
-      default:
-        return null;
     }
   };
 
@@ -189,7 +161,7 @@ const AdminHomePage = () => {
             className="bg-white border-2 border-gray-200 p-5"
           >
             <h3 className="text-lg font-medium text-gray-900 mb-4 text-center">Order Progression</h3>
-            <div className="flex justify-between items-center">
+            <div className="flex justify-evenly items-center">
               {/* Pending */}
               <div className="flex flex-col items-center">
                 <div className="bg-yellow-100 p-3 rounded-full mb-2">
@@ -211,20 +183,6 @@ const AdminHomePage = () => {
                 </div>
                 <div className="text-2xl font-bold text-gray-900">{acceptedCount}</div>
                 <div className="text-sm text-gray-500">Accepted</div>
-              </div>
-              
-              {/* Arrow */}
-              <div className="text-gray-400">
-                <ChevronRight className="h-5 w-5" />
-              </div>
-              
-              {/* Completed */}
-              <div className="flex flex-col items-center">
-                <div className="bg-green-100 p-3 rounded-full mb-2">
-                  <CheckCircle className="h-6 w-6 text-green-700" />
-                </div>
-                <div className="text-2xl font-bold text-gray-900">{completedCount}</div>
-                <div className="text-sm text-gray-500">Completed</div>
               </div>
             </div>
           </motion.div>

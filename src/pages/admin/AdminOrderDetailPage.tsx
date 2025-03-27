@@ -251,7 +251,7 @@ const AdminOrderDetailPage = () => {
         };
         
         // Add payment_status field when status is changing to completed
-        if (newStatus === 'completed') {
+        if (newStatus === 'accepted') {
           Object.assign(updateData, { payment_status: 'paid' });
         }
         
@@ -268,7 +268,7 @@ const AdminOrderDetailPage = () => {
           order_status: newStatus,
           total_amount: newTotal,
           // Also update payment_status in local state when completed
-          ...(newStatus === 'completed' ? { payment_status: 'paid' } : {})
+          ...(newStatus === 'accepted' ? { payment_status: 'paid' } : {})
         }));
       }
       
@@ -429,7 +429,7 @@ const AdminOrderDetailPage = () => {
               <div>
                 <h2 className="text-lg font-medium flex items-center mb-2">
                   <MapPin className="h-5 w-5 mr-2 text-gray-400" />
-                  Delivery Address
+                  Customer Address
                 </h2>
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <p className="text-gray-800">
@@ -477,54 +477,7 @@ const AdminOrderDetailPage = () => {
                 </div>
               </div>
             </div>
-          </div>
-          
-          {/* Order status */}
-          <div className="border-t border-gray-200 pt-6 pb-4">
-            <h2 className="text-lg font-medium mb-4">Order Status</h2>
-            
-            <div className="grid grid-cols-3 gap-3 mb-6">
-              <button
-                className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                  newStatus === 'pending' 
-                    ? 'bg-yellow-500 text-white' 
-                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                } ${order.order_status !== 'pending' ? 'opacity-40 cursor-not-allowed bg-gray-200' : ''}`}
-                onClick={() => setNewStatus('pending')}
-                disabled={order.order_status !== 'pending'}
-              >
-                1. Pending
-              </button>
-              <button
-                className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                  newStatus === 'accepted' 
-                    ? 'bg-blue-500 text-white' 
-                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                } ${(order.order_status === 'completed' || order.order_status === 'rejected' || 
-                    (order.order_status === 'pending' && !allCustomDishesHavePrices())) 
-                    ? 'opacity-40 cursor-not-allowed bg-gray-200' : ''}`}
-                onClick={() => setNewStatus('accepted')}
-                disabled={order.order_status === 'completed' || order.order_status === 'rejected' || 
-                         (order.order_status === 'pending' && !allCustomDishesHavePrices())}
-              >
-                2. Accept
-              </button>
-              <button
-                className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                  newStatus === 'completed' 
-                    ? 'bg-green-500 text-white' 
-                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                } ${(order.order_status === 'pending' || order.order_status === 'rejected' ||
-                    (order.order_status === 'accepted' && !allCustomDishesHavePrices()))
-                    ? 'opacity-40 cursor-not-allowed bg-gray-200' : ''}`}
-                onClick={() => setNewStatus('completed')}
-                disabled={order.order_status === 'pending' || order.order_status === 'rejected' ||
-                         (order.order_status === 'accepted' && !allCustomDishesHavePrices())}
-              >
-                3. Complete
-              </button>
-            </div>
-          </div>
+          </div>                  
           
           {/* Order Items */}
           <div className="border-t border-gray-200 pt-6">
@@ -661,6 +614,53 @@ const AdminOrderDetailPage = () => {
                 <span className="text-gray-900 font-medium">Total</span>
                 <span className="text-lg font-bold text-navy">{formatCurrency(calculateTotal())}</span>
               </div>
+            </div>
+          </div>
+
+          {/* Order status */}
+          <div className="border-t border-gray-200 pt-6">
+            <h2 className="text-lg font-medium mb-4">Order Status</h2>
+            
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              <button
+                className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                  newStatus === 'pending' 
+                    ? 'bg-yellow-500 text-white' 
+                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                } ${order.order_status !== 'pending' ? 'opacity-40 cursor-not-allowed bg-gray-200' : ''}`}
+                onClick={() => setNewStatus('pending')}
+                disabled={order.order_status !== 'pending'}
+              >
+                1. Pending
+              </button>
+              <button
+                className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                  newStatus === 'accepted' 
+                    ? 'bg-blue-500 text-white' 
+                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                } ${(order.order_status === 'completed' || order.order_status === 'rejected' || 
+                    (order.order_status === 'pending' && !allCustomDishesHavePrices())) 
+                    ? 'opacity-40 cursor-not-allowed bg-gray-200' : ''}`}
+                onClick={() => setNewStatus('accepted')}
+                disabled={order.order_status === 'completed' || order.order_status === 'rejected' || 
+                         (order.order_status === 'pending' && !allCustomDishesHavePrices())}
+              >
+                2. Accept
+              </button>
+              <button
+                className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                  newStatus === 'rejected' 
+                    ? 'bg-red-500 text-white' 
+                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                } ${(order.order_status === 'rejected' || order.order_status === 'completed' ||
+                    order.order_status === 'accepted')
+                    ? 'opacity-40 cursor-not-allowed bg-gray-200' : ''}`}
+                onClick={() => setNewStatus('rejected')}
+                disabled={order.order_status === 'completed' || order.order_status === 'rejected' ||
+                         order.order_status === 'accepted'}
+              >
+                3. Rejected
+              </button>
             </div>
           </div>
           

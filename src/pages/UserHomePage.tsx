@@ -206,7 +206,13 @@ const PopularDishesSection = ({
           <div 
             key={index}
             className="bg-white border-2 border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200 cursor-pointer"
-            onClick={() => onDishClick(dish.dish_id, dish.chef_id, dish.dish_name, dish.price, dish.image_url)}
+            onClick={() => {
+              if (!dish.dish_id) {
+                console.error('Cannot open dish details: Dish ID is undefined');
+                return;
+              }
+              onDishClick(dish.dish_id, dish.chef_id, dish.dish_name, dish.price, dish.image_url);
+            }}
           >
             <div className="h-48 overflow-hidden">
               <img 
@@ -497,8 +503,9 @@ const UserHomePage = () => {
           setPopularDishes(dishesWithInfo);
         } else {
           // If the RPC function exists and returns data, it already filters out non-existent dishes
-          // Take only the first 4 dishes
-          setPopularDishes(data.slice(0, 4));
+          // Take only the first 4 dishes and ensure all have valid dish_id
+          const validDishes = data.filter((dish: PopularDish) => dish.dish_id != null).slice(0, 4);
+          setPopularDishes(validDishes);
         }
       } catch (error) {
         console.error('Error fetching popular dishes:', error);
@@ -526,6 +533,13 @@ const UserHomePage = () => {
   const handlePopularDishClick = async (dishId: string, chefId: string, dishName: string, price: number, imageUrl: string | null) => {
     setLoadingPopularDishes(true);
     try {
+      // Check if dishId is undefined or null
+      if (!dishId) {
+        console.error('Dish ID is undefined or null');
+        navigate(`/order/${chefId}`);
+        return;
+      }
+      
       // Fetch dish details with all required fields for DishModal
       const { data: dishData, error: dishError } = await supabase
         .from('dishes')

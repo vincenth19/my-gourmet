@@ -65,15 +65,26 @@ BEGIN
       '/order-confirmation/' || NEW.id
     );
 
-    -- Create notification for the chef for cancelled orders
-    IF NEW.order_status = 'cancelled' AND NEW.chef_id IS NOT NULL THEN
-      INSERT INTO public.notifications (user_id, title, message, link)
-      VALUES (
-        NEW.chef_id,
-        'Order #' || short_id || ' Cancelled',
-        'Order has been cancelled by the customer',
-        '/chef/orders/' || NEW.id
-      );
+    -- Create notification for the chef for status changes
+    IF NEW.chef_id IS NOT NULL THEN
+      -- Different notifications based on status
+      IF NEW.order_status = 'accepted' THEN
+        INSERT INTO public.notifications (user_id, title, message, link)
+        VALUES (
+          NEW.chef_id,
+          'Order #' || short_id || ' Confirmed',
+          'You have confirmed an order from ' || NEW.profile_email,
+          '/chef/order/' || NEW.id
+        );
+      ELSIF NEW.order_status = 'cancelled' THEN
+        INSERT INTO public.notifications (user_id, title, message, link)
+        VALUES (
+          NEW.chef_id,
+          'Order #' || short_id || ' Cancelled',
+          'Order has been cancelled by the customer',
+          '/chef/order/' || NEW.id
+        );
+      END IF;
     END IF;
   END IF;
 
@@ -195,6 +206,6 @@ CREATE POLICY "Chefs can view notifications about their orders"
     EXISTS (
       SELECT 1 FROM public.orders o
       WHERE o.chef_id = auth.uid()
-      AND o.id::text = SUBSTRING(link FROM '/chef/orders/([^/]+)')
+      AND o.id::text = SUBSTRING(link FROM '/chef/order/([^/]+)')
     )
   ); 

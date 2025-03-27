@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { format } from 'date-fns';
-import { Clock, ChevronRight, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
-import Footer from '../components/Footer';
+import { ChevronRight } from 'lucide-react';
 
 // Type for order data
 interface Order {
@@ -64,22 +63,6 @@ const ChefHomePage = () => {
     
     fetchOrders();
   }, [user, navigate]);
-  
-  // Get counts by status for the stats section
-  const pendingCount = orders.filter(order => order.order_status === 'pending').length;
-  const acceptedCount = orders.filter(order => order.order_status === 'accepted').length;
-  const completedCount = orders.filter(order => order.order_status === 'completed').length;
-  const rejectedCount = orders.filter(order => order.order_status === 'rejected').length;
-  const cancelledCount = orders.filter(order => order.order_status === 'cancelled').length;
-  
-  // Format currency
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-AU', {
-      style: 'currency',
-      currency: 'AUD'
-    }).format(amount);
-  };
-  
   // Format date
   const formatDate = (dateString: string) => {
     return format(new Date(dateString), 'MMM d, yyyy');
@@ -89,42 +72,6 @@ const ChefHomePage = () => {
   const formatTime = (dateString: string) => {
     return format(new Date(dateString), 'h:mm a');
   };
-  
-  // Get status color based on order status
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'accepted':
-        return 'bg-blue-100 text-blue-800';
-      case 'completed':
-        return 'bg-green-100 text-green-800';
-      case 'rejected':
-        return 'bg-red-100 text-red-800';
-      case 'cancelled':
-        return 'bg-purple-100 text-purple-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-  
-  // Get status icon based on order status
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return <AlertCircle className="h-4 w-4" />;
-      case 'accepted':
-        return <Clock className="h-4 w-4" />;
-      case 'completed':
-        return <CheckCircle className="h-4 w-4" />;
-      case 'rejected':
-        return <XCircle className="h-4 w-4" />;
-      case 'cancelled':
-        return <XCircle className="h-4 w-4 text-purple-600" />;
-      default:
-        return null;
-    }
-  };
 
   // Filter orders to only show accepted orders for the table
   const acceptedOrders = orders.filter(order => order.order_status === 'accepted');
@@ -132,85 +79,6 @@ const ChefHomePage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Order Progress Group */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="bg-white border-2 border-gray-200 p-5"
-          >
-            <h3 className="text-lg font-medium text-gray-900 mb-4 text-center">Order Progression</h3>
-            <div className="flex justify-between items-center">
-              {/* Pending */}
-              <div className="flex flex-col items-center">
-                <div className="bg-yellow-100 p-3 rounded-full mb-2">
-                  <AlertCircle className="h-6 w-6 text-yellow-700" />
-                </div>
-                <div className="text-2xl font-bold text-gray-900">{pendingCount}</div>
-                <div className="text-sm text-gray-500">Pending</div>
-              </div>
-              
-              {/* Arrow */}
-              <div className="text-gray-400">
-                <ChevronRight className="h-5 w-5" />
-              </div>
-              
-              {/* Accepted */}
-              <div className="flex flex-col items-center">
-                <div className="bg-blue-100 p-3 rounded-full mb-2">
-                  <Clock className="h-6 w-6 text-blue-700" />
-                </div>
-                <div className="text-2xl font-bold text-gray-900">{acceptedCount}</div>
-                <div className="text-sm text-gray-500">Accepted</div>
-              </div>
-              
-              {/* Arrow */}
-              <div className="text-gray-400">
-                <ChevronRight className="h-5 w-5" />
-              </div>
-              
-              {/* Completed */}
-              <div className="flex flex-col items-center">
-                <div className="bg-green-100 p-3 rounded-full mb-2">
-                  <CheckCircle className="h-6 w-6 text-green-700" />
-                </div>
-                <div className="text-2xl font-bold text-gray-900">{completedCount}</div>
-                <div className="text-sm text-gray-500">Completed</div>
-              </div>
-            </div>
-          </motion.div>
-          
-          {/* Cancelled/Rejected Group */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="bg-white border-2 border-gray-200 p-5"
-          >
-            <h3 className="text-lg font-medium text-gray-900 mb-4 text-center">Discontinued Orders</h3>
-            <div className="flex justify-around items-center">
-              {/* Rejected */}
-              <div className="flex flex-col items-center">
-                <div className="bg-red-100 p-3 rounded-full mb-2">
-                  <XCircle className="h-6 w-6 text-red-700" />
-                </div>
-                <div className="text-2xl font-bold text-gray-900">{rejectedCount}</div>
-                <div className="text-sm text-gray-500">Rejected</div>
-              </div>
-              
-              {/* Cancelled */}
-              <div className="flex flex-col items-center">
-                <div className="bg-purple-100 p-3 rounded-full mb-2">
-                  <XCircle className="h-6 w-6 text-purple-700" />
-                </div>
-                <div className="text-2xl font-bold text-gray-900">{cancelledCount}</div>
-                <div className="text-sm text-gray-500">Cancelled</div>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-
         {/* Orders Table Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

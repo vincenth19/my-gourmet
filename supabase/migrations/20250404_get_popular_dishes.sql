@@ -1,6 +1,7 @@
 -- Create an RPC function to get the most ordered dishes with chef information
 CREATE OR REPLACE FUNCTION public.get_most_ordered_dishes(limit_count INTEGER DEFAULT 8)
 RETURNS TABLE (
+  dish_id UUID,
   dish_name TEXT,
   chef_name TEXT,
   chef_id UUID,
@@ -62,6 +63,7 @@ BEGIN
   )
   
   SELECT 
+    dd.dish_id,
     dd.dish_name,
     dd.chef_name,
     dd.chef_id,
