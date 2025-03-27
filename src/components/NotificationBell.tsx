@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router';
 import { Bell } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { Notification } from '../types/database.types';
 
 const NotificationBell = () => {
   const navigate = useNavigate();
@@ -14,8 +13,11 @@ const NotificationBell = () => {
   useEffect(() => {
     if (!user) return;
 
-    const subscription = supabase
-      .channel('notifications')
+    // Initial fetch
+    fetchUnreadCount();
+    
+    const channel = supabase
+      .channel('notification_count')
       .on('postgres_changes', 
         { 
           event: '*', 
@@ -23,15 +25,15 @@ const NotificationBell = () => {
           table: 'notifications',
           filter: `user_id=eq.${user.id}`
         }, 
-        async (payload) => {
-          // Refetch count on any change
+        async () => {
+          // Always refetch the count on any notification change
           await fetchUnreadCount();
         }
       )
       .subscribe();
 
     return () => {
-      subscription.unsubscribe();
+      supabase.removeChannel(channel);
     };
   }, [user]);
 
@@ -52,11 +54,6 @@ const NotificationBell = () => {
       console.error('Error fetching unread notifications count:', err);
     }
   };
-
-  // Initial fetch
-  useEffect(() => {
-    fetchUnreadCount();
-  }, [user]);
 
   return (
     <button

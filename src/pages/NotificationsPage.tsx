@@ -85,6 +85,30 @@ const NotificationsPage = () => {
   const handleNotificationClick = async (notification: Notification) => {
     try {
       if (!notification.is_read) {
+        // First check if notification still exists and is unread
+        const { data, error: checkError } = await supabase
+          .from('notifications')
+          .select('is_read')
+          .eq('id', notification.id)
+          .single();
+          
+        if (checkError || !data || data.is_read) {
+          // If already read, just update local state to match
+          setNotifications(prev => 
+            prev.map(n => 
+              n.id === notification.id 
+                ? { ...n, is_read: true } 
+                : n
+            )
+          );
+          
+          if (notification.link) {
+            navigateToLink(notification.link);
+          }
+          return;
+        }
+        
+        // Update the notification to marked as read
         const { error } = await supabase
           .from('notifications')
           .update({ is_read: true })
@@ -103,17 +127,22 @@ const NotificationsPage = () => {
       }
 
       if (notification.link) {
-        // Add back-link parameter for order-confirmation pages
-        if (notification.link.includes('/order-confirmation/')) {
-          // Append back-link parameter to return to notifications page
-          const separator = notification.link.includes('?') ? '&' : '?';
-          navigate(`${notification.link}${separator}back-link=${encodeURIComponent('/notifications')}`);
-        } else {
-          navigate(notification.link);
-        }
+        navigateToLink(notification.link);
       }
     } catch (err) {
       console.error('Error updating notification:', err);
+    }
+  };
+  
+  // Helper function to navigate to a link
+  const navigateToLink = (link: string) => {
+    // Add back-link parameter for order-confirmation pages
+    if (link.includes('/order-confirmation/')) {
+      // Append back-link parameter to return to notifications page
+      const separator = link.includes('?') ? '&' : '?';
+      navigate(`${link}${separator}back-link=${encodeURIComponent('/notifications')}`);
+    } else {
+      navigate(link);
     }
   };
 
@@ -139,10 +168,21 @@ const NotificationsPage = () => {
       
       if (error) throw error;
       
-      // Update the local state
-      setNotifications(prev => 
-        prev.map(n => ({ ...n, is_read: true }))
-      );
+      // Fetch the latest notifications to ensure everything is in sync
+      const { data: updatedData } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      
+      if (updatedData) {
+        setNotifications(updatedData);
+      } else {
+        // If fetch fails, update the local state
+        setNotifications(prev => 
+          prev.map(n => ({ ...n, is_read: true }))
+        );
+      }
     } catch (err) {
       console.error('Error marking all notifications as read:', err);
     } finally {

@@ -13,6 +13,18 @@ export default function NotificationSubscription() {
   const markAsRead = async (notification: Notification) => {
     try {
       if (!notification.is_read) {
+        // First check if notification still exists and is unread
+        const { data, error: checkError } = await supabase
+          .from('notifications')
+          .select('is_read')
+          .eq('id', notification.id)
+          .single();
+          
+        if (checkError || !data || data.is_read) {
+          return; // Skip if already read or doesn't exist
+        }
+        
+        // Update the notification to marked as read
         const { error } = await supabase
           .from('notifications')
           .update({ is_read: true })
