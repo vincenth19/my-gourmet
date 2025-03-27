@@ -1,11 +1,10 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router';
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
-import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../contexts/AuthContext';
 import { format } from 'date-fns';
-import { Clock, ChevronRight, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
-import Footer from '../components/Footer';
+import { Clock, ChevronRight, CheckCircle, XCircle, AlertCircle, DollarSign } from 'lucide-react';
 
 // Type for order data
 interface Order {
@@ -24,14 +23,17 @@ interface Order {
   requested_time: string;
   cancellation_fee?: number;
   original_amount?: number;
+  chef_id: string;
+  chef_name?: string;
 }
 
-const ChefHomePage = () => {
+const AdminHomePage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState<Order[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [chefNames, setChefNames] = useState<Record<string, string>>({});
   
   useEffect(() => {
     const fetchOrders = async () => {
@@ -44,14 +46,32 @@ const ChefHomePage = () => {
       setError(null);
       
       try {
-        // Fetch all orders for this chef
+        // Fetch all orders (admin view)
         const { data, error } = await supabase
           .from('orders')
           .select('*')
-          .eq('chef_id', user.id)
           .order('created_at', { ascending: false });
           
         if (error) throw error;
+        
+        // Fetch chef names to display with orders
+        const chefIds = [...new Set(data?.map(order => order.chef_id) || [])];
+        if (chefIds.length > 0) {
+          const { data: chefData, error: chefError } = await supabase
+            .from('profiles')
+            .select('id, display_name')
+            .in('id', chefIds);
+            
+          if (chefError) throw chefError;
+          
+          // Create a map of chef IDs to names
+          const chefNameMap: Record<string, string> = {};
+          chefData?.forEach(chef => {
+            chefNameMap[chef.id] = chef.display_name;
+          });
+          
+          setChefNames(chefNameMap);
+        }
         
         setOrders(data || []);
       } catch (error: any) {
@@ -71,6 +91,16 @@ const ChefHomePage = () => {
   const completedCount = orders.filter(order => order.order_status === 'completed').length;
   const rejectedCount = orders.filter(order => order.order_status === 'rejected').length;
   const cancelledCount = orders.filter(order => order.order_status === 'cancelled').length;
+  
+  // Calculate total revenue from completed orders
+  const totalRevenue = orders
+    .filter(order => order.order_status === 'completed')
+    .reduce((sum, order) => sum + order.total_amount, 0);
+  
+  // Calculate pending revenue from accepted orders
+  const pendingRevenue = orders
+    .filter(order => order.order_status === 'accepted')
+    .reduce((sum, order) => sum + order.total_amount, 0);
   
   // Format currency
   const formatCurrency = (amount: number) => {
@@ -126,13 +156,31 @@ const ChefHomePage = () => {
     }
   };
 
-  // Filter orders to only show accepted orders for the table
-  const acceptedOrders = orders.filter(order => order.order_status === 'accepted');
-
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">Admin Dashboard</h1>
+        
+        {/* Revenue Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="bg-white border-2 border-gray-200 p-5"
+          >
+            <h3 className="text-lg font-medium text-gray-900 mb-4 text-center">Revenue</h3>
+            <div className="flex justify-center items-center">
+              <div className="flex flex-col items-center">
+                <div className="bg-green-100 p-3 rounded-full mb-2">
+                  <DollarSign className="h-6 w-6 text-green-700" />
+                </div>
+                <div className="text-2xl font-bold text-gray-900">{formatCurrency(totalRevenue)}</div>
+                <div className="text-sm text-gray-500">Completed Orders</div>
+              </div>
+            </div>
+          </motion.div>
+          
           {/* Order Progress Group */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -219,7 +267,7 @@ const ChefHomePage = () => {
           className="bg-white border-2 border-gray-200 p-6 mb-8"
         >
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">Active Orders</h2>
+            <h2 className="text-xl font-semibold text-gray-900">All Orders</h2>
           </div>
           
           {loading ? (
@@ -237,10 +285,10 @@ const ChefHomePage = () => {
                 Try Again
               </button>
             </div>
-          ) : acceptedOrders.length === 0 ? (
+          ) : orders.length === 0 ? (
             <div className="bg-gray-50 rounded-lg p-8 text-center">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No Active Orders</h3>
-              <p className="text-gray-600 mb-4">You don't have any active orders right now.</p>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No Orders Found</h3>
+              <p className="text-gray-600 mb-4">There are no orders in the system yet.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -257,7 +305,13 @@ const ChefHomePage = () => {
                       Customer
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Scheduled
+                      Chef
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Amount
                     </th>
                     <th scope="col" className="relative px-6 py-3">
                       <span className="sr-only">View</span>
@@ -265,11 +319,11 @@ const ChefHomePage = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {acceptedOrders.map((order) => (
+                  {orders.map((order) => (
                     <tr 
                       key={order.id} 
                       className="hover:bg-gray-50 cursor-pointer transition-colors"
-                      onClick={() => navigate(`/chef/order/${order.id}?back-link=${encodeURIComponent('/chef/home')}`)}
+                      onClick={() => navigate(`/admin/order/${order.id}?back-link=${encodeURIComponent('/admin/home')}`)}
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">
@@ -284,8 +338,18 @@ const ChefHomePage = () => {
                         <div className="text-xs text-gray-500">{order.profile_contact_number}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{formatDate(order.requested_time)}</div>
-                        <div className="text-xs text-gray-500">{formatTime(order.requested_time)}</div>
+                        <div className="text-sm text-gray-900">{chefNames[order.chef_id] || 'Unknown Chef'}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(order.order_status)}`}>
+                          {order.order_status.charAt(0).toUpperCase() + order.order_status.slice(1)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{formatCurrency(order.total_amount)}</div>
+                        <div className="text-xs text-gray-500">
+                          {order.payment_status === 'paid' ? 'Paid' : 'Unpaid'}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button className="text-navy hover:text-navy-light">
@@ -304,4 +368,4 @@ const ChefHomePage = () => {
   );
 };
 
-export default ChefHomePage; 
+export default AdminHomePage; 
