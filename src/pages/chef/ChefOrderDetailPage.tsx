@@ -401,7 +401,7 @@ const ChefOrderDetailPage = () => {
           </button>
         </div>
         
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div className="bg-white border border-gray-200 p-6 mb-6">
           <div className="flex justify-between items-start mb-6">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
