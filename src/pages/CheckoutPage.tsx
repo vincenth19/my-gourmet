@@ -4,8 +4,8 @@ import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { CartItem, Profile, Address, DietaryTag, PaymentMethod } from '../types/database.types';
-import { Calendar, Clock, MapPin, CreditCard, Check, AlertCircle, ArrowLeft, Calendar as CalendarIcon } from 'lucide-react';
-import { format, addDays, setHours, setMinutes, isAfter, isBefore } from 'date-fns';
+import { Calendar, Clock, MapPin, CreditCard, Check, AlertCircle, ChevronLeft, Calendar as CalendarIcon } from 'lucide-react';
+import { format, addDays, setHours, setMinutes} from 'date-fns';
 import AddressForm from '../components/AddressForm';
 import PaymentMethodForm from '../components/PaymentMethodForm';
 
@@ -446,7 +446,7 @@ const CheckoutPage = () => {
             onClick={() => navigate('/cart')} 
             className="flex items-center text-navy hover:text-navy/80"
           >
-            <ArrowLeft className="h-5 w-5 mr-1" />
+            <ChevronLeft className="h-5 w-5 mr-1" />
             Back to Cart
           </button>
         </div>
@@ -676,7 +676,7 @@ const CheckoutPage = () => {
                   <CreditCard className="h-5 w-5 text-navy mr-2" /> Payment Method
                 </h2>
                 
-                {paymentMethods.length > 0 ? (
+                {paymentMethods.length > 0 && !showPaymentForm ? (
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {paymentMethods.map(method => (
@@ -720,20 +720,20 @@ const CheckoutPage = () => {
                       onChange={setNewPaymentMethod}
                       className="mt-4"
                     />
-                    <div className="flex space-x-4 mt-4">
-                      <button
-                        onClick={saveNewPaymentMethod}
-                        className="bg-navy text-white py-2 px-4 rounded-md hover:bg-navy-light transition-colors"
-                        disabled={submitting}
-                      >
-                        Save Payment Method
-                      </button>
+                    <div className="flex space-x-4 mt-4 justify-end w-full">
                       <button
                         onClick={() => setShowPaymentForm(false)}
-                        className="border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
+                        className="border border-gray-300 text-gray-700 py-2 px-4 hover:bg-gray-50 transition-colors"
                         disabled={submitting}
                       >
                         Cancel
+                      </button>
+                      <button
+                        onClick={saveNewPaymentMethod}
+                        className="bg-navy text-white py-2 px-4 hover:bg-navy-light transition-colors"
+                        disabled={submitting}
+                      >
+                        Save Payment Method
                       </button>
                     </div>
                   </div>

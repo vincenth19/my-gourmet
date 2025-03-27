@@ -234,7 +234,7 @@ const PaymentMethodForm = ({ initialValues = {}, onChange, disabled = false, cla
         
         <div>
           <label htmlFor="cvv" className="block text-sm font-medium text-gray-700 mb-1">
-            Security CodeCVV
+            Security Code (CVV/CVC/CSC)
           </label>
           <input
             id="cvv"
