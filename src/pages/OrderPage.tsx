@@ -510,7 +510,7 @@ const OrderPage = () => {
               </div>
               <button
                 onClick={() => setShowCustomDishForm(true)}
-                className="mt-4 sm:mt-0 flex items-center bg-navy hover:bg-navy-light text-white font-medium py-2 px-4 rounded transition-colors"
+                className="mt-4 sm:mt-0 flex items-center bg-navy hover:bg-navy-light text-white font-medium py-2 px-4 transition-colors"
               >
                 <FilePlus className="h-5 w-5 mr-2" />
                 Create Your Own Dish

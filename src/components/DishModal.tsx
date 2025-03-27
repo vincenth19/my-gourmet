@@ -429,7 +429,7 @@ const DishModal = ({
             <div className="flex-shrink-0 p-6 pt-4 border-t border-gray-300">
               <button
                 onClick={handleAddToCart}
-                className="w-full bg-navy text-white py-3 rounded-lg hover:bg-navy-light transition-colors"
+                className="w-full bg-navy text-white py-3 hover:bg-navy-light transition-colors"
               >
                 Add to Order ({quantity} {quantity === 1 ? 'item' : 'items'})
               </button>

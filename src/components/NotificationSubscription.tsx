@@ -80,15 +80,34 @@ export default function NotificationSubscription() {
           
           // Create a custom toast component that can be clicked if there's a link
           const ToastContent = () => (
-            <div 
-              className={`cursor-${notification.link ? 'pointer' : 'default'} flex flex-col gap-1 bg-white p-4 shadow-md border-gray-200 border`}
-              onClick={() => handleNotificationClick(notification)}
-            >
-              <div className="font-semibold">{notification.title}</div>
-              <div className="text-sm">{notification.message}</div>
-              {notification.link && (
-                <div className="text-xs text-blue-500">Click to view details</div>
-              )}
+            <div className="relative flex flex-col gap-1 bg-white p-4 shadow-md border-gray-200 border rounded-md">
+              {/* Close Button */}
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent triggering the parent onClick
+                  toast.dismiss(notification.id); // Dismiss this specific toast
+                  markAsRead(notification);
+                }}
+                className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                aria-label="Close notification"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+              
+              {/* Notification Content */}
+              <div 
+                className={`cursor-${notification.link ? 'pointer' : 'default'} pr-5`}
+                onClick={() => notification.link && handleNotificationClick(notification)}
+              >
+                <div className="font-semibold">{notification.title}</div>
+                <div className="text-sm">{notification.message}</div>
+                {notification.link && (
+                  <div className="text-xs text-blue-500 mt-1">Click to view details</div>
+                )}
+              </div>
             </div>
           );
 
@@ -98,6 +117,7 @@ export default function NotificationSubscription() {
             {
               duration: 5000,
               position: 'top-right',
+              id: notification.id, // Use notification ID as toast ID for dismissal
             }
           );
         }
