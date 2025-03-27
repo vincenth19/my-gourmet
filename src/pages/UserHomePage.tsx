@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { useCart } from '../contexts/CartContext';
 import { Clock, ChevronRight, TrendingUp, Users, X, Minus, Plus } from 'lucide-react';
 import ChefModal from '../components/ChefModal';
 import DishModal from '../components/DishModal';
@@ -320,6 +321,7 @@ const ChefsSection = ({
 const UserHomePage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { refreshCart } = useCart();
   const [loading, setLoading] = useState(true);
   const [recentOrders, setRecentOrders] = useState<Order[]>([]);
   const [chefs, setChefs] = useState<Chef[]>([]);
@@ -572,13 +574,24 @@ const UserHomePage = () => {
     }
   };
   
-  // Handler for adding dish to cart - update to work with DishModal
+  // Handler for adding dish to cart
   const handleAddPopularDishToCart = async () => {
     if (!selectedPopularDish || !user) {
       if (!user) {
         navigate('/sign-in');
         return;
       }
+      return;
+    }
+
+    // Validate dish type selection
+    if (
+      selectedPopularDish.dish_types && 
+      selectedPopularDish.dish_types.types && 
+      selectedPopularDish.dish_types.types.length > 0 && 
+      !selectedDishType
+    ) {
+      alert('Please select a cooking preference for this dish.');
       return;
     }
 
@@ -632,6 +645,9 @@ const UserHomePage = () => {
         });
       
       if (itemError) throw itemError;
+      
+      // Refresh cart to update the navbar counter
+      await refreshCart();
       
       // Close modal and navigate to order page
       setIsPopularDishModalOpen(false);

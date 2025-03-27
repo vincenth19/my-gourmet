@@ -79,6 +79,28 @@ const DishModal = ({
     }
   };
 
+  // Additional validation function to check if form is valid
+  const validateForm = (): boolean => {
+    // Check if dish type selection is required but not selected
+    if (
+      dish.dish_types && 
+      dish.dish_types.types && 
+      dish.dish_types.types.length > 0 && 
+      !selectedDishType
+    ) {
+      alert('Please select a cooking preference for this dish.');
+      return false;
+    }
+    return true;
+  };
+
+  // Handle add to cart with validation
+  const handleAddToCart = () => {
+    if (validateForm()) {
+      onAddToCart();
+    }
+  };
+
   if (!isOpen || !dish) return null;
 
   return (
@@ -145,7 +167,10 @@ const DishModal = ({
               {/* Dish Types */}
               {dish.dish_types && dish.dish_types.types && dish.dish_types.types.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">Select Cooking Preference</h3>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">
+                    Cooking Preference
+                    <span className="text-red-500 ml-1">*</span>
+                  </h3>
                   <div className="space-y-2">
                     {dish.dish_types.types.map((type, index) => (
                       <div key={index} className="flex items-center">
@@ -156,6 +181,7 @@ const DishModal = ({
                           checked={selectedDishType === type}
                           onChange={() => onDishTypeChange(type)}
                           className="h-4 w-4 text-navy focus:ring-navy border-gray-300"
+                          required
                         />
                         <label htmlFor={`dish-type-mobile-${index}`} className="ml-2 block text-sm text-gray-700">
                           {type}
@@ -171,7 +197,10 @@ const DishModal = ({
               dish.customization_options.options && 
               dish.customization_options.options.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">Customization Options</h3>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">
+                    Customization Options
+                    <span className="text-xs text-gray-500 ml-2">(Optional)</span>
+                  </h3>
                   <div className="space-y-2">
                     {dish.customization_options.options.map((option, index) => (
                       <div key={index} className="flex items-center">
@@ -239,7 +268,7 @@ const DishModal = ({
           {/* Sticky footer for mobile */}
           <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 shadow-md">
             <button
-              onClick={onAddToCart}
+              onClick={handleAddToCart}
               className="w-full bg-navy text-white py-3 rounded-lg hover:bg-navy-light transition-colors"
             >
               Add to Order ({quantity} {quantity === 1 ? 'item' : 'items'})
@@ -302,7 +331,10 @@ const DishModal = ({
               {/* Dish Types */}
               {dish.dish_types && dish.dish_types.types && dish.dish_types.types.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-3">Select Cooking Preference</h3>
+                  <h3 className="text-sm font-medium text-gray-700 mb-3">
+                    Cooking Preference
+                    <span className="text-red-500 ml-1">*</span>
+                  </h3>
                   <div className="space-y-2">
                     {dish.dish_types.types.map((type, index) => (
                       <div key={index} className="flex items-center">
@@ -313,6 +345,7 @@ const DishModal = ({
                           checked={selectedDishType === type}
                           onChange={() => onDishTypeChange(type)}
                           className="h-4 w-4 text-navy focus:ring-navy border-gray-300"
+                          required
                         />
                         <label htmlFor={`dish-type-desktop-${index}`} className="ml-2 block text-sm text-gray-700">
                           {type}
@@ -328,7 +361,10 @@ const DishModal = ({
               dish.customization_options.options && 
               dish.customization_options.options.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-3">Customization Options</h3>
+                  <h3 className="text-sm font-medium text-gray-700 mb-3">
+                    Customization Options
+                    <span className="text-xs text-gray-500 ml-2">(Optional)</span>
+                  </h3>
                   <div className="space-y-2">
                     {dish.customization_options.options.map((option, index) => (
                       <div key={index} className="flex items-center">
@@ -392,7 +428,7 @@ const DishModal = ({
             {/* Fixed footer */}
             <div className="flex-shrink-0 p-6 pt-4 border-t border-gray-300">
               <button
-                onClick={onAddToCart}
+                onClick={handleAddToCart}
                 className="w-full bg-navy text-white py-3 rounded-lg hover:bg-navy-light transition-colors"
               >
                 Add to Order ({quantity} {quantity === 1 ? 'item' : 'items'})
