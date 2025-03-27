@@ -172,7 +172,16 @@ const CartPage = () => {
   
   // Go back to continue shopping
   const continueShopping = () => {
-    navigate(-1);
+    // Try to get a chef ID from cart items
+    const firstChefId = Object.keys(getItemsByChef()).find(id => id !== 'custom');
+    
+    if (firstChefId && firstChefId !== 'custom') {
+      // Navigate to the chef's order page
+      navigate(`/order/${firstChefId}`);
+    } else {
+      // Fall back to browser history if no chef ID is found
+      navigate(-1);
+    }
   };
   
   // Get chef name by ID
