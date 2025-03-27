@@ -582,7 +582,7 @@ const UserHomePage = () => {
   };
   
   // Handler for adding dish to cart
-  const handleAddPopularDishToCart = async () => {
+  const handleAddPopularDishToCart = async (proceedToCheckout = false) => {
     if (!selectedPopularDish || !user) {
       if (!user) {
         navigate('/sign-in');
@@ -656,9 +656,15 @@ const UserHomePage = () => {
       // Refresh cart to update the navbar counter
       await refreshCart();
       
-      // Close modal and navigate to order page
+      // Close modal
       setIsPopularDishModalOpen(false);
-      navigate(`/order/${selectedPopularDish.chef_id}`);
+      
+      // Navigate based on the proceedToCheckout parameter
+      if (proceedToCheckout) {
+        navigate('/checkout');
+      } else {
+        navigate(`/order/${selectedPopularDish.chef_id}`);
+      }
       
     } catch (error) {
       console.error('Error adding to cart:', error);
@@ -699,7 +705,7 @@ const UserHomePage = () => {
         />
       )}
 
-      {/* Use the official DishModal with proper typing */}
+      {/* Popular Dish Modal */}
       {selectedPopularDish && (
         <DishModal
           dish={selectedPopularDish}

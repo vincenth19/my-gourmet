@@ -503,6 +503,32 @@ const OrderPage = () => {
           </div>
         ) : chef ? (
           <>
+            <div className="bg-navy text-white p-4 mb-6 flex items-center justify-between">
+              <div className="flex items-center">
+                <div>
+                  <h2 className="text-xl font-semibold">Select Your Dishes</h2>
+                  <p className="text-white/80 text-sm">Choose from our delicious selection or request a custom dish</p>
+                  <p className="text-white/80 text-sm mt-2">
+                    If you have more than 50 guests, please contact us via email at{" "}
+                    <a href="mailto:support@mygourmet.com" className="text-white/80 hover:text-white underline text-gold font-bold">
+                    support@mygourmet.com
+                    </a>
+                    {" "}or call us at{" "}
+                    <a href="tel:+1234567890" className="text-white/80 hover:text-white underline text-gold font-bold">
+                    (+61) 456-7890
+                    </a>
+                  </p>
+                </div>
+              </div>
+              <div className="hidden md:flex items-center">
+                <span className="text-white/90 mr-2 text-sm">Step 2 of 3</span>
+                <div className="flex space-x-1">
+                  <div className="w-8 h-1.5 bg-white rounded-full"></div>
+                  <div className="w-8 h-1.5 bg-white rounded-full"></div>
+                  <div className="w-8 h-1.5 bg-white/30 rounded-full"></div>
+                </div>
+              </div>
+            </div>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">{chef.display_name}'s Menu</h1>
@@ -537,7 +563,7 @@ const OrderPage = () => {
               transition={{ duration: 0.5, delay: 0.2 }}
             >
               <div className="mb-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-6">Chef's Collection</h2>
+                <h2 className="text-xl font-bold text-gray-900 mb-6">Chef's Signature Dishes</h2>
                 
                 {dishes.length === 0 ? (
                   <div className="p-8 text-center">
