@@ -1,5 +1,5 @@
 -- Create an RPC function to get the most ordered dishes with chef information
-CREATE OR REPLACE FUNCTION public.get_most_ordered_dishes(limit_count INTEGER DEFAULT 4)
+CREATE OR REPLACE FUNCTION public.get_most_ordered_dishes(limit_count INTEGER DEFAULT 8)
 RETURNS TABLE (
   dish_name TEXT,
   chef_name TEXT,
@@ -24,7 +24,7 @@ BEGIN
       od.dish_name
     ORDER BY 
       order_count DESC
-    LIMIT limit_count
+    LIMIT limit_count * 2 -- Get more dishes to account for filtering
   ),
   dish_details AS (
     SELECT 
@@ -57,6 +57,12 @@ BEGIN
       ) AS image_url
     FROM 
       dish_counts dc
+    -- Only include dishes that still exist in the dishes table
+    WHERE EXISTS (
+      SELECT 1 
+      FROM public.dishes d 
+      WHERE d.name = dc.dish_name
+    )
   )
   
   SELECT 
@@ -69,9 +75,10 @@ BEGIN
   FROM 
     dish_details dd
   ORDER BY 
-    dd.order_count DESC;
+    dd.order_count DESC
+  LIMIT limit_count; -- Final limit
 END;
 $$ LANGUAGE plpgsql;
 
 -- Add comment for the function
-COMMENT ON FUNCTION public.get_most_ordered_dishes(INTEGER) IS 'Get the most ordered dishes with chef information and order counts'; 
+COMMENT ON FUNCTION public.get_most_ordered_dishes(INTEGER) IS 'Get the most ordered dishes with chef information and order counts, only returning dishes that still exist in the dishes table'; 

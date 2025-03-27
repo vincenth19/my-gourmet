@@ -86,7 +86,7 @@ const UserHomePage = () => {
       try {
         // Get the most ordered dishes with their counts
         const { data, error } = await supabase.rpc('get_most_ordered_dishes', {
-          limit_count: 4
+          limit_count: 8 // Request more to account for possible missing dishes
         });
 
         if (error) {
@@ -113,11 +113,25 @@ const UserHomePage = () => {
           const topDishes = Object.entries(dishCount)
             .map(([dish_name, { count, price }]) => ({ dish_name, count, price }))
             .sort((a, b) => b.count - a.count)
-            .slice(0, 4);
+            .slice(0, 8); // Get more dishes to account for possible missing ones
           
           // Get chef info and create the final array
-          const dishesWithInfo: PopularDish[] = await Promise.all(
-            topDishes.map(async dish => {
+          const dishesWithInfo: PopularDish[] = [];
+          
+          for (const dish of topDishes) {
+            try {
+              // Check if dish still exists in dishes table
+              const { data: dishExists, error: dishExistsError } = await supabase
+                .from('dishes')
+                .select('id')
+                .eq('name', dish.dish_name)
+                .limit(1);
+              
+              if (dishExistsError || !dishExists || dishExists.length === 0) {
+                // Skip this dish if it doesn't exist anymore
+                continue;
+              }
+              
               // Get chef info from an order with this dish
               const { data: orderData } = await supabase
                 .from('orders')
@@ -125,28 +139,38 @@ const UserHomePage = () => {
                 .eq('id', fallbackData?.find(item => item.dish_name === dish.dish_name)?.order_id)
                 .single();
               
-              // Try to get image from dishes table
+              // Get image from dishes table
               const { data: dishData } = await supabase
                 .from('dishes')
                 .select('image_url')
                 .eq('name', dish.dish_name)
                 .single();
               
-              return {
+              dishesWithInfo.push({
                 dish_name: dish.dish_name,
                 chef_name: orderData?.chef_name || 'Unknown Chef',
                 chef_id: orderData?.chef_id || '',
                 image_url: dishData?.image_url || null,
                 price: dish.price,
                 order_count: dish.count
-              };
-            })
-          );
+              });
+              
+              // Once we have 4 valid dishes, stop
+              if (dishesWithInfo.length >= 4) {
+                break;
+              }
+            } catch (err) {
+              console.error(`Error processing dish ${dish.dish_name}:`, err);
+              // Continue with next dish if there's an error
+              continue;
+            }
+          }
           
           setPopularDishes(dishesWithInfo);
         } else {
-          // If the RPC function exists and returns data
-          setPopularDishes(data);
+          // If the RPC function exists and returns data, it already filters out non-existent dishes
+          // Take only the first 4 dishes
+          setPopularDishes(data.slice(0, 4));
         }
       } catch (error) {
         console.error('Error fetching popular dishes:', error);
@@ -389,8 +413,8 @@ const UserHomePage = () => {
                     <p className="text-gray-600 text-sm mb-3 line-clamp-4">
                       {chef.preferences || "No description available"}
                     </p>
-                    <div className="bg-navy text-white text-sm font-medium px-3 py-1.5 text-center">
-                      View Profile
+                    <div className="bg-navy text-white text-sm font-medium px-3 py-1.5 rounded text-center">
+                      Start Order
                     </div>
                   </div>
                 </div>
