@@ -306,8 +306,8 @@ const ChefsSection = ({
               <p className="text-gray-600 text-sm mb-3 line-clamp-4">
                 {chef.preferences || "No description available"}
               </p>
-              <div className="bg-navy text-white text-sm font-medium px-3 py-1.5 rounded text-center">
-                Start Order
+              <div className="bg-navy text-white text-sm font-medium px-3 py-1.5 text-center">
+                View Profile
               </div>
             </div>
           </div>
