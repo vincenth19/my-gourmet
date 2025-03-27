@@ -284,12 +284,20 @@ const ChefOrderDetailPage = () => {
       
       // Then update the order status and total amount if needed
       if (isStatusChanged || priceUpdatePromises.length > 0) {
+        // If status is changing to completed, also update payment_status to paid
+        const updateData = { 
+          order_status: newStatus,
+          total_amount: newTotal
+        };
+        
+        // Add payment_status field when status is changing to completed
+        if (newStatus === 'completed') {
+          Object.assign(updateData, { payment_status: 'paid' });
+        }
+        
         const { error } = await supabase
           .from('orders')
-          .update({ 
-            order_status: newStatus,
-            total_amount: newTotal
-          })
+          .update(updateData)
           .eq('id', orderId);
           
         if (error) throw error;
@@ -298,7 +306,9 @@ const ChefOrderDetailPage = () => {
         setOrder((prev: any) => ({
           ...prev,
           order_status: newStatus,
-          total_amount: newTotal
+          total_amount: newTotal,
+          // Also update payment_status in local state when completed
+          ...(newStatus === 'completed' ? { payment_status: 'paid' } : {})
         }));
       }
       
@@ -413,13 +423,22 @@ const ChefOrderDetailPage = () => {
             </div>
             
             <div className="flex flex-col items-end">
-              <div className={`px-4 py-1 rounded-full text-sm font-medium mb-2 ${
-                order.order_status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                order.order_status === 'accepted' ? 'bg-blue-100 text-blue-800' :
-                order.order_status === 'completed' ? 'bg-green-100 text-green-800' :
-                'bg-red-100 text-red-800'
-              }`}>
-                {order.order_status.charAt(0).toUpperCase() + order.order_status.slice(1)}
+              <div className="flex space-x-2 mb-2">
+                <div className={`px-4 py-1 rounded-full text-sm font-medium ${
+                  order.order_status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                  order.order_status === 'accepted' ? 'bg-blue-100 text-blue-800' :
+                  order.order_status === 'completed' ? 'bg-green-100 text-green-800' :
+                  'bg-red-100 text-red-800'
+                }`}>
+                  {order.order_status.charAt(0).toUpperCase() + order.order_status.slice(1)}
+                </div>
+                
+                <div className={`px-4 py-1 rounded-full text-sm font-medium ${
+                  order.payment_status === 'paid' ? 'bg-green-100 text-green-800' : 
+                  'bg-orange-100 text-orange-800'
+                }`}>
+                  {order.payment_status === 'paid' ? 'Paid' : 'Unpaid'}
+                </div>
               </div>
               
               <div className="text-lg font-bold text-navy">
