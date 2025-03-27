@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { Clock, ChevronRight, TrendingUp, Award } from 'lucide-react';
-import Footer from '../components/Footer';
+import { Clock, ChevronRight, TrendingUp, Users } from 'lucide-react';
+import ChefModal from '../components/ChefModal';
 
 // Type for order data
 interface Order {
@@ -23,20 +23,26 @@ interface Chef {
   preferences: string;
 }
 
+// Type for popular dish data
+interface PopularDish {
+  dish_name: string;
+  chef_name: string;
+  chef_id: string;
+  image_url: string | null;
+  price: number;
+  order_count: number;
+}
+
 const UserHomePage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [recentOrders, setRecentOrders] = useState<Order[]>([]);
   const [chefs, setChefs] = useState<Chef[]>([]);
-
-  // Dummy trending orders data
-  const trendingOrders = [
-    { id: '1', dish_name: 'Beef Wellington', chef_name: 'Gordon Willian', ordered_count: 32, image_url: 'https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=2269&auto=format&fit=crop' },
-    { id: '2', dish_name: 'Pad Thai', chef_name: 'Ming Chen', ordered_count: 28, image_url: 'https://images.unsplash.com/photo-1559314809-0d155014e29e?q=80&w=2270&auto=format&fit=crop' },
-    { id: '3', dish_name: 'Barramundi with Native Herbs', chef_name: 'Sydney Wilson', ordered_count: 25, image_url: 'https://api.photon.aremedia.net.au//wp-content/uploads/sites/10/Gt/2020/03/09/13322/web_barramundi_capers.jpg?resize=760%2C608' },
-    { id: '4', dish_name: 'Seafood Risotto', chef_name: 'Gordon Ramsay', ordered_count: 22, image_url: 'https://images.unsplash.com/photo-1551326844-4df70f78d0e9?q=80&w=2426&auto=format&fit=crop' }
-  ];
+  const [selectedChef, setSelectedChef] = useState<Chef | null>(null);
+  const [isChefModalOpen, setIsChefModalOpen] = useState(false);
+  const [popularDishes, setPopularDishes] = useState<PopularDish[]>([]);
+  const [loadingPopularDishes, setLoadingPopularDishes] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -73,6 +79,87 @@ const UserHomePage = () => {
     fetchData();
   }, [user]);
 
+  // Fetch popular dishes
+  useEffect(() => {
+    const fetchPopularDishes = async () => {
+      setLoadingPopularDishes(true);
+      try {
+        // Get the most ordered dishes with their counts
+        const { data, error } = await supabase.rpc('get_most_ordered_dishes', {
+          limit_count: 4
+        });
+
+        if (error) {
+          // If the RPC function doesn't exist yet, use a direct query instead
+          const { data: fallbackData, error: fallbackError } = await supabase
+            .from('order_dishes')
+            .select('dish_name, order_id, dish_price')
+            .neq('dish_name', 'Custom Dish Request')
+            .order('created_at', { ascending: false })
+            .limit(50);
+
+          if (fallbackError) throw fallbackError;
+          
+          // Process the data to count occurrences and get unique dishes
+          const dishCount: Record<string, { count: number, price: number }> = {};
+          fallbackData?.forEach(item => {
+            if (!dishCount[item.dish_name]) {
+              dishCount[item.dish_name] = { count: 0, price: item.dish_price };
+            }
+            dishCount[item.dish_name].count += 1;
+          });
+          
+          // Convert to array and sort by count
+          const topDishes = Object.entries(dishCount)
+            .map(([dish_name, { count, price }]) => ({ dish_name, count, price }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 4);
+          
+          // Get chef info and create the final array
+          const dishesWithInfo: PopularDish[] = await Promise.all(
+            topDishes.map(async dish => {
+              // Get chef info from an order with this dish
+              const { data: orderData } = await supabase
+                .from('orders')
+                .select('chef_name, chef_id')
+                .eq('id', fallbackData?.find(item => item.dish_name === dish.dish_name)?.order_id)
+                .single();
+              
+              // Try to get image from dishes table
+              const { data: dishData } = await supabase
+                .from('dishes')
+                .select('image_url')
+                .eq('name', dish.dish_name)
+                .single();
+              
+              return {
+                dish_name: dish.dish_name,
+                chef_name: orderData?.chef_name || 'Unknown Chef',
+                chef_id: orderData?.chef_id || '',
+                image_url: dishData?.image_url || null,
+                price: dish.price,
+                order_count: dish.count
+              };
+            })
+          );
+          
+          setPopularDishes(dishesWithInfo);
+        } else {
+          // If the RPC function exists and returns data
+          setPopularDishes(data);
+        }
+      } catch (error) {
+        console.error('Error fetching popular dishes:', error);
+        // Fallback to empty array
+        setPopularDishes([]);
+      } finally {
+        setLoadingPopularDishes(false);
+      }
+    };
+    
+    fetchPopularDishes();
+  }, []);
+
   // Format currency
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-AU', {
@@ -88,6 +175,34 @@ const UserHomePage = () => {
       month: 'short',
       day: 'numeric'
     });
+  };
+
+  // Get proper image URL for dishes
+  const getImageUrl = (imageUrl: string | null) => {
+    if (!imageUrl) return 'https://via.placeholder.com/600x400?text=No+Image';
+    
+    // If it's already a full URL, return it
+    if (imageUrl.startsWith('http')) {
+      return imageUrl;
+    }
+    
+    // Otherwise, get the public URL from Supabase storage
+    const { data } = supabase.storage
+      .from('dish_images')
+      .getPublicUrl(imageUrl);
+    
+    return data.publicUrl || 'https://via.placeholder.com/600x400?text=No+Image';
+  };
+
+  // Add handler for chef click
+  const handleChefClick = (chef: Chef) => {
+    setSelectedChef(chef);
+    setIsChefModalOpen(true);
+  };
+
+  // Handle dish click
+  const handleDishClick = (chefId: string) => {
+    navigate(`/order/${chefId}`);
   };
 
   return (
@@ -152,7 +267,7 @@ const UserHomePage = () => {
           </motion.section>
         )}
 
-        {/* Trending Now Section */}
+        {/* Popular Dishes Section */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -161,31 +276,57 @@ const UserHomePage = () => {
         >
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-              <TrendingUp className="mr-2 h-5 w-5 text-navy" /> Trending Now
+              <TrendingUp className="mr-2 h-5 w-5 text-navy" /> Popular Dishes
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {trendingOrders.map((item) => (
-              <div 
-                key={item.id}
-                className="bg-white shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200"
-              >
-                <div className="h-48 overflow-hidden">
-                  <img 
-                    src={item.image_url}
-                    alt={item.dish_name}
-                    className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-                <div className="p-4">
-                  <h3 className="font-medium text-lg">{item.dish_name}</h3>
-                  <p className="text-gray-600 text-sm">by {item.chef_name}</p>
-                  <div className="mt-2 flex items-center text-sm">
-                    <span className="text-gray-600 font-medium">Ordered {item.ordered_count} times this week</span>
+            {loadingPopularDishes ? (
+              // Loading state
+              Array(4).fill(0).map((_, index) => (
+                <div key={index} className="animate-pulse bg-white shadow-sm overflow-hidden">
+                  <div className="h-48 bg-gray-200"></div>
+                  <div className="p-4">
+                    <div className="h-4 bg-gray-200 w-3/4 mb-2"></div>
+                    <div className="h-3 bg-gray-200 w-1/2 mb-3"></div>
+                    <div className="h-5 bg-gray-200 w-1/4"></div>
                   </div>
                 </div>
+              ))
+            ) : popularDishes.length > 0 ? (
+              // Populated state
+              popularDishes.map((dish, index) => (
+                <div 
+                  key={index}
+                  className="bg-white border-2 border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200 cursor-pointer"
+                  onClick={() => handleDishClick(dish.chef_id)}
+                >
+                  <div className="h-48 overflow-hidden">
+                    <img 
+                      src={getImageUrl(dish.image_url)}
+                      alt={dish.dish_name}
+                      className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).onerror = null;
+                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x400?text=No+Image';
+                      }}
+                    />
+                  </div>
+                  <div className="p-4">
+                    <p className="text-xs text-navy font-medium mb-1">By {dish.chef_name}</p>
+                    <h3 className="font-medium text-lg">{dish.dish_name}</h3>
+                    <div className="mt-2 flex justify-between items-center">
+                      <span className="text-gray-600 text-sm">Ordered {dish.order_count} times</span>
+                      <span className="font-bold text-navy">{formatCurrency(dish.price)}</span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              // Empty state
+              <div className="col-span-4 bg-white p-8 text-center rounded-lg">
+                <p className="text-gray-500">No popular dishes available</p>
               </div>
-            ))}
+            )}
           </div>
         </motion.section>
 
@@ -196,10 +337,10 @@ const UserHomePage = () => {
           transition={{ duration: 0.5, delay: 0.4 }}
           className="mb-10"
         >
-          {/* Start Order Here Banner */}
+          {/* Add banner to indicate this is step 1 */}
           <div className="bg-navy text-white p-4 mb-6 flex items-center justify-between">
             <div className="flex items-center">
-              <Award className="mr-3 h-6 w-6" />
+              <Users className="mr-3 h-6 w-6" />
               <div>
                 <h2 className="text-xl font-semibold">Start Your Order Here</h2>
                 <p className="text-white/80 text-sm">Select a chef to view their menu and place an order</p>
@@ -214,6 +355,7 @@ const UserHomePage = () => {
               </div>
             </div>
           </div>
+          
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {loading ? (
@@ -228,7 +370,7 @@ const UserHomePage = () => {
                 <div 
                   key={chef.id}
                   className="flex flex-col cursor-pointer group border border-gray-200 hover:border-navy transition-colors duration-200 overflow-hidden bg-white"
-                  onClick={() => navigate(`/order/${chef.id}`)}
+                  onClick={() => handleChefClick(chef)}
                 >
                   <div className="relative">
                     <img 
@@ -244,11 +386,11 @@ const UserHomePage = () => {
                   
                   <div className="p-4">
                     <h3 className="font-bold text-lg text-gray-900 mb-1">{chef.display_name}</h3>
-                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                    <p className="text-gray-600 text-sm mb-3 line-clamp-4">
                       {chef.preferences || "No description available"}
                     </p>
-                    <div className="bg-navy text-white text-sm font-medium px-3 py-1.5 rounded text-center">
-                      Start Order
+                    <div className="bg-navy text-white text-sm font-medium px-3 py-1.5 text-center">
+                      View Profile
                     </div>
                   </div>
                 </div>
@@ -257,6 +399,15 @@ const UserHomePage = () => {
           </div>
         </motion.section>
       </main>
+
+      {/* Add the ChefModal */}
+      {selectedChef && (
+        <ChefModal
+          chef={selectedChef}
+          isOpen={isChefModalOpen}
+          onClose={() => setIsChefModalOpen(false)}
+        />
+      )}
     </div>
   );
 };
