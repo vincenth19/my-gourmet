@@ -5,6 +5,11 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { Clock, ChevronRight, TrendingUp, Users, X, Minus, Plus } from 'lucide-react';
 import ChefModal from '../components/ChefModal';
+import DishModal from '../components/DishModal';
+import { Dish as DBDish, DietaryTag } from '../types/database.types';
+
+// Type adaptations for API vs DB inconsistencies
+type DishWithTags = DBDish & { dietary_tags?: DietaryTag[] };
 
 // Type for order data
 interface Order {
@@ -48,16 +53,17 @@ interface Dish {
   created_at: string; 
 }
 
-// Add dish interface (simplified for UserHomePage)
-interface SimpleDish {
-  id: string;
-  name: string;
-  description?: string;
-  price: number;
-  chef_id: string;
-  image_url?: string;
-  dietary_tags?: { label: string }[];
-}
+// Function to adapt customization_options format
+const adaptDishFormat = (dish: any): DishWithTags => {
+  // Convert from backend format to UI format if needed
+  if (dish.customization_options && 'option' in dish.customization_options) {
+    dish.customization_options = {
+      options: dish.customization_options.option
+    };
+  }
+  
+  return dish;
+};
 
 // Utility functions
 const formatCurrency = (amount: number) => {
@@ -89,118 +95,6 @@ const getImageUrl = (imageUrl: string | null) => {
     .getPublicUrl(imageUrl);
   
   return data.publicUrl || 'https://via.placeholder.com/600x400?text=No+Image';
-};
-
-// Create simple PopularDishModal component
-const PopularDishModal = ({ 
-  dish, 
-  isOpen, 
-  onClose, 
-  onAddToCart 
-}: { 
-  dish: SimpleDish, 
-  isOpen: boolean, 
-  onClose: () => void, 
-  onAddToCart: (quantity: number) => void 
-}) => {
-  const [quantity, setQuantity] = useState(1);
-
-  const incrementQuantity = () => {
-    setQuantity(Math.min(quantity + 1, 50));
-  };
-  
-  const decrementQuantity = () => {
-    setQuantity(Math.max(quantity - 1, 1));
-  };
-  
-  if (!isOpen || !dish) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        transition={{ duration: 0.2 }}
-        className="bg-white shadow-lg max-w-md w-full rounded-lg overflow-hidden"
-      >
-        <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-          <h2 className="text-xl font-bold text-gray-900">{dish.name}</h2>
-          <button 
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            <X className="h-6 w-6" />
-          </button>
-        </div>
-        
-        <div className="h-48 relative">
-          <img 
-            src={getImageUrl(dish.image_url || '')}
-            alt={dish.name}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              (e.target as HTMLImageElement).onerror = null;
-              (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x600?text=No+Image';
-            }}
-          />
-        </div>
-        
-        <div className="p-4 space-y-4">
-          <p className="text-gray-600">{dish.description || "No description available for this dish."}</p>
-          
-          {dish.dietary_tags && dish.dietary_tags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {dish.dietary_tags.map((tag, index) => (
-                <span 
-                  key={index} 
-                  className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-gray-800"
-                >
-                  {tag.label}
-                </span>
-              ))}
-            </div>
-          )}
-          
-          <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Quantity</h3>
-            <div className="flex items-center">
-              <button
-                onClick={decrementQuantity}
-                className="border border-gray-200 text-gray-600 p-1 rounded-l hover:bg-gray-200"
-              >
-                <Minus className="h-4 w-4" />
-              </button>
-              <input
-                type="number"
-                min="1"
-                max="50"
-                value={quantity}
-                onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-                className="border-t border-b border-gray-200 text-center w-12 py-1"
-              />
-              <button
-                onClick={incrementQuantity}
-                className="border border-gray-200 text-gray-600 p-1 rounded-r hover:bg-gray-200"
-              >
-                <Plus className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-          
-          <div className="mt-4 flex justify-between items-center">
-            <span className="text-lg font-bold text-navy">{formatCurrency(dish.price * quantity)}</span>
-            <button
-              onClick={() => onAddToCart(quantity)}
-              className="bg-navy hover:bg-navy-light text-white font-medium py-2 px-4 rounded transition-colors"
-            >
-              Add to Cart
-            </button>
-          </div>
-        </div>
-      </motion.div>
-    </div>
-  );
 };
 
 // Welcome Banner Component
@@ -433,8 +327,14 @@ const UserHomePage = () => {
   const [isChefModalOpen, setIsChefModalOpen] = useState(false);
   const [popularDishes, setPopularDishes] = useState<PopularDish[]>([]);
   const [loadingPopularDishes, setLoadingPopularDishes] = useState(true);
-  const [selectedPopularDish, setSelectedPopularDish] = useState<SimpleDish | null>(null);
+  const [selectedPopularDish, setSelectedPopularDish] = useState<DishWithTags | null>(null);
   const [isPopularDishModalOpen, setIsPopularDishModalOpen] = useState(false);
+  
+  // Add state for DishModal props
+  const [quantity, setQuantity] = useState(1);
+  const [selectedCustomizations, setSelectedCustomizations] = useState<string[]>([]);
+  const [dishNote, setDishNote] = useState('');
+  const [selectedDishType, setSelectedDishType] = useState<string | undefined>(undefined);
 
   // Fetch user data, recent orders, and chefs
   useEffect(() => {
@@ -614,11 +514,11 @@ const UserHomePage = () => {
     setIsChefModalOpen(true);
   };
 
-  // Handler for popular dish selection
+  // Handler for popular dish selection - update to match DishModal requirements
   const handlePopularDishClick = async (dishId: string, chefId: string, dishName: string, price: number, imageUrl: string | null) => {
     setLoadingPopularDishes(true);
     try {
-      // Fetch dish details
+      // Fetch dish details with all required fields for DishModal
       const { data: dishData, error: dishError } = await supabase
         .from('dishes')
         .select(`
@@ -628,6 +528,9 @@ const UserHomePage = () => {
           price, 
           image_url, 
           chef_id,
+          created_at,
+          customization_options,
+          dish_types,
           dietary_tags: dish_dietary_tags(dietary_tag_id(label))
         `)
         .eq('id', dishId)
@@ -636,25 +539,28 @@ const UserHomePage = () => {
       if (dishError) throw dishError;
 
       if (dishData) {
-        // Format dietary tags
+        // Transform the dietary_tags format to match our interface
         const formattedDietaryTags = dishData.dietary_tags 
           ? dishData.dietary_tags.map((tag: any) => ({ 
               label: tag.dietary_tag_id.label 
             }))
           : [];
-        
-        // Create dish object for modal
-        const simpleDish: SimpleDish = {
-          id: dishData.id,
-          name: dishData.name,
-          description: dishData.description,
-          price: dishData.price,
-          chef_id: dishData.chef_id,
-          image_url: dishData.image_url,
-          dietary_tags: formattedDietaryTags
+          
+        // Create dish with proper format
+        const formattedDish = {
+          ...dishData,
+          dietary_tags: formattedDietaryTags,
+          created_at: dishData.created_at || new Date().toISOString()
         };
         
-        setSelectedPopularDish(simpleDish);
+        // Reset modal state
+        setQuantity(1);
+        setSelectedCustomizations([]);
+        setDishNote('');
+        setSelectedDishType(undefined);
+        
+        // Set dish and open modal
+        setSelectedPopularDish(adaptDishFormat(formattedDish));
         setIsPopularDishModalOpen(true);
       }
     } catch (error) {
@@ -666,8 +572,8 @@ const UserHomePage = () => {
     }
   };
   
-  // Handler for adding dish to cart
-  const handleAddPopularDishToCart = async (quantity: number) => {
+  // Handler for adding dish to cart - update to work with DishModal
+  const handleAddPopularDishToCart = async () => {
     if (!selectedPopularDish || !user) {
       if (!user) {
         navigate('/sign-in');
@@ -702,6 +608,13 @@ const UserHomePage = () => {
         cartId = cartData.id;
       }
 
+      // Prepare customization_options in the correct format
+      const customizationOptions = selectedCustomizations.length > 0 
+        ? { option: selectedCustomizations }
+        : null;
+        
+      const dishTypesValue = selectedDishType ? { types: [selectedDishType] } : { types: [] };
+
       // Add item to cart
       const { error: itemError } = await supabase
         .from('cart_items')
@@ -711,7 +624,11 @@ const UserHomePage = () => {
           chef_id: selectedPopularDish.chef_id,
           dish_name: selectedPopularDish.name,
           dish_price: selectedPopularDish.price,
-          quantity: quantity
+          quantity: quantity,
+          customization_options: customizationOptions,
+          dish_note: dishNote.trim() || null,
+          dietary_tags: selectedPopularDish.dietary_tags ? { tags: selectedPopularDish.dietary_tags.map(tag => tag.label) } : null,
+          dish_types: dishTypesValue,
         });
       
       if (itemError) throw itemError;
@@ -755,12 +672,28 @@ const UserHomePage = () => {
         />
       )}
 
-      {/* Popular Dish Modal */}
+      {/* Use the official DishModal with proper typing */}
       {selectedPopularDish && (
-        <PopularDishModal
+        <DishModal
           dish={selectedPopularDish}
           isOpen={isPopularDishModalOpen}
           onClose={() => setIsPopularDishModalOpen(false)}
+          quantity={quantity}
+          selectedCustomizations={selectedCustomizations}
+          dishNote={dishNote}
+          selectedDishType={selectedDishType}
+          onQuantityChange={setQuantity}
+          onCustomizationToggle={(option) => {
+            setSelectedCustomizations(prev => {
+              if (prev.includes(option)) {
+                return prev.filter(item => item !== option);
+              } else {
+                return [...prev, option];
+              }
+            });
+          }}
+          onDishNoteChange={setDishNote}
+          onDishTypeChange={setSelectedDishType}
           onAddToCart={handleAddPopularDishToCart}
         />
       )}
