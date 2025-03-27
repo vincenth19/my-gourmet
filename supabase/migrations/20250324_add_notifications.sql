@@ -33,17 +33,6 @@ BEGIN
 
   -- For new orders (INSERT)
   IF TG_OP = 'INSERT' THEN
-    -- Create notification for the chef
-    IF NEW.chef_id IS NOT NULL THEN
-      INSERT INTO public.notifications (user_id, title, message, link)
-      VALUES (
-        NEW.chef_id,
-        'New Order #' || short_id || ' Received',
-        'You have received a new order from ' || NEW.profile_email,
-        '/chef/order/' || NEW.id
-      );
-    END IF;
-
     -- Create notification for the customer
     INSERT INTO public.notifications (user_id, title, message, link)
     VALUES (
@@ -53,6 +42,8 @@ BEGIN
       '/order-confirmation/' || NEW.id
     );
 
+    -- No chef notification here, we'll handle it in the order_dishes trigger
+  
   -- For order status changes (UPDATE)
   ELSIF TG_OP = 'UPDATE' AND OLD.order_status != NEW.order_status THEN
     -- Create notification for the customer
@@ -92,8 +83,70 @@ $$ LANGUAGE plpgsql
 SECURITY INVOKER
 SET search_path = '';
 
--- Drop existing trigger if it exists
+-- Create function to check for custom dishes and send notifications to chef or admin
+CREATE OR REPLACE FUNCTION public.handle_order_dishes_insert()
+RETURNS TRIGGER AS $$
+DECLARE
+  short_id TEXT;
+  chef_id_val UUID;
+  profile_email_val TEXT;
+  order_id_val UUID;
+  admin_id UUID := 'dddddddd-dddd-dddd-dddd-dddddddddddd'; -- Admin user ID
+  has_custom_dish BOOLEAN := FALSE;
+BEGIN
+  -- Get order details
+  SELECT o.id, o.chef_id, o.profile_email INTO order_id_val, chef_id_val, profile_email_val
+  FROM public.orders o
+  WHERE o.id = NEW.order_id;
+  
+  -- Check if this order has any custom dishes
+  SELECT EXISTS (
+    SELECT 1 FROM public.order_dishes
+    WHERE order_id = NEW.order_id
+    AND custom_dish_name IS NOT NULL
+  ) INTO has_custom_dish;
+  
+  -- Only proceed if we haven't sent a notification for this order yet
+  IF NOT EXISTS (
+    SELECT 1 FROM public.notifications
+    WHERE link LIKE '%' || NEW.order_id || '%'
+    AND (user_id = chef_id_val OR user_id = admin_id)
+    AND title LIKE 'New Order%'
+  ) THEN
+    -- Extract first block of UUID (before first hyphen)
+    short_id := SPLIT_PART(order_id_val::TEXT, '-', 1);
+    
+    -- Send notification to admin or chef based on custom dish presence
+    IF has_custom_dish THEN
+      -- Send to admin for orders with custom dishes
+      INSERT INTO public.notifications (user_id, title, message, link)
+      VALUES (
+        admin_id,
+        'New Order #' || short_id || ' with Custom Dish',
+        'A new order with custom dish request has been received from ' || profile_email_val,
+        '/admin/order/' || order_id_val
+      );
+    ELSE
+      -- Send to chef for regular orders
+      INSERT INTO public.notifications (user_id, title, message, link)
+      VALUES (
+        chef_id_val,
+        'New Order #' || short_id || ' Received',
+        'You have received a new order from ' || profile_email_val,
+        '/chef/order/' || order_id_val
+      );
+    END IF;
+  END IF;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql
+SECURITY INVOKER
+SET search_path = '';
+
+-- Drop existing triggers if they exist
 DROP TRIGGER IF EXISTS order_status_change_trigger ON public.orders;
+DROP TRIGGER IF EXISTS order_dishes_insert_trigger ON public.order_dishes;
 
 -- Create triggers for both INSERT and UPDATE events
 CREATE TRIGGER order_insert_trigger
@@ -105,6 +158,12 @@ CREATE TRIGGER order_update_trigger
 AFTER UPDATE ON public.orders
 FOR EACH ROW
 EXECUTE FUNCTION public.handle_order_events();
+
+-- Create trigger for order_dishes insertion
+CREATE TRIGGER order_dishes_insert_trigger
+AFTER INSERT ON public.order_dishes
+FOR EACH ROW
+EXECUTE FUNCTION public.handle_order_dishes_insert();
 
 -- Add RLS policies for notifications
 CREATE POLICY "Users can view their own notifications"

@@ -350,6 +350,13 @@ const CheckoutPage = () => {
       
       if (profileError) throw profileError;
       
+      // Check if there are any custom dishes in the cart
+      const hasCustomDishes = cartItems.some(item => item.custom_dish_name);
+      
+      // Set order status and payment status based on custom dish presence
+      const orderStatus = hasCustomDishes ? 'pending' : 'accepted';
+      const paymentStatus = hasCustomDishes ? 'unpaid' : 'paid';
+      
       // Create a new order according to schema
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
@@ -371,8 +378,8 @@ const CheckoutPage = () => {
           payment_details: `**** ${paymentMethodData.card_number.slice(-4)}`,
           
           order_date: new Date().toISOString().split('T')[0],
-          order_status: 'pending',
-          payment_status: 'unpaid',
+          order_status: orderStatus,
+          payment_status: paymentStatus,
           total_amount: calculateTotal(),
           is_asap: false,
           requested_time: scheduledAt.toISOString()

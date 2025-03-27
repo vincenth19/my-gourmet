@@ -148,7 +148,7 @@ BEGIN
         'I have a mild garlic allergy, please use minimal garlic'
     );
     
-    -- 2. COMPLETED order with chef_western
+    -- 2. ACCEPTED order with chef_western (previously COMPLETED)
     INSERT INTO public.orders (
         id, profile_id, profile_email, profile_contact_number, chef_id, chef_name,
         address_line, city, state, zip_code,
@@ -168,14 +168,14 @@ BEGIN
         'card', 
         'Visa ending in 4242',
         CURRENT_DATE - interval '10 days', 
-        'completed', 
+        'accepted', 
         'paid', 
         86.50, 
         true, 
         CURRENT_TIMESTAMP - interval '10 days'
     );
     
-    -- Add dishes to the completed order
+    -- Add dishes to the accepted order
     INSERT INTO public.order_dishes (
         order_id, dish_id, chef_id, dish_name, quantity, dish_price, customization_options, dish_types
     ) VALUES (
@@ -189,7 +189,7 @@ BEGIN
         '{"types": ["Al dente"]}'
     );
     
-    -- Add a custom dish to the completed order (with chef-assigned price)
+    -- Add a custom dish to the accepted order (with chef-assigned price)
     INSERT INTO public.order_dishes (
         order_id, dish_id, chef_id, dish_name, quantity, dish_price, custom_dish_name, custom_description, custom_price, dish_types
     ) VALUES (
@@ -205,7 +205,7 @@ BEGIN
         '{"types": []}'
     );
     
-    -- 3. COMPLETED order with chef_sydney
+    -- 3. ACCEPTED order with chef_sydney (previously COMPLETED)
     INSERT INTO public.orders (
         id, profile_id, profile_email, profile_contact_number, chef_id, chef_name,
         address_line, city, state, zip_code,
@@ -225,14 +225,14 @@ BEGIN
         'card', 
         'Visa ending in 4242',
         CURRENT_DATE - interval '15 days', 
-        'completed', 
+        'accepted', 
         'paid', 
         97.48, 
         false, 
         CURRENT_TIMESTAMP - interval '15 days'
     );
     
-    -- Add dishes to the completed order
+    -- Add dishes to the accepted order
     INSERT INTO public.order_dishes (
         order_id, dish_id, chef_id, dish_name, quantity, dish_price, customization_options
     ) VALUES 
@@ -275,7 +275,7 @@ BEGIN
         'card', 
         'Visa ending in 4242',
         CURRENT_DATE - interval '5 days', 
-        'completed', 
+        'accepted', 
         'paid', 
         68.00, 
         true, 
@@ -394,7 +394,7 @@ BEGIN
         '{"option": ["Passion fruit topping", "Extra cream", "Extra berries"]}'
     );
     
-    -- 2. COMPLETED order with chef_western
+    -- 2. ACCEPTED order with chef_western (previously COMPLETED)
     INSERT INTO public.orders (
         id, profile_id, profile_email, profile_contact_number, chef_id, chef_name,
         address_line, city, state, zip_code,
@@ -414,14 +414,14 @@ BEGIN
         'card', 
         'Visa ending in 4242',
         CURRENT_DATE - interval '12 days', 
-        'completed', 
+        'accepted', 
         'paid', 
         108.49, 
         false, 
         CURRENT_TIMESTAMP - interval '12 days'
     );
     
-    -- Add dishes to the completed order
+    -- Add dishes to the accepted order
     INSERT INTO public.order_dishes (
         order_id, dish_name, quantity, dish_price, customization_options, dish_types
     ) VALUES (
@@ -449,7 +449,7 @@ BEGIN
         '{"types": []}'
     );
     
-    -- 3. COMPLETED order with chef_western
+    -- 3. ACCEPTED order with chef_western (previously COMPLETED)
     INSERT INTO public.orders (
         id, profile_id, profile_email, profile_contact_number, chef_id, chef_name,
         address_line, city, state, zip_code,
@@ -469,14 +469,14 @@ BEGIN
         'card', 
         'Visa ending in 4242',
         CURRENT_DATE - interval '20 days', 
-        'completed', 
+        'accepted', 
         'paid', 
         131.98, 
         true, 
         CURRENT_TIMESTAMP - interval '20 days'
     );
     
-    -- Add dishes to the completed order
+    -- Add dishes to the accepted order
     INSERT INTO public.order_dishes (
         order_id, dish_name, quantity, dish_price, customization_options
     ) VALUES (
@@ -507,7 +507,7 @@ BEGIN
         'card', 
         'Visa ending in 4242',
         CURRENT_DATE - interval '7 days', 
-        'completed', 
+        'accepted', 
         'paid', 
         49.50, 
         false, 

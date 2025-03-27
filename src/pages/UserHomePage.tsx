@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
-import { Clock, ChevronRight, TrendingUp, Users, X, Minus, Plus } from 'lucide-react';
+import { Clock, ChevronRight, TrendingUp} from 'lucide-react';
 import ChefModal from '../components/ChefModal';
 import DishModal from '../components/DishModal';
 import { Dish as DBDish, DietaryTag } from '../types/database.types';
@@ -100,19 +100,19 @@ const getImageUrl = (imageUrl: string | null) => {
 
 // Welcome Banner Component
 const WelcomeBanner = () => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5 }}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
     className="bg-white rounded-xl shadow-md p-6 sm:p-8 mb-8"
-  >
+        >
     <h1 className="text-2xl font-bold text-gray-900 mb-2">
-      Welcome to MyGourmet
-    </h1>
-    <p className="text-gray-600">
-      Discover delicious home-cooked meals from talented chefs in your area.
-    </p>
-  </motion.div>
+            Welcome to MyGourmet
+          </h1>
+          <p className="text-gray-600">
+            Discover delicious home-cooked meals from talented chefs in your area.
+          </p>
+        </motion.div>
 );
 
 // Recent Orders Section Component
@@ -123,9 +123,9 @@ const RecentOrdersSection = ({ orders }: { orders: Order[] }) => {
   
   return (
     <motion.section
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.2 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
       className="mb-10"
     >
       <div className="flex justify-between items-center mb-4">
@@ -185,7 +185,7 @@ const PopularDishesSection = ({
     <div className="flex justify-between items-center mb-4">
       <h2 className="text-xl font-semibold text-gray-900 flex items-center">
         <TrendingUp className="mr-2 h-5 w-5 text-navy" /> Popular Dishes
-      </h2>
+            </h2>
     </div>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {loading ? (
@@ -197,8 +197,8 @@ const PopularDishesSection = ({
               <div className="h-4 bg-gray-200 w-3/4 mb-2"></div>
               <div className="h-3 bg-gray-200 w-1/2 mb-3"></div>
               <div className="h-5 bg-gray-200 w-1/4"></div>
-            </div>
-          </div>
+                </div>
+              </div>
         ))
       ) : dishes.length > 0 ? (
         // Populated state
@@ -218,7 +218,7 @@ const PopularDishesSection = ({
                   (e.target as HTMLImageElement).src = 'https://placehold.co/600x400?text=No+Image';
                 }}
               />
-            </div>
+                </div>
             <div className="p-4">
               <p className="text-xs text-navy font-medium mb-1">By {dish.chef_name}</p>
               <h3 className="font-medium text-lg">{dish.dish_name}</h3>
@@ -252,29 +252,28 @@ const ChefsSection = ({
   onViewProfileClick: (chef: Chef) => void
 }) => (
   <motion.section
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5, delay: 0.4 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
     className="mb-10"
   >
     {/* Add banner to indicate this is step 1 */}
     <div className="bg-navy text-white p-4 mb-6 flex items-center justify-between">
       <div className="flex items-center">
-        <Users className="mr-3 h-6 w-6" />
-        <div>
+                <div>
           <h2 className="text-xl font-semibold">Start Your Order Here</h2>
           <p className="text-white/80 text-sm">Select a chef to view their menu and place an order</p>
-        </div>
-      </div>
+                </div>
+              </div>
       <div className="hidden md:flex items-center">
         <span className="text-white/90 mr-2 text-sm">Step 1 of 3</span>
         <div className="flex space-x-1">
           <div className="w-8 h-1.5 bg-white rounded-full"></div>
           <div className="w-8 h-1.5 bg-white/30 rounded-full"></div>
           <div className="w-8 h-1.5 bg-white/30 rounded-full"></div>
-        </div>
-      </div>
-    </div>
+                </div>
+              </div>
+            </div>
     
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
       {loading ? (
@@ -685,7 +684,7 @@ const UserHomePage = () => {
           onDishClick={handlePopularDishClick} 
         />
         
-        <div id="chefs-section" className="py-12">
+        <div id="chefs-section">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Our Chefs</h2>
           <ChefsSection 
             chefs={chefs} 
