@@ -550,7 +550,7 @@ const ProfilePage = () => {
             </div>
           </div>
         ) : paymentMethod ? (
-          <div className="rounded-lg border border-gray-200 p-6">
+          <div className="border border-gray-200 p-6">
             <div className="flex flex-col space-y-3">
               <div className="flex items-center">
                 <span className="font-medium w-32">Card Number:</span>
@@ -572,7 +572,7 @@ const ProfilePage = () => {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-8 text-center">
-            <div className="mb-4 rounded-full bg-gray-100 p-4">
+            <div className="mb-4 bg-gray-100 p-4">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
               </svg>
@@ -804,7 +804,7 @@ const ProfilePage = () => {
         </div>
 
         {showAddressForm ? (
-          <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+          <div className="border border-gray-200 p-4 bg-gray-50">
             <h3 className="text-lg font-medium mb-4">
               {editingAddressId ? 'Edit Address' : 'Add New Address'}
             </h3>
@@ -823,13 +823,13 @@ const ProfilePage = () => {
           </div>
         ) : addresses.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 text-center">
-            <div className="mb-4 rounded-full bg-gray-100 p-4">
+            <div className="mb-4 bg-gray-100 p-4">
               <MapPin className="h-10 w-10 text-gray-400" />
             </div>
             <p className="text-gray-600 mb-4">You don't have any saved addresses yet.</p>
             <button
               onClick={() => setShowAddressForm(true)}
-              className="bg-navy text-white px-4 py-2 rounded hover:bg-navy-light transition-colors"
+              className="bg-navy text-white px-4 py-2 hover:bg-navy-light transition-colors"
             >
               Add Your First Address
             </button>
@@ -846,11 +846,11 @@ const ProfilePage = () => {
               .map(address => (
                 <div 
                   key={address.id} 
-                  className={`rounded-lg border p-4 relative 
+                  className={`border p-4 relative 
                     ${address.id === profile?.default_address ? 'bg-blue-100 bg-opacity-5 border-navy-light' : 'border-gray-200'}`}
                 >
                   {address.id === profile?.default_address && (
-                    <div className="flex justify-end text-navy text-xs pb-4 rounded-full items-center">
+                    <div className="flex justify-end text-navy text-xs pb-4 items-center">
                       Default
                     </div>
                   )}
@@ -868,14 +868,14 @@ const ProfilePage = () => {
                       <div className="flex space-x-2">
                         <button
                           onClick={() => editAddress(address)}
-                          className="text-navy hover:text-navy-light text-sm border-navy border rounded-lg px-2 py-1"
+                          className="text-navy hover:text-navy-light text-sm border-navy border px-2 py-1"
                         >
                           Edit
                         </button>
                         {address.id !== profile?.default_address && (
                         <button
                           onClick={() => setDefaultAddress(address.id)}
-                          className="text-gray-600 hover:text-navy text-sm flex items-center border-navy border rounded-lg px-2 py-1"
+                          className="text-gray-600 hover:text-navy text-sm flex items-center border-navy border px-2 py-1"
                         >
                           Set as Default
                         </button>
@@ -883,7 +883,7 @@ const ProfilePage = () => {
                       </div>
                       <button
                         onClick={() => deleteAddress(address.id)}
-                        className="text-red-500 hover:text-red-700 text-sm border-red-500 border rounded-lg px-2 py-1"
+                        className="text-red-500 hover:text-red-700 text-sm border-red-500 border px-2 py-1"
                       >
                         Delete
                       </button>                      
@@ -922,13 +922,13 @@ const ProfilePage = () => {
 
           {/* Success and error messages */}
           {successMessage && (
-            <div className="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+            <div className="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3">
               {successMessage}
             </div>
           )}
           
           {error && (
-            <div className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
+            <div className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3">
               {error}
             </div>
           )}
@@ -962,7 +962,7 @@ const ProfilePage = () => {
                     )}
                   </div>
                   
-                  <div className="bg-blue-50 bg-opacity-5 rounded-lg p-6">
+                  <div className="bg-blue-50 bg-opacity-5 p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
                         <h2 className="text-sm font-medium mb-1">Name</h2>
@@ -983,7 +983,7 @@ const ProfilePage = () => {
                     </div>
                   </div>
 
-                  <div className="bg-gray-50 rounded-lg p-6">
+                  <div className="bg-gray-50 p-6">
                     <h2 className="text-lg font-medium text-gray-900 mb-4">
                       {profile.role === 'chef' ? 'About Me' : 'Preferences'}
                     </h2>
@@ -994,7 +994,7 @@ const ProfilePage = () => {
                   {profile.role !== 'chef' && (
                     <>
                       {/* Dietary Preferences Section */}
-                      <div className="bg-gray-50 rounded-lg p-6">
+                      <div className="bg-gray-50 p-6">
                         <DietaryPreferences 
                           profileId={profile.id} 
                           readOnly={true}
@@ -1046,7 +1046,7 @@ const ProfilePage = () => {
                     )}
                   </div>
                 
-                  <div className="bg-blue-50 bg-opacity-5 rounded-lg p-6">
+                  <div className="bg-blue-50 bg-opacity-5 p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
                         <label htmlFor="display_name" className="block text-sm font-medium text-gray-500 mb-1">
@@ -1058,7 +1058,7 @@ const ProfilePage = () => {
                           name="display_name"
                           value={editedProfile?.display_name || ''}
                           onChange={handleChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent"
+                          className="w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-navy focus:border-transparent"
                         />
                       </div>
                       
@@ -1078,7 +1078,7 @@ const ProfilePage = () => {
                           name="contact_number"
                           value={editedProfile?.contact_number || ''}
                           onChange={handleChange}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent"
+                          className="w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-navy focus:border-transparent"
                           placeholder="Enter your contact number"
                         />
                       </div>
@@ -1090,7 +1090,7 @@ const ProfilePage = () => {
                     </div>
                   </div>
                   
-                  <div className="bg-gray-50 rounded-lg p-6">
+                  <div className="bg-gray-50 p-6">
                     <label htmlFor="preferences" className="block text-lg font-medium text-gray-900 mb-4">
                       {profile.role === 'chef' ? 'About Me' : 'Preferences'}
                     </label>
@@ -1099,7 +1099,7 @@ const ProfilePage = () => {
                       name="preferences"
                       value={editedProfile?.preferences || ''}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent h-32"
+                      className="w-full px-4 py-3 border border-gray-300 focus:ring-2 focus:ring-navy focus:border-transparent h-32"
                       placeholder={profile.role === 'chef' ? 'Enter your culinary background, cooking style, etc.' : 'Enter your food preferences, dietary restrictions, etc.'}
                     />
                   </div>
@@ -1107,7 +1107,7 @@ const ProfilePage = () => {
                   {profile.role !== 'chef' && (
                     <>
                       {/* Dietary Preferences Section */}
-                      <div className="bg-gray-50 rounded-lg p-6">
+                      <div className="bg-gray-50 p-6">
                         <DietaryPreferences 
                           profileId={profile.id} 
                           readOnly={false}

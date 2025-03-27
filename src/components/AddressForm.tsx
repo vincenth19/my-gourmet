@@ -91,7 +91,7 @@ const AddressForm = ({
           onChange={handleChange}
           disabled={disabled}
           required
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500"
+          className="w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-navy focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500"
         />
       </div>
 
@@ -108,7 +108,7 @@ const AddressForm = ({
             onChange={handleChange}
             disabled={disabled}
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500"
+            className="w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-navy focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500"
           />
         </div>
 
@@ -123,7 +123,7 @@ const AddressForm = ({
             onChange={handleChange}
             disabled={disabled}
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500"
+            className="w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-navy focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500"
           >
             <option value="" disabled>Select a state</option>
             {AUSTRALIAN_STATES.map(state => (
@@ -151,7 +151,7 @@ const AddressForm = ({
           disabled={disabled}
           required
           placeholder="4 digit postcode"
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500"
+          className="w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-navy focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500"
         />
         <p className="text-xs text-gray-500 mt-1">4 digits only</p>
       </div>
@@ -167,7 +167,7 @@ const AddressForm = ({
           onChange={handleChange}
           disabled={disabled}
           placeholder="E.g., Entrance code, delivery instructions, landmark..."
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500 min-h-[80px]"
+          className="w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-navy focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500 min-h-[80px]"
         />
       </div>
 
@@ -178,7 +178,7 @@ const AddressForm = ({
               type="button"
               onClick={onCancel}
               disabled={disabled}
-              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors duration-200 disabled:opacity-50"
+              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 transition-colors duration-200 disabled:opacity-50"
             >
               Cancel
             </button>
@@ -187,7 +187,7 @@ const AddressForm = ({
             <button
               type="submit"
               disabled={disabled}
-              className="px-4 py-2 bg-navy hover:bg-navy-light text-white rounded-lg transition-colors duration-200 disabled:opacity-50"
+              className="px-4 py-2 bg-navy hover:bg-navy-light text-white transition-colors duration-200 disabled:opacity-50"
             >
               {submitButtonText}
             </button>

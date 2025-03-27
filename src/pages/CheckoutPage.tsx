@@ -459,7 +459,7 @@ const CheckoutPage = () => {
             <p className="mt-4 text-gray-600">Loading checkout information...</p>
           </div>
         ) : error ? (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <div className="bg-red-50 border border-red-200 p-4 mb-6">
             <div className="flex items-center">
               <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
               <p className="text-red-800">{error}</p>
@@ -474,7 +474,7 @@ const CheckoutPage = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4 }}
-                  className="bg-white rounded-lg shadow p-6"
+                  className="bg-white border-2 border-gray-200 p-6"
                 >
                   <h2 className="text-lg font-medium text-gray-900 mb-4">Your Chef</h2>
                   <div className="flex items-center">
@@ -511,7 +511,7 @@ const CheckoutPage = () => {
                         <div 
                           key={address.id}
                           onClick={() => setSelectedAddressId(address.id)}
-                          className={`border rounded-lg p-4 cursor-pointer transition-colors duration-200 ${
+                          className={`border p-4 cursor-pointer transition-colors duration-200 ${
                             selectedAddressId === address.id 
                               ? 'border-navy bg-blue-50' 
                               : 'border-gray-200 hover:border-gray-300'
@@ -557,7 +557,7 @@ const CheckoutPage = () => {
                     <p className="text-gray-600 mb-4">You don't have any saved addresses yet.</p>
                     <button
                       onClick={() => setShowAddressForm(true)}
-                      className="bg-navy text-white py-2 px-4 rounded-md hover:bg-navy-light transition-colors"
+                      className="bg-navy text-white py-2 px-4 hover:bg-navy-light transition-colors"
                     >
                       Add Address
                     </button>
@@ -570,7 +570,7 @@ const CheckoutPage = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.2 }}
-                className="bg-white rounded-lg shadow p-6"
+                className="bg-white border-2 border-gray-200 p-6"
               >
                 <h2 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
                   <Calendar className="h-5 w-5 text-navy mr-2" /> Schedule
@@ -586,7 +586,7 @@ const CheckoutPage = () => {
                         <button
                           key={index}
                           onClick={() => setSelectedDate(date)}
-                          className={`py-2 px-1 text-center border rounded-md transition-colors ${
+                          className={`py-2 px-1 text-center border transition-colors ${
                             selectedDate.toDateString() === date.toDateString()
                               ? 'bg-navy text-white border-navy'
                               : 'border-gray-300 hover:border-gray-400'
@@ -618,7 +618,7 @@ const CheckoutPage = () => {
                             key={time}
                             onClick={() => !isDisabled && setSelectedTime(time)}
                             disabled={isDisabled}
-                            className={`py-2 px-3 text-sm text-center border rounded-md transition-colors ${
+                            className={`py-2 px-3 text-sm text-center border transition-colors ${
                               selectedTime === time
                                 ? 'bg-navy text-white border-navy'
                                 : isDisabled
@@ -633,7 +633,7 @@ const CheckoutPage = () => {
                     </div>
                   </div>
                   
-                  <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+                  <div className="bg-blue-50 border border-blue-200 p-4">
                     <div className="flex items-start">
                       <CalendarIcon className="h-5 w-5 text-blue-500 mt-0.5 mr-2" />
                       <div>
@@ -648,7 +648,7 @@ const CheckoutPage = () => {
                     </div>
                   </div>
                   
-                  <div className="bg-amber-50 border border-amber-200 rounded-md p-4">
+                  <div className="bg-amber-50 border border-amber-200 p-4">
                     <div className="flex items-start">
                       <Clock className="h-5 w-5 text-amber-500 mt-0.5 mr-2" />
                       <div>
@@ -670,7 +670,7 @@ const CheckoutPage = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.3 }}
-                className="bg-white rounded-lg shadow p-6"
+                className="bg-white border-2 border-gray-200 p-6"
               >
                 <h2 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
                   <CreditCard className="h-5 w-5 text-navy mr-2" /> Payment Method
@@ -683,7 +683,7 @@ const CheckoutPage = () => {
                         <div 
                           key={method.id}
                           onClick={() => setSelectedPaymentId(method.id)}
-                          className={`border rounded-lg p-4 cursor-pointer transition-colors duration-200 ${
+                          className={`border p-4 cursor-pointer transition-colors duration-200 ${
                             selectedPaymentId === method.id 
                               ? 'border-navy bg-blue-50' 
                               : 'border-gray-200 hover:border-gray-300'
@@ -757,7 +757,7 @@ const CheckoutPage = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.4 }}
-                className="bg-white rounded-lg shadow sticky top-24"
+                className="bg-white border-2 border-gray-200 sticky top-24"
               >
                 <div className="p-6 border-b border-gray-200">
                   <h2 className="text-lg font-medium text-gray-900">Order Summary</h2>
@@ -823,7 +823,7 @@ const CheckoutPage = () => {
                       !selectedPaymentId ||
                       !cartItems.length
                     }
-                    className="w-full bg-navy text-white py-3 rounded-lg mt-6 hover:bg-navy-light transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-navy text-white py-3 mt-6 hover:bg-navy-light transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {submitting ? 'Processing...' : 'Place Order'}
                   </button>

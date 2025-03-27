@@ -226,20 +226,20 @@ const CartPage = () => {
             <p className="mt-4 text-gray-600">Loading your cart...</p>
           </div>
         ) : error ? (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <div className="bg-red-50 border border-red-200 p-4 mb-6">
             <div className="flex items-center">
               <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
               <p className="text-red-800">{error}</p>
             </div>
           </div>
         ) : cartItems.length === 0 ? (
-          <div className="bg-white rounded-lg shadow p-6 text-center">
+          <div className="bg-white border-2 border-gray-200 shadow p-6 text-center">
             <ShoppingBag className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h2 className="text-xl font-medium text-gray-900 mb-2">Your cart is empty</h2>
             <p className="text-gray-600 mb-6">Looks like you haven't added any dishes to your cart yet.</p>
             <button
               onClick={continueShopping}
-              className="bg-navy text-white px-6 py-2 rounded-lg hover:bg-navy-light transition-colors"
+              className="bg-navy text-white px-6 py-2 hover:bg-navy-light transition-colors"
             >
               Start Ordering
             </button>
@@ -253,14 +253,14 @@ const CartPage = () => {
                 transition={{ duration: 0.4, delay: 0.1 }}
               >
                 {/* One Chef Policy */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div className="bg-blue-50 border border-blue-200 p-4 mb-6">
                   <p className="text-blue-800 text-sm">
                     <strong>One Chef Policy:</strong> You can only order from one chef at a time. 
                     This ensures each chef can focus on crafting a perfect experience for you.
                   </p>
                 </div>
                 
-                <div className="bg-white rounded-lg shadow overflow-hidden mb-6">
+                <div className="bg-white border-2 border-gray-200 overflow-hidden mb-6">
                   {/* Cart Items by Chef */}
                   {Object.entries(itemsByChef).map(([chefId, items]) => (
                     <div key={chefId} className="border-b border-gray-200 last:border-0">
@@ -386,7 +386,7 @@ const CartPage = () => {
 
                           {/* Custom dish note if price is zero */}
                           {item.custom_dish_name && item.dish_price === 0 && (
-                            <div className="mt-3 bg-blue-50 border border-blue-100 rounded p-2 text-xs text-blue-800">
+                            <div className="mt-3 bg-blue-50 border border-blue-100 p-2 text-xs text-blue-800">
                               <p>Pricing for this custom dish will be provided by the chef after reviewing your request.</p>
                             </div>
                           )}
@@ -414,7 +414,7 @@ const CartPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.2 }}
               >
-                <div className="bg-white rounded-lg shadow overflow-hidden sticky top-24">
+                <div className="bg-white border-2 border-gray-200 overflow-hidden sticky top-24">
                   <div className="p-4 border-b border-gray-200">
                     <h2 className="text-lg font-medium text-gray-900">Order Summary</h2>
                   </div>
@@ -436,7 +436,7 @@ const CartPage = () => {
                     <button
                       onClick={proceedToCheckout}
                       disabled={updating || cartItems.length === 0}
-                      className="w-full bg-navy text-white py-3 rounded-lg mt-6 hover:bg-navy-light transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full bg-navy text-white py-3 mt-6 hover:bg-navy-light transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {updating ? 'Updating...' : 'Proceed to Checkout'}
                     </button>

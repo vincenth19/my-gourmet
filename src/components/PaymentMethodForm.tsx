@@ -146,7 +146,7 @@ const PaymentMethodForm = ({ initialValues = {}, onChange, disabled = false, cla
           type="text"
           value={formValues.name_on_card || ''}
           onChange={handleChange}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent"
+          className="w-full px-4 py-3 border border-gray-300 focus:ring-2 focus:ring-navy focus:border-transparent"
           placeholder="John Doe"
           disabled={disabled}
           required
@@ -166,7 +166,7 @@ const PaymentMethodForm = ({ initialValues = {}, onChange, disabled = false, cla
           type="text"
           value={formValues.card_number || ''}
           onChange={handleChange}
-          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent ${
+          className={`w-full px-4 py-3 border focus:ring-2 focus:ring-navy focus:border-transparent ${
             errors.card_number ? 'border-red-500' : 'border-gray-300'
           }`}
           placeholder="1234567890123456"
@@ -189,7 +189,7 @@ const PaymentMethodForm = ({ initialValues = {}, onChange, disabled = false, cla
             <select
               value={expiryMonth}
               onChange={(e) => handleExpiryChange('month', e.target.value)}
-              className={`px-3 py-3 border rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent ${
+              className={`px-3 py-3 border focus:ring-2 focus:ring-navy focus:border-transparent ${
                 errors.expiry_date ? 'border-red-500' : 'border-gray-300'
               }`}
               disabled={disabled}
@@ -210,7 +210,7 @@ const PaymentMethodForm = ({ initialValues = {}, onChange, disabled = false, cla
             <select
               value={expiryYear}
               onChange={(e) => handleExpiryChange('year', e.target.value)}
-              className={`px-3 py-3 border rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent ${
+              className={`px-3 py-3 border focus:ring-2 focus:ring-navy focus:border-transparent ${
                 errors.expiry_date ? 'border-red-500' : 'border-gray-300'
               }`}
               disabled={disabled}
@@ -242,7 +242,7 @@ const PaymentMethodForm = ({ initialValues = {}, onChange, disabled = false, cla
             type="password"
             value={formValues.cvv || ''}
             onChange={handleChange}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-navy focus:border-transparent ${
+            className={`w-full px-4 py-3 border focus:ring-2 focus:ring-navy focus:border-transparent ${
               errors.cvv ? 'border-red-500' : 'border-gray-300'
             }`}
             placeholder="•••"
