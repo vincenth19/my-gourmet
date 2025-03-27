@@ -14,7 +14,7 @@ VALUES
  'Acquerello aged carnaroli rice slowly cooked to perfection with house-made seafood fumét and Krug Grande Cuvée champagne. Enriched with mascarpone and 24-month aged Parmigiano-Reggiano, then crowned with a butter-poached Maine lobster tail and claw meat. Finished with shaved bottarga, Sturia caviar, and micro herbs from our rooftop garden. Each grain remains distinct while achieving the quintessential "wave" texture of authentic Italian risotto.',
  '{"options": ["Extra lobster", "Truffle shavings", "Caviar supplement", "Dairy-free option", "Extra creamy"]}',
  '{"types": []}',
- 'https://www.denverlifemagazine.com/wp-content/uploads/2019/10/dish.jpg'),
+ 'https://images.unsplash.com/photo-1461009683693-342af2f2d6ce?q=80&w=2896'),
 
 ('11111111-1111-1111-1111-111111111111', 'Coq au Vin', 42.75, 
  'A refined interpretation of the French classic featuring free-range Bresse chicken marinated for 48 hours in 2015 Domaine de la Romanée-Conti pinot noir. Slowly braised with heritage carrots, pearl onions from our garden, forest mushrooms, and Alsatian bacon lardons. The sauce is intensified through careful reduction and finished with a touch of cognac. Served with silky potato purée incorporating French cultured butter and a delicate garnish of thyme blossoms.',
@@ -88,7 +88,7 @@ VALUES
  'Premium grass-fed Tasmanian lamb rack with optimal marbling, coated with a sophisticated glaze incorporating Australia`s iconic Vegemite, leatherwood honey, and native thyme. The racks are first sous-vide with indigenous herbs then finished in our wood-fired oven for perfect caramelization. Each cutlet is precisely cooked to maintain juicy tenderness and served with triple-cooked rosemary-infused potatoes and a native saltbush jus. The dish is completed with charred baby vegetables from local organic farms and a sprinkle of hand-harvested Murray River pink salt.',
  '{"options": ["Extra cutlets", "Wattleseed jus", "Extra vegetables", "Less Vegemite flavor"]}',
  '{"types": ["Medium rare", "Medium", "Well done"]}',
- 'https://img.delicious.com.au/vHIx_qQ1/del/2017/07/miso-lamb-cutlets-49822-2.jpg'),
+ 'https://images.unsplash.com/photo-1514516345957-556ca7d90a29?q=80&w=2940'),
 
 ('33333333-3333-3333-3333-333333333333', 'Emu Burger with Beetroot', 38.75, 
  'Lean, protein-rich emu patty from birds raised on a specialized farm in South Australia. The meat is ground to order and seasoned with native mountain pepper, wattleseed, and smoked salt. Served on a house-baked damper roll made with ancient grain flour and bush tomato. Topped with a free-range egg from heritage-breed hens, beetroot pickled with Davidson plum, caramelized onions slow-cooked for six hours, and our signature bush tomato relish incorporating native muntries. Accompanied by triple-cooked sweet potato wedges tossed with bush herb salt.',
