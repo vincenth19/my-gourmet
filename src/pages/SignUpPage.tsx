@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { motion } from 'framer-motion';
 import type { FormEvent, ChangeEvent } from 'react';
@@ -19,7 +19,7 @@ const SignUpPage = () => {
     firstName: '',
     lastName: '',
     phoneNumber: '',
-    userType: 'customer', // 'customer' or 'chef'
+    userType: '', // Empty default value
   });
   
   // State for payment method details
@@ -31,17 +31,88 @@ const SignUpPage = () => {
   });
   
   const [error, setError] = useState('');
+  const [passwordLengthError, setPasswordLengthError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Check password length on change
+  useEffect(() => {
+    if (formData.password) {
+      if (formData.password.length < 6) {
+        setPasswordLengthError('Password must be at least 6 characters');
+      } else {
+        setPasswordLengthError('');
+      }
+    } else {
+      setPasswordLengthError('');
+    }
+  }, [formData.password]);
+
+  // Check password match on change
+  useEffect(() => {
+    // Only validate if both fields have values
+    if (formData.password && formData.confirmPassword) {
+      if (formData.password !== formData.confirmPassword) {
+        setPasswordError('Passwords do not match');
+      } else {
+        setPasswordError('');
+      }
+    } else {
+      setPasswordError('');
+    }
+  }, [formData.password, formData.confirmPassword]);
+
+  // Validate Australian phone number
+  useEffect(() => {
+    if (formData.phoneNumber) {
+      // Remove spaces, dashes, and parentheses for validation
+      const cleanPhone = formData.phoneNumber.replace(/[\s\-()]/g, '');
+      
+      // Australian mobile numbers start with 04 and are 10 digits
+      // Landlines can start with 02, 03, 07, 08 and are 10 digits
+      // International format with +61 is also allowed (11 digits after removing the +)
+      const isValidAusMobile = /^(04\d{8})$/.test(cleanPhone);
+      const isValidAusLandline = /^(0[2378]\d{8})$/.test(cleanPhone);
+      const isValidAusIntl = /^(\+?61\d{9})$/.test(cleanPhone);
+      
+      if (!(isValidAusMobile || isValidAusLandline || isValidAusIntl)) {
+        setPhoneError('Please enter a valid Australian phone number');
+      } else {
+        setPhoneError('');
+      }
+    } else {
+      setPhoneError('');
+    }
+  }, [formData.phoneNumber]);
 
   // Go to next step
   const handleContinue = (e: FormEvent) => {
     e.preventDefault();
     setError('');
 
-    // Validate first step
+    // Validate required fields
+    if (!formData.userType) {
+      setError('Please select an account type');
+      return;
+    }
+
+    // Validate password length
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
+    // Validate password match
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
+      return;
+    }
+    
+    // Validate phone number
+    if (phoneError) {
+      setError(phoneError);
       return;
     }
     
@@ -73,6 +144,27 @@ const SignUpPage = () => {
     e.preventDefault();
     setError('');
     setLoading(true);
+
+    // Validate account type again for safety
+    if (!formData.userType) {
+      setError('Please select an account type');
+      setLoading(false);
+      return;
+    }
+    
+    // Validate password length again for safety
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters');
+      setLoading(false);
+      return;
+    }
+    
+    // Validate phone number again for safety
+    if (phoneError) {
+      setError(phoneError);
+      setLoading(false);
+      return;
+    }
 
     try {
       // Sign up the user in Supabase with metadata for profile creation
@@ -188,19 +280,28 @@ const SignUpPage = () => {
 
         <div>
           <label htmlFor="userType" className="block text-sm font-medium text-gray-700 mb-1">
-            I want to
+            I want to...
           </label>
-          <select
-            id="userType"
-            name="userType"
-            value={formData.userType}
-            onChange={handleChange}
-            className="appearance-none relative block w-full px-4 py-3 bg-gray-50 border border-gray-200  text-gray-900 focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent transition-colors duration-200"
-            disabled={loading}
-          >
-            <option value="customer">Book Private Chefs</option>
-            <option value="chef">Work as a Private Chef</option>
-          </select>
+          <div className="relative">
+            <select
+              id="userType"
+              name="userType"
+              value={formData.userType}
+              onChange={handleChange}
+              required
+              className="appearance-none relative block w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent transition-colors duration-200 pr-10"
+              disabled={loading}
+            >
+              <option value="" disabled>Select account type</option>
+              <option value="customer">Book Private Chefs</option>
+              <option value="chef">Work as a Private Chef</option>
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </div>
+          </div>
         </div>
 
         <div>
@@ -214,10 +315,14 @@ const SignUpPage = () => {
             required
             value={formData.password}
             onChange={handleChange}
-            className="appearance-none relative block w-full px-4 py-3 bg-gray-50 border border-gray-200  text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent transition-colors duration-200"
+            className={`appearance-none relative block w-full px-4 py-3 bg-gray-50 border ${passwordLengthError ? 'border-red-500' : 'border-gray-200'} text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent transition-colors duration-200`}
             placeholder="Create a password"
             disabled={loading}
+            minLength={6}
           />
+          {passwordLengthError && (
+            <p className="mt-1 text-sm text-red-600">{passwordLengthError}</p>
+          )}
         </div>
 
         <div>
@@ -231,27 +336,36 @@ const SignUpPage = () => {
             required
             value={formData.confirmPassword}
             onChange={handleChange}
-            className="appearance-none relative block w-full px-4 py-3 bg-gray-50 border border-gray-200  text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent transition-colors duration-200"
+            className={`appearance-none relative block w-full px-4 py-3 bg-gray-50 border ${passwordError ? 'border-red-500' : 'border-gray-200'} text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent transition-colors duration-200`}
             placeholder="Confirm your password"
             disabled={loading}
           />
+          {passwordError && (
+            <p className="mt-1 text-sm text-red-600">{passwordError}</p>
+          )}
         </div>
 
         <div>
           <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
-            Phone Number
+            Phone Number (Australian)
           </label>
           <input
             id="phoneNumber"
             name="phoneNumber"
-            type="text"
+            type="tel"
             required
             value={formData.phoneNumber}
             onChange={handleChange}
-            className="appearance-none relative block w-full px-4 py-3 bg-gray-50 border border-gray-200  text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent transition-colors duration-200"
-            placeholder="Enter your phone number"
+            className={`appearance-none relative block w-full px-4 py-3 bg-gray-50 border ${phoneError ? 'border-red-500' : 'border-gray-200'} text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent transition-colors duration-200`}
+            placeholder="e.g. 0412 345 678"
             disabled={loading}
           />
+          {phoneError && (
+            <p className="mt-1 text-sm text-red-600">{phoneError}</p>
+          )}
+          <p className="mt-1 text-xs text-gray-500">
+            Format: 04XX XXX XXX (mobile) or 0X XXXX XXXX (landline)
+          </p>
         </div>
       </div>
 
@@ -259,7 +373,7 @@ const SignUpPage = () => {
         <button
           type="submit"
           className="group relative w-full flex justify-center py-3 px-4 border border-transparent  text-white bg-navy hover:bg-navy-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-navy transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-          disabled={loading}
+          disabled={loading || !!passwordError || !!passwordLengthError || !!phoneError}
         >
           {formData.userType === 'chef' ? 'Create Account' : 'Continue'}
         </button>
