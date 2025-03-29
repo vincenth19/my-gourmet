@@ -176,7 +176,7 @@ const Navbar = ({ activePage: propActivePage }: NavbarProps) => {
                 <Menu size={24} />
               </button>
               
-              <Link to={userRole === 'chef' ? '/chef/home' : '/home'}>
+              <Link to={userRole === 'chef' ? '/chef/home' : userRole === 'admin' ? '/admin/home' : '/home'}>
                 <img src={logoBnw} width={150} alt="MyGourmet Logo" />
               </Link>
             </div>
