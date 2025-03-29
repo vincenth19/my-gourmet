@@ -190,11 +190,12 @@ const AdminOrderDetailPage = () => {
   };
   
   // Update order status
-  const updateOrder = async () => {
-    if (!user || !orderId || newStatus === order.order_status) return;
+  const updateOrder = async (status: string) => {
+    setNewStatus(status);
+    if (!user || !orderId || status === order.order_status) return;
     
     // Ensure all custom dishes have prices set before accepting or completing
-    if (['accepted', 'completed'].includes(newStatus) && !allCustomDishesHavePrices()) {
+    if (['accepted', 'completed'].includes(status) && !allCustomDishesHavePrices()) {
       setError('You must set prices for all custom dishes before accepting or completing this order.');
       return;
     }
@@ -205,7 +206,7 @@ const AdminOrderDetailPage = () => {
     try {
       // Prepare to update pricing for any custom dishes that might need it
       const priceUpdatePromises = [];
-      let isStatusChanged = newStatus !== order.order_status;
+      let isStatusChanged = status !== order.order_status;
       
       // First update any custom dish prices if needed
       for (const [dishId, price] of Object.entries(editingPrices)) {
@@ -246,12 +247,12 @@ const AdminOrderDetailPage = () => {
       if (isStatusChanged || priceUpdatePromises.length > 0) {
         // If status is changing to completed, also update payment_status to paid
         const updateData = { 
-          order_status: newStatus,
+          order_status: status,
           total_amount: newTotal
         };
         
         // Add payment_status field when status is changing to completed
-        if (newStatus === 'accepted') {
+        if (status === 'accepted') {
           Object.assign(updateData, { payment_status: 'paid' });
         }
         
@@ -265,10 +266,10 @@ const AdminOrderDetailPage = () => {
         // Update local state
         setOrder((prev: any) => ({
           ...prev,
-          order_status: newStatus,
+          order_status: status,
           total_amount: newTotal,
           // Also update payment_status in local state when completed
-          ...(newStatus === 'accepted' ? { payment_status: 'paid' } : {})
+          ...(status === 'accepted' ? { payment_status: 'paid' } : {})
         }));
       }
       
@@ -438,6 +439,18 @@ const AdminOrderDetailPage = () => {
                   </p>
                 </div>
               </div>
+              {order.access_note && (
+                <div>
+                  <h2 className="text-lg font-medium flex items-center mb-2">
+                    Access Note
+                  </h2>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <p className="text-gray-800">
+                      {order.access_note}
+                    </p>
+                  </div>
+                </div>
+                )}
             </div>
             
             <div className="space-y-6">
@@ -616,53 +629,6 @@ const AdminOrderDetailPage = () => {
               </div>
             </div>
           </div>
-
-          {/* Order status */}
-          <div className="border-t border-gray-200 pt-6">
-            <h2 className="text-lg font-medium mb-4">Order Status</h2>
-            
-            <div className="grid grid-cols-3 gap-3 mb-6">
-              <button
-                className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                  newStatus === 'pending' 
-                    ? 'bg-yellow-500 text-white' 
-                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                } ${order.order_status !== 'pending' ? 'opacity-40 cursor-not-allowed bg-gray-200' : ''}`}
-                onClick={() => setNewStatus('pending')}
-                disabled={order.order_status !== 'pending'}
-              >
-                1. Pending
-              </button>
-              <button
-                className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                  newStatus === 'accepted' 
-                    ? 'bg-blue-500 text-white' 
-                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                } ${(order.order_status === 'completed' || order.order_status === 'rejected' || 
-                    (order.order_status === 'pending' && !allCustomDishesHavePrices())) 
-                    ? 'opacity-40 cursor-not-allowed bg-gray-200' : ''}`}
-                onClick={() => setNewStatus('accepted')}
-                disabled={order.order_status === 'completed' || order.order_status === 'rejected' || 
-                         (order.order_status === 'pending' && !allCustomDishesHavePrices())}
-              >
-                2. Accept
-              </button>
-              <button
-                className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                  newStatus === 'rejected' 
-                    ? 'bg-red-500 text-white' 
-                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                } ${(order.order_status === 'rejected' || order.order_status === 'completed' ||
-                    order.order_status === 'accepted')
-                    ? 'opacity-40 cursor-not-allowed bg-gray-200' : ''}`}
-                onClick={() => setNewStatus('rejected')}
-                disabled={order.order_status === 'completed' || order.order_status === 'rejected' ||
-                         order.order_status === 'accepted'}
-              >
-                3. Rejected
-              </button>
-            </div>
-          </div>
           
           {/* Universal Update Button */}
           <div className="border-t border-gray-200 pt-6 mt-4">
@@ -678,15 +644,24 @@ const AdminOrderDetailPage = () => {
               </div>
             )}
             
-            <button
-              className="w-full px-5 py-3 bg-navy text-white rounded-lg hover:bg-navy-light transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              onClick={updateOrder}
-              disabled={updatingStatus || 
-                (newStatus === order.order_status && Object.keys(editingPrices).length === 0) || 
-                ((['accepted', 'completed'].includes(newStatus)) && !allCustomDishesHavePrices())}
-            >
-              {updatingStatus ? 'Updating Order...' : 'Update Order'}
-            </button>
+            <div className="flex justify-between gap-4">
+              <button
+                className="px-5 py-3 bg-red-500 text-white hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={() => updateOrder('rejected')}
+                disabled={updatingStatus || 
+                  (order.order_status === 'rejected' || order.order_status === 'completed' || order.order_status === 'cancelled' || order.order_status === 'accepted')}
+              >
+                {updatingStatus ? 'Rejecting Order...' : 'Reject Order'}
+              </button>
+              <button
+                className="px-5 py-3 bg-navy text-white hover:bg-navy-light transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={() => updateOrder('accepted')}
+                disabled={updatingStatus || 
+                  (order.order_status === 'accepted' || order.order_status === 'completed' || order.order_status === 'cancelled')}
+              >
+                {updatingStatus ? 'Accepting Order...' : 'Accept Order'}
+              </button>
+            </div>
           </div>
         </div>
       </main>

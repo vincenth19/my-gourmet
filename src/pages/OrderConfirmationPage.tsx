@@ -264,12 +264,18 @@ const OrderConfirmationPage = () => {
                   <div className="border-t border-gray-200 pt-6">
                     <div className="flex items-center mb-3">
                       <MapPin className="h-5 w-5 text-navy mr-2" />
-                      <h2 className="text-lg font-medium text-gray-900">Delivery Location</h2>
+                      <h2 className="text-lg font-medium text-gray-900">Your Address</h2>
                     </div>
                     <div>
                       <p className="text-gray-700">
                         {order.address_line}, {order.city}, {order.state} {order.zip_code}
                       </p>
+                      {order.access_note && (
+                        <div className="mt-2">
+                          <p className="text-sm font-medium text-gray-700">Access Notes:</p>
+                          <p className="text-gray-700">{order.access_note}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                   

@@ -187,6 +187,12 @@ const ChefOrderDetailPage = () => {
                     {order.address_line}<br />
                     {order.city}, {order.state} {order.zip_code}
                   </p>
+                  {order.access_note && (
+                    <div className="mt-2 pt-2 border-t border-gray-200">
+                      <p className="text-sm font-medium text-gray-700">Access Notes:</p>
+                      <p className="text-gray-800">{order.access_note}</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

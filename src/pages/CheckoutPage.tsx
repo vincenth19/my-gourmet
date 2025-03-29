@@ -372,6 +372,7 @@ const CheckoutPage = () => {
           city: addressData.city,
           state: addressData.state,
           zip_code: addressData.zip_code,
+          access_note: addressData.access_note,
           
           // Payment details
           payment_method_type: paymentMethodData.method_type,

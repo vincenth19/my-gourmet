@@ -24,7 +24,7 @@ CREATE TABLE public.addresses (
   city VARCHAR NOT NULL,
   state VARCHAR NOT NULL,
   zip_code VARCHAR NOT NULL,
-  access_note TEXT,
+  access_note TEXT NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -122,6 +122,7 @@ CREATE TABLE public.orders (
   city VARCHAR NOT NULL,
   state VARCHAR NOT NULL,
   zip_code VARCHAR NOT NULL,
+  access_note TEXT NOT NULL,
   
   -- Payment details at time of order
   payment_method_type VARCHAR NOT NULL,

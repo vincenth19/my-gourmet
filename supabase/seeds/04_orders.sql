@@ -47,6 +47,7 @@ DECLARE
     customer1_city VARCHAR;
     customer1_state VARCHAR;
     customer1_zip VARCHAR;
+    customer1_access_note TEXT;
     
     customer2_name VARCHAR;
     customer2_email VARCHAR;
@@ -55,6 +56,7 @@ DECLARE
     customer2_city VARCHAR;
     customer2_state VARCHAR;
     customer2_zip VARCHAR;
+    customer2_access_note TEXT;
     
     -- Chef names
     chef_western_name VARCHAR;
@@ -80,10 +82,10 @@ BEGIN
     FROM public.profiles WHERE id = customer2_id;
     
     -- Get address details
-    SELECT address_line, city, state, zip_code INTO customer1_address_line, customer1_city, customer1_state, customer1_zip
+    SELECT address_line, city, state, zip_code, access_note INTO customer1_address_line, customer1_city, customer1_state, customer1_zip, customer1_access_note
     FROM public.addresses WHERE id = customer1_address;
     
-    SELECT address_line, city, state, zip_code INTO customer2_address_line, customer2_city, customer2_state, customer2_zip
+    SELECT address_line, city, state, zip_code, access_note INTO customer2_address_line, customer2_city, customer2_state, customer2_zip, customer2_access_note
     FROM public.addresses WHERE id = customer2_address;
     
     -- Get chef names
@@ -96,7 +98,7 @@ BEGIN
     -- 1. PENDING order with chef_western (including custom dish)
     INSERT INTO public.orders (
         id, profile_id, profile_email, profile_contact_number, chef_id, chef_name,
-        address_line, city, state, zip_code,
+        address_line, city, state, zip_code, access_note,
         payment_method_type, payment_details,
         order_date, order_status, payment_status, total_amount, is_asap, requested_time
     ) VALUES (
@@ -110,6 +112,7 @@ BEGIN
         customer1_city, 
         customer1_state, 
         customer1_zip,
+        customer1_access_note,
         'card', 
         'Visa ending in 4242',
         CURRENT_DATE, 
@@ -151,7 +154,7 @@ BEGIN
     -- 2. ACCEPTED order with chef_western (previously COMPLETED)
     INSERT INTO public.orders (
         id, profile_id, profile_email, profile_contact_number, chef_id, chef_name,
-        address_line, city, state, zip_code,
+        address_line, city, state, zip_code, access_note,
         payment_method_type, payment_details,
         order_date, order_status, payment_status, total_amount, is_asap, requested_time
     ) VALUES (
@@ -165,6 +168,7 @@ BEGIN
         customer1_city, 
         customer1_state, 
         customer1_zip,
+        customer1_access_note,
         'card', 
         'Visa ending in 4242',
         CURRENT_DATE - interval '10 days', 
@@ -208,7 +212,7 @@ BEGIN
     -- 3. ACCEPTED order with chef_sydney (previously COMPLETED)
     INSERT INTO public.orders (
         id, profile_id, profile_email, profile_contact_number, chef_id, chef_name,
-        address_line, city, state, zip_code,
+        address_line, city, state, zip_code, access_note,
         payment_method_type, payment_details,
         order_date, order_status, payment_status, total_amount, is_asap, requested_time
     ) VALUES (
@@ -222,6 +226,7 @@ BEGIN
         customer1_city, 
         customer1_state, 
         customer1_zip,
+        customer1_access_note,
         'card', 
         'Visa ending in 4242',
         CURRENT_DATE - interval '15 days', 
@@ -258,7 +263,7 @@ BEGIN
     -- 4. REJECTED order with chef_asian
     INSERT INTO public.orders (
         id, profile_id, profile_email, profile_contact_number, chef_id, chef_name,
-        address_line, city, state, zip_code,
+        address_line, city, state, zip_code, access_note,
         payment_method_type, payment_details,
         order_date, order_status, payment_status, total_amount, is_asap, requested_time
     ) VALUES (
@@ -272,6 +277,7 @@ BEGIN
         customer1_city, 
         customer1_state, 
         customer1_zip,
+        customer1_access_note,
         'card', 
         'Visa ending in 4242',
         CURRENT_DATE - interval '5 days', 
@@ -296,7 +302,7 @@ BEGIN
     -- 5. CANCELLED order with chef_sydney
     INSERT INTO public.orders (
         id, profile_id, profile_email, profile_contact_number, chef_id, chef_name,
-        address_line, city, state, zip_code,
+        address_line, city, state, zip_code, access_note,
         payment_method_type, payment_details,
         order_date, order_status, payment_status, total_amount, is_asap, requested_time,
         cancellation_fee, original_amount
@@ -311,6 +317,7 @@ BEGIN
         customer1_city, 
         customer1_state, 
         customer1_zip,
+        customer1_access_note,
         'card', 
         'Visa ending in 4242',
         CURRENT_DATE - interval '3 days', 
@@ -352,7 +359,7 @@ BEGIN
     -- 1. PENDING order with chef_sydney
     INSERT INTO public.orders (
         id, profile_id, profile_email, profile_contact_number, chef_id, chef_name,
-        address_line, city, state, zip_code,
+        address_line, city, state, zip_code, access_note,
         payment_method_type, payment_details,
         order_date, order_status, payment_status, total_amount, is_asap, requested_time
     ) VALUES (
@@ -366,6 +373,7 @@ BEGIN
         customer2_city, 
         customer2_state, 
         customer2_zip,
+        customer2_access_note,
         'card', 
         'Visa ending in 4242',
         CURRENT_DATE, 
@@ -397,7 +405,7 @@ BEGIN
     -- 2. ACCEPTED order with chef_western (previously COMPLETED)
     INSERT INTO public.orders (
         id, profile_id, profile_email, profile_contact_number, chef_id, chef_name,
-        address_line, city, state, zip_code,
+        address_line, city, state, zip_code, access_note,
         payment_method_type, payment_details,
         order_date, order_status, payment_status, total_amount, is_asap, requested_time
     ) VALUES (
@@ -411,6 +419,7 @@ BEGIN
         customer2_city, 
         customer2_state, 
         customer2_zip,
+        customer2_access_note,
         'card', 
         'Visa ending in 4242',
         CURRENT_DATE - interval '12 days', 
@@ -452,7 +461,7 @@ BEGIN
     -- 3. ACCEPTED order with chef_western (previously COMPLETED)
     INSERT INTO public.orders (
         id, profile_id, profile_email, profile_contact_number, chef_id, chef_name,
-        address_line, city, state, zip_code,
+        address_line, city, state, zip_code, access_note,
         payment_method_type, payment_details,
         order_date, order_status, payment_status, total_amount, is_asap, requested_time
     ) VALUES (
@@ -466,6 +475,7 @@ BEGIN
         customer2_city, 
         customer2_state, 
         customer2_zip,
+        customer2_access_note,
         'card', 
         'Visa ending in 4242',
         CURRENT_DATE - interval '20 days', 
@@ -490,7 +500,7 @@ BEGIN
     -- 4. REJECTED order with chef_western
     INSERT INTO public.orders (
         id, profile_id, profile_email, profile_contact_number, chef_id, chef_name,
-        address_line, city, state, zip_code,
+        address_line, city, state, zip_code, access_note,
         payment_method_type, payment_details,
         order_date, order_status, payment_status, total_amount, is_asap, requested_time
     ) VALUES (
@@ -504,6 +514,7 @@ BEGIN
         customer2_city, 
         customer2_state, 
         customer2_zip,
+        customer2_access_note,
         'card', 
         'Visa ending in 4242',
         CURRENT_DATE - interval '7 days', 
@@ -528,7 +539,7 @@ BEGIN
     -- 5. CANCELLED order with chef_asian
     INSERT INTO public.orders (
         id, profile_id, profile_email, profile_contact_number, chef_id, chef_name,
-        address_line, city, state, zip_code,
+        address_line, city, state, zip_code, access_note,
         payment_method_type, payment_details,
         order_date, order_status, payment_status, total_amount, is_asap, requested_time,
         cancellation_fee, original_amount
@@ -543,6 +554,7 @@ BEGIN
         customer2_city, 
         customer2_state, 
         customer2_zip,
+        customer2_access_note,
         'card', 
         'Visa ending in 4242',
         CURRENT_DATE - interval '4 days', 

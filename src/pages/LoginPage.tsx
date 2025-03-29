@@ -147,7 +147,7 @@ const LoginPage = () => {
             <p className="text-sm text-gray-600">
               Don't have an account?{' '}
               <Link to="/sign-up" className="text-navy hover:text-navy-light transition-colors duration-200 underline">
-                Dine with us
+                Create an account
               </Link>
             </p>
           </div>
