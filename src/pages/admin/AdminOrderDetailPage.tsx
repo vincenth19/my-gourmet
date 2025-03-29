@@ -657,7 +657,7 @@ const AdminOrderDetailPage = () => {
                 className="px-5 py-3 bg-navy text-white hover:bg-navy-light transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={() => updateOrder('accepted')}
                 disabled={updatingStatus || 
-                  (order.order_status === 'accepted' || order.order_status === 'completed' || order.order_status === 'cancelled')}
+                  (order.order_status === 'accepted' || order.order_status === 'completed' || order.order_status === 'cancelled' || (order.order_status === 'pending' && !allCustomDishesHavePrices()))}
               >
                 {updatingStatus ? 'Accepting Order...' : 'Accept Order'}
               </button>
