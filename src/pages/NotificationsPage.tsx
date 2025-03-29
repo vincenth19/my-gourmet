@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { Notification } from '../types/database.types';
 import { format, isToday, isYesterday, isSameWeek, isSameYear } from 'date-fns';
-import { Bell, CheckCircle, ArrowUpRight } from 'lucide-react';
+import { Bell, ArrowUpRight } from 'lucide-react';
 
 // Group notifications by their date
 interface GroupedNotifications {
@@ -288,9 +288,8 @@ const NotificationsPage = () => {
           <button
             onClick={markAllAsRead}
             disabled={markingAllAsRead}
-            className="flex items-center gap-1 px-3 py-1 text-sm text-blue-600 border border-blue-300 rounded hover:bg-blue-50 transition-colors disabled:opacity-50"
+            className="flex items-center gap-1 px-3 py-1 text-sm text-navy border border-navy rounded hover:bg-blue-50 transition-colors disabled:opacity-50"
           >
-            <CheckCircle className="h-4 w-4" />
             {markingAllAsRead ? 'Marking as read...' : 'Mark all as read'}
           </button>
         )}
@@ -313,12 +312,12 @@ const NotificationsPage = () => {
                     key={notification.id}
                     onClick={() => handleNotificationClick(notification)}
                     className={`
-                      p-4 border border-gray-200 rounded-md transition-colors duration-200
+                      p-4 border border-gray-200 transition-colors duration-200
                       ${notification.link ? 'cursor-pointer hover:bg-gray-50' : ''}
                       ${notification.is_read ? 'bg-white' : 'bg-blue-50'}
                     `}
                   >
-                    <div className="flex items-start justify-between">
+                    <div className="flex flex-col md:flex-row items-start justify-between">
                       <div className="flex-1">
                         <h3 className="font-semibold text-lg">{notification.title}</h3>
                         <p className="text-gray-600 mt-1">{notification.message}</p>
@@ -327,7 +326,7 @@ const NotificationsPage = () => {
                         </p>
                       </div>
                       {notification.link && (
-                        <div className="flex items-center gap-2 border-gray-200 border-1 py-1 px-3">
+                        <div className="mt-2 md:mt-0 flex items-center self-end md:self-start gap-2 border-gray-200 border-1 py-1 px-3">
                           View Order
                           <ArrowUpRight className="h-5 w-5 text-gray-400 mt-1 flex-shrink-0" />
                         </div>

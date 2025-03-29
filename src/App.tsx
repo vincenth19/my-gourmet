@@ -13,7 +13,7 @@ const App = () => {
             <div className="flex items-center">
               <img src={logo} alt="MyGourmet Logo" className="w-40" />
             </div>
-            <div className="flex items-center space-x-8">
+            <div className="flex items-center space-x-4">
               <Link to="/sign-in" className="text-gray-300 hover:text-gold transition-colors duration-200 font-light">
                 Sign In
               </Link>

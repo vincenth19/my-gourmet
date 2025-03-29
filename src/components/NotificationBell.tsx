@@ -4,7 +4,11 @@ import { Bell } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
-const NotificationBell = () => {
+interface NotificationBellProps {
+  onClick?: () => void;
+}
+
+const NotificationBell = ({ onClick }: NotificationBellProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
@@ -55,9 +59,14 @@ const NotificationBell = () => {
     }
   };
 
+  const handleClick = () => {
+    navigate('/notifications');
+    if (onClick) onClick();
+  };
+
   return (
     <button
-      onClick={() => navigate('/notifications')}
+      onClick={handleClick}
       className="relative p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
       aria-label="Notifications"
     >

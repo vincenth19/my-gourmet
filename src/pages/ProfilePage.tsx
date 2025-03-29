@@ -1127,14 +1127,14 @@ const ProfilePage = () => {
                     <div className="flex justify-end space-x-3 pt-4">
                       <button
                         onClick={handleEditToggle}
-                        className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors duration-200"
+                        className="px-4 py-2 border-1 border-navy hover:bg-blue-50 text-gray-800 transition-colors duration-200"
                         disabled={saving}
                       >
                         Cancel
                       </button>
                       <button
                         onClick={handleSave}
-                        className="px-4 py-2 bg-navy hover:bg-navy-light text-white rounded-lg transition-colors duration-200 flex items-center"
+                        className="px-4 py-2 bg-navy hover:bg-navy-light text-white transition-colors duration-200 flex items-center"
                         disabled={saving}
                       >
                         {saving ? (
@@ -1157,7 +1157,7 @@ const ProfilePage = () => {
         <div className="mt-8 flex justify-center w-full">
           <button
             onClick={handleLogout}
-            className="px-4 py-2 w-full border border-red-500 bg-transparent hover:bg-red-500 text-red-500 hover:text-white rounded-lg transition-colors duration-200"
+            className="px-4 py-2 w-full border border-red-500 bg-transparent hover:bg-red-500 text-red-500 hover:text-white transition-colors duration-200"
           >
             Logout
           </button>

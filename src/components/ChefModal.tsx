@@ -57,11 +57,6 @@ const ChefModal = ({ chef, isOpen, onClose }: ChefModalProps) => {
             <div className="flex justify-between items-start">
               <div>
                 <h2 className="text-xl font-bold text-gray-900">{chef.display_name}</h2>
-                <div className="flex items-center mt-1 text-xs text-gray-500">
-                  <span className="font-medium text-navy">Step 1</span>
-                  <ChevronRight className="h-3 w-3 mx-1" />
-                  <span>Select Chef</span>
-                </div>
               </div>
               <button 
                 onClick={onClose}
@@ -93,24 +88,6 @@ const ChefModal = ({ chef, isOpen, onClose }: ChefModalProps) => {
                 <p className="text-gray-600">
                   {chef.preferences || "No description available for this chef."}
                 </p>
-              </div>
-              
-              <div className="bg-gray-50 p-4 border border-gray-200">
-                <h3 className="font-medium text-sm text-gray-700 mb-2">Ordering Process</h3>
-                <div className="space-y-2">
-                  <div className="flex items-center">
-                    <div className="w-6 h-6 rounded-full bg-navy text-white flex items-center justify-center text-xs font-bold">1</div>
-                    <span className="ml-2 text-sm font-medium">Select this chef</span>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="w-6 h-6 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center text-xs font-bold">2</div>
-                    <span className="ml-2 text-sm text-gray-600">Choose from their menu</span>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="w-6 h-6 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center text-xs font-bold">3</div>
-                    <span className="ml-2 text-sm text-gray-600">Submit your order</span>
-                  </div>
-                </div>
               </div>
             </div>
           </div>

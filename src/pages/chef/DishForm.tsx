@@ -2,7 +2,7 @@ import { useState, useEffect, ChangeEvent, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { supabase } from '../../lib/supabase';
 import { Dish, DietaryTag } from '../../types/database.types';
-import { ArrowLeft, Upload, X, Plus, Trash2 } from 'lucide-react';
+import { Upload, X, Plus, Trash2, ChevronLeft } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -430,9 +430,9 @@ const DishForm = () => {
         <div className="mb-6 flex items-center">
           <button
             onClick={() => navigate('/chef/dishes')}
-            className="mr-4 p-2 text-gray-600 hover:text-gray-900"
+            className="mr-2 py-2 text-gray-600 hover:text-gray-900"
           >
-            <ArrowLeft size={24} />
+            <ChevronLeft size={24} />
           </button>
           <h1 className="text-2xl font-bold text-gray-900">
             {isEditMode ? 'Edit Dish' : 'Add New Dish'}
