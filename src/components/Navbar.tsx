@@ -60,7 +60,7 @@ const Navbar = ({ activePage: propActivePage }: NavbarProps) => {
                   <button 
                     className={`${activePage === 'chef-home' || activePage === 'admin-home' 
                       ? 'text-navy border-b-2 border-navy' 
-                      : 'text-gray-600 hover:text-navy'} font-light transition-colors duration-200 px-2 py-1`}
+                      : 'text-gray-600 hover:text-navy'} font-medium transition-colors duration-200 px-2 py-1`}
                   >
                     My Dashboard
                   </button>
@@ -72,7 +72,7 @@ const Navbar = ({ activePage: propActivePage }: NavbarProps) => {
                   <button 
                     className={`${activePage === 'profile' 
                       ? 'text-navy border-b-2 border-navy' 
-                      : 'text-gray-600 hover:text-navy'} font-light transition-colors duration-200 px-2 py-1`}
+                      : 'text-gray-600 hover:text-navy'} font-medium transition-colors duration-200 px-2 py-1`}
                   >
                     Profile
                   </button>
@@ -85,7 +85,7 @@ const Navbar = ({ activePage: propActivePage }: NavbarProps) => {
                   <button 
                     className={`${activePage === 'orders' 
                       ? 'text-navy border-b-2 border-navy' 
-                      : 'text-gray-600 hover:text-navy'} font-light transition-colors duration-200 px-2 py-1`}
+                      : 'text-gray-600 hover:text-navy'} font-medium transition-colors duration-200 px-2 py-1`}
                   >
                     My Orders
                   </button>
@@ -98,7 +98,7 @@ const Navbar = ({ activePage: propActivePage }: NavbarProps) => {
                   <button 
                     className={`${activePage === 'dishes' 
                       ? 'text-navy border-b-2 border-navy' 
-                      : 'text-gray-600 hover:text-navy'} font-light transition-colors duration-200 px-2 py-1`}
+                      : 'text-gray-600 hover:text-navy'} font-medium transition-colors duration-200 px-2 py-1`}
                   >
                     My Dishes
                   </button>
@@ -111,10 +111,9 @@ const Navbar = ({ activePage: propActivePage }: NavbarProps) => {
                   <button 
                     className={`${activePage === 'cart' 
                       ? 'text-navy border-b-2 border-navy' 
-                      : 'text-gray-600 hover:text-navy'} font-light transition-colors duration-200 flex items-center px-2 py-1 relative`}
+                      : 'text-gray-600 hover:text-navy'} font-medium transition-colors duration-200 flex items-center px-2 py-1 relative`}
                   >
                     <ShoppingCart size={18} className="mr-1" />
-                    Cart
                     {cartItemsCount > 0 && (
                       <span className="text-navy font-bold rounded-full h-5 w-5 flex items-center justify-center">
                         {cartItemsCount > 9 ? '9+' : cartItemsCount}

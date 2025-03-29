@@ -357,7 +357,7 @@ const UserHomePage = () => {
             .from('orders')
             .select('*')
             .eq('profile_id', user.id)
-            .order('created_at', { ascending: false })
+            .order('order_date', { ascending: false })
             .limit(3);
           
           if (ordersError) throw ordersError;
