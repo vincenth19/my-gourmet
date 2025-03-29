@@ -323,7 +323,7 @@ const PastOrdersSection = ({
   formatDate: (dateString: string) => string
 }) => {
   const totalPastOrders = Object.values(pastOrders).reduce((count, orders) => count + orders.length, 0);
-  
+
   return (
     <div className="mt-8">
       <button
@@ -386,83 +386,83 @@ const OrderTableView = ({
   formatDate: (dateString: string) => string,
   formatTime: (dateString: string) => string
 }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.5 }}
-    className="bg-white border-2 border-gray-200 p-6 mb-8"
-  >
-    <div className="flex justify-between items-center mb-6">
+          className="bg-white border-2 border-gray-200 p-6 mb-8"
+        >
+          <div className="flex justify-between items-center mb-6">
       <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
       {title === "Past Orders" && (
         <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
           {orders.length}
         </span>
       )}
-    </div>
-    
+          </div>
+          
     {orders.length === 0 ? (
-      <div className="bg-gray-50 rounded-lg p-8 text-center">
+            <div className="bg-gray-50 rounded-lg p-8 text-center">
         <h3 className="text-lg font-medium text-gray-900 mb-2">{emptyMessage}</h3>
         <p className="text-gray-600 mb-4">You don't have any {title.toLowerCase()} right now.</p>
-      </div>
-    ) : (
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Order #
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Date
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Customer
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Scheduled
-              </th>
-              <th scope="col" className="relative px-6 py-3">
-                <span className="sr-only">View</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Order #
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Customer
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Scheduled
+                    </th>
+                    <th scope="col" className="relative px-6 py-3">
+                      <span className="sr-only">View</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
             {orders.map((order) => (
-              <tr 
-                key={order.id} 
+                    <tr 
+                      key={order.id} 
                 className="hover:bg-blue-50 cursor-pointer transition-colors"
-                onClick={() => navigate(`/chef/order/${order.id}?back-link=${encodeURIComponent('/chef/home')}`)}
-              >
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">
-                    {order.id.slice(0, 8).toUpperCase()}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{formatDate(order.created_at)}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{order.profile_email}</div>
-                  <div className="text-xs text-gray-500">{order.profile_contact_number}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{formatDate(order.requested_time)}</div>
-                  <div className="text-xs text-gray-500">{formatTime(order.requested_time)}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <button className="text-navy hover:text-navy-light">
-                    <ChevronRight className="h-5 w-5" />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    )}
-  </motion.div>
+                      onClick={() => navigate(`/chef/order/${order.id}?back-link=${encodeURIComponent('/chef/home')}`)}
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">
+                          {order.id.slice(0, 8).toUpperCase()}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{formatDate(order.created_at)}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{order.profile_email}</div>
+                        <div className="text-xs text-gray-500">{order.profile_contact_number}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">{formatDate(order.requested_time)}</div>
+                        <div className="text-xs text-gray-500">{formatTime(order.requested_time)}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button className="text-navy hover:text-navy-light">
+                          <ChevronRight className="h-5 w-5" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </motion.div>
 );
 
 const ChefHomePage = () => {
@@ -566,7 +566,10 @@ const ChefHomePage = () => {
       upcoming: {}
     };
     
-    orders.forEach(order => {
+    // Only show non-pending orders (i.e., filter out pending orders)
+    const nonPendingOrders = orders.filter(order => order.order_status !== 'pending');
+    
+    nonPendingOrders.forEach(order => {
       const orderDate = new Date(order.requested_time);
       const dateKey = formatDate(order.requested_time);
       

@@ -63,6 +63,9 @@ DECLARE
     chef_asian_name VARCHAR;
     chef_sydney_name VARCHAR;
     
+    -- Reference date (March 29, 2025 11:57 PM)
+    reference_date TIMESTAMP := CURRENT_TIMESTAMP;
+    
 BEGIN
     -- Fetch the first two dishes for each chef
     SELECT id INTO chef_western_dish1 FROM public.dishes WHERE chef_id = chef_western_id LIMIT 1;
@@ -95,12 +98,13 @@ BEGIN
     
     -- Create orders for customer 1
     
-    -- 1. PENDING order with chef_western (including custom dish)
+    -- 1. PENDING order with chef_western (including custom dish) - FUTURE PENDING ORDER
     INSERT INTO public.orders (
         id, profile_id, profile_email, profile_contact_number, chef_id, chef_name,
         address_line, city, state, zip_code, access_note,
         payment_method_type, payment_details,
-        order_date, order_status, payment_status, total_amount, is_asap, requested_time
+        order_date, order_status, payment_status, total_amount, is_asap, requested_time,
+        is_hidden
     ) VALUES (
         customer1_pending_id, 
         customer1_id, 
@@ -115,12 +119,13 @@ BEGIN
         customer1_access_note,
         'card', 
         'Visa ending in 4242',
-        CURRENT_DATE, 
+        reference_date::date, 
         'pending', 
         'paid', 
         125.75, 
         false, 
-        CURRENT_TIMESTAMP + interval '2 days'
+        reference_date + interval '2 days' + interval '4 hours',
+        true
     );
     
     -- Add a regular dish to the pending order
@@ -151,7 +156,7 @@ BEGIN
         'I have a mild garlic allergy, please use minimal garlic'
     );
     
-    -- 2. ACCEPTED order with chef_western (previously COMPLETED)
+    -- 2. ACCEPTED order with chef_western (PAST ORDER 1)
     INSERT INTO public.orders (
         id, profile_id, profile_email, profile_contact_number, chef_id, chef_name,
         address_line, city, state, zip_code, access_note,
@@ -171,12 +176,12 @@ BEGIN
         customer1_access_note,
         'card', 
         'Visa ending in 4242',
-        CURRENT_DATE - interval '10 days', 
+        reference_date::date - interval '3 days', 
         'accepted', 
         'paid', 
         86.50, 
         true, 
-        CURRENT_TIMESTAMP - interval '10 days'
+        reference_date + interval '2 days' + interval '3 hours'
     );
     
     -- Add dishes to the accepted order
@@ -209,7 +214,7 @@ BEGIN
         '{"types": []}'
     );
     
-    -- 3. ACCEPTED order with chef_sydney (previously COMPLETED)
+    -- 3. ACCEPTED order with chef_sydney (PAST ORDER 2)
     INSERT INTO public.orders (
         id, profile_id, profile_email, profile_contact_number, chef_id, chef_name,
         address_line, city, state, zip_code, access_note,
@@ -229,12 +234,12 @@ BEGIN
         customer1_access_note,
         'card', 
         'Visa ending in 4242',
-        CURRENT_DATE - interval '15 days', 
+        reference_date::date - interval '5 days', 
         'accepted', 
         'paid', 
         97.48, 
         false, 
-        CURRENT_TIMESTAMP - interval '15 days'
+        reference_date - interval '5 days' + interval '8 hours'
     );
     
     -- Add dishes to the accepted order
@@ -260,7 +265,7 @@ BEGIN
         '{"option": ["Add cheese", "Gluten-free bun"]}'
     );
     
-    -- 4. REJECTED order with chef_asian
+    -- 4. ACCEPTED order with chef_asian (PAST ORDER 3)
     INSERT INTO public.orders (
         id, profile_id, profile_email, profile_contact_number, chef_id, chef_name,
         address_line, city, state, zip_code, access_note,
@@ -280,15 +285,15 @@ BEGIN
         customer1_access_note,
         'card', 
         'Visa ending in 4242',
-        CURRENT_DATE - interval '5 days', 
+        reference_date::date - interval '1 day', 
         'accepted', 
         'paid', 
         68.00, 
         true, 
-        CURRENT_TIMESTAMP - interval '5 days'
+        reference_date - interval '1 day' + interval '6 hours'
     );
     
-    -- Add dishes to the rejected order
+    -- Add dishes to the accepted order
     INSERT INTO public.order_dishes (
         order_id, dish_name, quantity, dish_price, customization_options
     ) VALUES (
@@ -299,13 +304,12 @@ BEGIN
         '{"option": ["Extra pancakes", "Extra crispy skin", "Spring onion garnish"]}'
     );
     
-    -- 5. CANCELLED order with chef_sydney
+    -- 5. ACCEPTED order with chef_sydney (FUTURE ACCEPTED ORDER)
     INSERT INTO public.orders (
         id, profile_id, profile_email, profile_contact_number, chef_id, chef_name,
         address_line, city, state, zip_code, access_note,
         payment_method_type, payment_details,
-        order_date, order_status, payment_status, total_amount, is_asap, requested_time,
-        cancellation_fee, original_amount
+        order_date, order_status, payment_status, total_amount, is_asap, requested_time
     ) VALUES (
         customer1_cancelled_id, 
         customer1_id, 
@@ -320,17 +324,15 @@ BEGIN
         customer1_access_note,
         'card', 
         'Visa ending in 4242',
-        CURRENT_DATE - interval '3 days', 
-        'cancelled', 
+        reference_date::date, 
+        'accepted', 
         'paid', 
-        50.00,  -- Cancellation fee
+        121.98,
         false, 
-        CURRENT_TIMESTAMP - interval '3 days',
-        50.00,  -- Cancellation fee
-        121.98  -- Original amount
+        reference_date + interval '1 day' + interval '2 hours'
     );
     
-    -- Add dishes to the cancelled order (including a custom dish)
+    -- Add dishes to the future accepted order
     INSERT INTO public.order_dishes (
         order_id, dish_name, quantity, dish_price, customization_options
     ) VALUES (
@@ -341,7 +343,7 @@ BEGIN
         '{"option": ["Medium Rare", "Quandong glaze", "Additional finger lime"]}'
     );
     
-    -- Add custom dish to cancelled order
+    -- Add custom dish to future accepted order
     INSERT INTO public.order_dishes (
         order_id, dish_name, quantity, dish_price, custom_dish_name, custom_description, custom_price
     ) VALUES (
@@ -356,7 +358,7 @@ BEGIN
     
     -- Create orders for customer 2
     
-    -- 1. PENDING order with chef_sydney
+    -- 1. PENDING order with chef_sydney (FUTURE PENDING ORDER)
     INSERT INTO public.orders (
         id, profile_id, profile_email, profile_contact_number, chef_id, chef_name,
         address_line, city, state, zip_code, access_note,
@@ -376,12 +378,12 @@ BEGIN
         customer2_access_note,
         'card', 
         'Visa ending in 4242',
-        CURRENT_DATE, 
+        reference_date::date, 
         'pending', 
         'paid', 
         93.98, 
         false, 
-        CURRENT_TIMESTAMP + interval '1 day'
+        reference_date + interval '1 day' + interval '10 hours'
     );
     
     -- Add dishes to the pending order
@@ -402,7 +404,7 @@ BEGIN
         '{"option": ["Passion fruit topping", "Extra cream", "Extra berries"]}'
     );
     
-    -- 2. ACCEPTED order with chef_western (previously COMPLETED)
+    -- 2. ACCEPTED order with chef_western (PAST ORDER 1)
     INSERT INTO public.orders (
         id, profile_id, profile_email, profile_contact_number, chef_id, chef_name,
         address_line, city, state, zip_code, access_note,
@@ -422,12 +424,12 @@ BEGIN
         customer2_access_note,
         'card', 
         'Visa ending in 4242',
-        CURRENT_DATE - interval '12 days', 
+        reference_date::date - interval '12 days', 
         'accepted', 
         'paid', 
         108.49, 
         false, 
-        CURRENT_TIMESTAMP - interval '12 days'
+        reference_date - interval '12 days' + interval '7 hours'
     );
     
     -- Add dishes to the accepted order
@@ -458,7 +460,7 @@ BEGIN
         '{"types": []}'
     );
     
-    -- 3. ACCEPTED order with chef_western (previously COMPLETED)
+    -- 3. ACCEPTED order with chef_western (PAST ORDER 2)
     INSERT INTO public.orders (
         id, profile_id, profile_email, profile_contact_number, chef_id, chef_name,
         address_line, city, state, zip_code, access_note,
@@ -478,12 +480,12 @@ BEGIN
         customer2_access_note,
         'card', 
         'Visa ending in 4242',
-        CURRENT_DATE - interval '20 days', 
+        reference_date::date - interval '20 days', 
         'accepted', 
         'paid', 
         131.98, 
         true, 
-        CURRENT_TIMESTAMP - interval '20 days'
+        reference_date - interval '20 days' + interval '5 hours'
     );
     
     -- Add dishes to the accepted order
@@ -497,7 +499,7 @@ BEGIN
         '{"option": ["Medium", "Extra mushroom duxelles"]}'
     );
     
-    -- 4. REJECTED order with chef_western
+    -- 4. ACCEPTED order with chef_western (PAST ORDER 3)
     INSERT INTO public.orders (
         id, profile_id, profile_email, profile_contact_number, chef_id, chef_name,
         address_line, city, state, zip_code, access_note,
@@ -517,15 +519,15 @@ BEGIN
         customer2_access_note,
         'card', 
         'Visa ending in 4242',
-        CURRENT_DATE - interval '7 days', 
+        reference_date::date - interval '7 days', 
         'accepted', 
         'paid', 
         49.50, 
         false, 
-        CURRENT_TIMESTAMP - interval '7 days'
+        reference_date - interval '7 days' + interval '6 hours'
     );
     
-    -- Add dishes to the rejected order
+    -- Add dishes to the accepted order
     INSERT INTO public.order_dishes (
         order_id, dish_name, quantity, dish_price, customization_options
     ) VALUES (
@@ -536,13 +538,12 @@ BEGIN
         '{"option": ["Dairy-free option", "Caviar supplement"]}'
     );
     
-    -- 5. CANCELLED order with chef_asian
+    -- 5. ACCEPTED order with chef_asian (FUTURE ACCEPTED ORDER)
     INSERT INTO public.orders (
         id, profile_id, profile_email, profile_contact_number, chef_id, chef_name,
         address_line, city, state, zip_code, access_note,
         payment_method_type, payment_details,
-        order_date, order_status, payment_status, total_amount, is_asap, requested_time,
-        cancellation_fee, original_amount
+        order_date, order_status, payment_status, total_amount, is_asap, requested_time
     ) VALUES (
         customer2_cancelled_id, 
         customer2_id, 
@@ -557,17 +558,15 @@ BEGIN
         customer2_access_note,
         'card', 
         'Visa ending in 4242',
-        CURRENT_DATE - interval '4 days', 
-        'cancelled', 
+        reference_date::date, 
+        'accepted', 
         'paid', 
-        50.00,  -- Cancellation fee
+        62.75,
         true, 
-        CURRENT_TIMESTAMP - interval '4 days',
-        50.00,  -- Cancellation fee
-        62.75  -- Original amount
+        reference_date + interval '3 days' + interval '9 hours'
     );
     
-    -- Add dish to the cancelled order
+    -- Add dish to the future accepted order
     INSERT INTO public.order_dishes (
         order_id, dish_name, quantity, dish_price, customization_options
     ) VALUES (
@@ -578,18 +577,265 @@ BEGIN
         '{"option": ["Sashimi addition", "Less wasabi", "Extra ginger"]}'
     );
     
+    -- ADDITIONAL FUTURE ORDERS FOR CHEF MING CHEN (ASIAN CHEF)
+    
+    -- Future Order 1 for Chef Ming Chen
+    DECLARE
+        chef_ming_future1_id UUID := uuid_generate_v4();
+    BEGIN
+        INSERT INTO public.orders (
+            id, profile_id, profile_email, profile_contact_number, chef_id, chef_name,
+            address_line, city, state, zip_code, access_note,
+            payment_method_type, payment_details,
+            order_date, order_status, payment_status, total_amount, is_asap, requested_time
+        ) VALUES (
+            chef_ming_future1_id, 
+            customer1_id, 
+            customer1_email, 
+            customer1_phone, 
+            chef_asian_id, 
+            chef_asian_name,
+            customer1_address_line, 
+            customer1_city, 
+            customer1_state, 
+            customer1_zip,
+            customer1_access_note,
+            'card', 
+            'Visa ending in 4242',
+            reference_date::date, 
+            'pending', 
+            'paid', 
+            145.50,
+            false, 
+            reference_date + interval '4 days' + interval '5 hours'
+        );
+        
+        -- Add dishes to the order
+        INSERT INTO public.order_dishes (
+            order_id, dish_name, quantity, dish_price, customization_options
+        ) VALUES (
+            chef_ming_future1_id,
+            'Peking Duck Feast',
+            2,
+            72.75,
+            '{"option": ["Extra pancakes", "Extra hoisin sauce", "Spring onion garnish"]}'
+        );
+    END;
+    
+    -- Future Order 2 for Chef Ming Chen
+    DECLARE
+        chef_ming_future2_id UUID := uuid_generate_v4();
+    BEGIN
+        INSERT INTO public.orders (
+            id, profile_id, profile_email, profile_contact_number, chef_id, chef_name,
+            address_line, city, state, zip_code, access_note,
+            payment_method_type, payment_details,
+            order_date, order_status, payment_status, total_amount, is_asap, requested_time
+        ) VALUES (
+            chef_ming_future2_id, 
+            customer2_id, 
+            customer2_email, 
+            customer2_phone, 
+            chef_asian_id, 
+            chef_asian_name,
+            customer2_address_line, 
+            customer2_city, 
+            customer2_state, 
+            customer2_zip,
+            customer2_access_note,
+            'card', 
+            'Visa ending in 4242',
+            reference_date::date, 
+            'accepted', 
+            'paid', 
+            89.99,
+            false, 
+            reference_date + interval '5 days' + interval '7 hours'
+        );
+        
+        -- Add dishes to the order
+        INSERT INTO public.order_dishes (
+            order_id, dish_name, quantity, dish_price, customization_options
+        ) VALUES (
+            chef_ming_future2_id,
+            'Dim Sum Selection',
+            1,
+            89.99,
+            '{"option": ["Extra dumplings", "Less spicy", "Vegetarian options"]}'
+        );
+    END;
+    
+    -- Future Order 3 for Chef Ming Chen
+    DECLARE
+        chef_ming_future3_id UUID := uuid_generate_v4();
+    BEGIN
+        INSERT INTO public.orders (
+            id, profile_id, profile_email, profile_contact_number, chef_id, chef_name,
+            address_line, city, state, zip_code, access_note,
+            payment_method_type, payment_details,
+            order_date, order_status, payment_status, total_amount, is_asap, requested_time
+        ) VALUES (
+            chef_ming_future3_id, 
+            customer1_id, 
+            customer1_email, 
+            customer1_phone, 
+            chef_asian_id, 
+            chef_asian_name,
+            customer1_address_line, 
+            customer1_city, 
+            customer1_state, 
+            customer1_zip,
+            customer1_access_note,
+            'card', 
+            'Visa ending in 4242',
+            reference_date::date, 
+            'accepted', 
+            'paid', 
+            120.25,
+            false, 
+            reference_date + interval '6 days' + interval '2 hours'
+        );
+        
+        -- Add dishes to the order
+        INSERT INTO public.order_dishes (
+            order_id, dish_name, quantity, dish_price, customization_options
+        ) VALUES 
+        (
+            chef_ming_future3_id,
+            'Seafood Hot Pot',
+            1,
+            85.50,
+            '{"option": ["Extra seafood", "Medium spicy", "Add udon noodles"]}'
+        ),
+        (
+            chef_ming_future3_id,
+            'Mango Sticky Rice',
+            1,
+            34.75,
+            '{"option": ["Extra mango", "Coconut cream on side"]}'
+        );
+    END;
+    
+    -- ADDITIONAL FUTURE ORDERS FOR CHEF SYDNEY WILSON
+    
+    -- Future Order 1 for Chef Sydney Wilson
+    DECLARE
+        chef_sydney_future1_id UUID := uuid_generate_v4();
+    BEGIN
+        INSERT INTO public.orders (
+            id, profile_id, profile_email, profile_contact_number, chef_id, chef_name,
+            address_line, city, state, zip_code, access_note,
+            payment_method_type, payment_details,
+            order_date, order_status, payment_status, total_amount, is_asap, requested_time
+        ) VALUES (
+            chef_sydney_future1_id, 
+            customer2_id, 
+            customer2_email, 
+            customer2_phone, 
+            chef_sydney_id, 
+            chef_sydney_name,
+            customer2_address_line, 
+            customer2_city, 
+            customer2_state, 
+            customer2_zip,
+            customer2_access_note,
+            'card', 
+            'Visa ending in 4242',
+            reference_date::date, 
+            'pending', 
+            'paid', 
+            115.50,
+            false, 
+            reference_date + interval '7 days' + interval '6 hours'
+        );
+        
+        -- Add dishes to the order
+        INSERT INTO public.order_dishes (
+            order_id, dish_name, quantity, dish_price, customization_options
+        ) VALUES 
+        (
+            chef_sydney_future1_id,
+            'Kangaroo Fillet with Native Herbs',
+            1,
+            75.50,
+            '{"option": ["Medium rare", "Bush tomato sauce", "Extra finger lime"]}'
+        ),
+        (
+            chef_sydney_future1_id,
+            'Wattleseed Pavlova',
+            1,
+            40.00,
+            '{"option": ["Extra berries", "Macadamia crumble"]}'
+        );
+    END;
+    
+    -- Future Order 2 for Chef Sydney Wilson
+    DECLARE
+        chef_sydney_future2_id UUID := uuid_generate_v4();
+    BEGIN
+        INSERT INTO public.orders (
+            id, profile_id, profile_email, profile_contact_number, chef_id, chef_name,
+            address_line, city, state, zip_code, access_note,
+            payment_method_type, payment_details,
+            order_date, order_status, payment_status, total_amount, is_asap, requested_time
+        ) VALUES (
+            chef_sydney_future2_id, 
+            customer1_id, 
+            customer1_email, 
+            customer1_phone, 
+            chef_sydney_id, 
+            chef_sydney_name,
+            customer1_address_line, 
+            customer1_city, 
+            customer1_state, 
+            customer1_zip,
+            customer1_access_note,
+            'card', 
+            'Visa ending in 4242',
+            reference_date::date, 
+            'accepted', 
+            'paid', 
+            130.25,
+            false, 
+            reference_date + interval '8 days' + interval '4 hours'
+        );
+        
+        -- Add dishes to the order
+        INSERT INTO public.order_dishes (
+            order_id, dish_name, quantity, dish_price, customization_options
+        ) VALUES 
+        (
+            chef_sydney_future2_id,
+            'Barramundi with Bush Tucker',
+            1,
+            65.25,
+            '{"option": ["Davidson plum sauce", "Extra crispy skin", "Native herb salad"]}'
+        ),
+        (
+            chef_sydney_future2_id,
+            'Lemon Myrtle Cheesecake',
+            1,
+            35.00,
+            '{"option": ["Macadamia crust", "Extra berry coulis"]}'
+        ),
+        (
+            chef_sydney_future2_id,
+            'Quandong Spritz',
+            1,
+            30.00,
+            '{"option": ["Less sweet", "Extra quandong"]}'
+        );
+    END;
+    
     -- Verify order distribution across chefs:
     -- Chef Western: 5 orders (2 for customer1, 3 for customer2)
-    -- Chef Asian: 2 orders (1 for customer1, 1 for customer2)
-    -- Chef Sydney: 3 orders (2 for customer1, 1 for customer2)
+    -- Chef Asian: 5 orders (3 for customer1, 2 for customer2) - added 3 future orders
+    -- Chef Sydney: 5 orders (3 for customer1, 2 for customer2) - added 2 future orders
     
-    -- Verify custom dishes:
-    -- Customer1 has custom dishes in pending, completed and cancelled orders
-    -- As required in the specifications
-    
-    RAISE NOTICE 'Successfully created 10 orders (5 for each customer) distributed across chefs';
+    RAISE NOTICE 'Successfully created 10 orders with 3 past orders, 1 future accepted order, and 1 future pending order per customer';
+    RAISE NOTICE 'Reference date used: %', reference_date;
     RAISE NOTICE 'Chef Western: 5 orders';
-    RAISE NOTICE 'Chef Asian: 2 orders';
-    RAISE NOTICE 'Chef Sydney: 3 orders';
+    RAISE NOTICE 'Chef Asian: 5 orders';
+    RAISE NOTICE 'Chef Sydney: 5 orders';
     
 END $$; 
