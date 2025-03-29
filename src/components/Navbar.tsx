@@ -65,7 +65,7 @@ const Navbar = ({ activePage: propActivePage }: NavbarProps) => {
                 ? "bg-blue-100 md:bg-transparent md:rounded-none md:text-navy md:relative md:after:content-[''] md:after:absolute md:after:bottom-0 md:after:left-0 after:w-full md:after:h-[2px] md:after:bg-black"
                 : 'text-gray-600 hover:text-navy'} flex items-center font-medium transition-colors duration-200 px-2 py-1 ${isMobile ? 'w-full text-left mb-2' : ''}`}
             >
-              <LayoutDashboard size={isMobile ? 30 : 18} className={"mr-2"} />
+              <LayoutDashboard size={18} className={"mr-2"} />
               Dashboard
             </button>
           </Link>
