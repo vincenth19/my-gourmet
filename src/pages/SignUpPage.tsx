@@ -7,7 +7,7 @@ import logoBnw from '../assets/logo-w-text-bnw.svg';
 import PaymentMethodForm from '../components/PaymentMethodForm';
 import { PaymentMethod } from '../types/database.types';
 import Footer from '../components/Footer';
-
+import { ChevronLeft } from 'lucide-react';
 const SignUpPage = () => {
   // Track the current step of the signup flow
   const [step, setStep] = useState(1);
@@ -386,7 +386,16 @@ const SignUpPage = () => {
     <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
       <div className="space-y-6">
         {/* Payment Method */}
-        <div className="bg-gray-50  p-6">
+        <div className="bg-gray-50 p-6">
+          <button
+            type="button"
+            onClick={handleBack}
+            className="mb-4 flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-navy transition-colors duration-200"
+            disabled={loading}
+          >
+            <ChevronLeft size={18} className={"mr-2"} />
+            Back
+          </button>
           <h3 className="text-lg font-medium text-gray-900 mb-4">Payment Method</h3>
           <PaymentMethodForm
             initialValues={paymentDetails}
@@ -396,22 +405,13 @@ const SignUpPage = () => {
         </div>
       </div>
 
-      <div className="flex flex-col space-y-3">
+      <div className="flex flex-col space-y-3">        
         <button
           type="submit"
           className="group relative w-full flex justify-center py-3 px-4 border border-transparent  text-white bg-navy hover:bg-navy-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-navy transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={loading}
         >
           {loading ? 'Creating account...' : 'Create Account'}
-        </button>
-        
-        <button
-          type="button"
-          onClick={handleBack}
-          className="w-full flex justify-center py-3 px-4 border border-gray-300  text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-navy transition-colors duration-200"
-          disabled={loading}
-        >
-          Back
         </button>
       </div>
     </form>
@@ -443,7 +443,7 @@ const SignUpPage = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="max-w-md w-full space-y-8"
+          className="max-w-lg w-full space-y-8"
         >
           <div className="text-center">
             <h2 className="text-3xl font-light text-gray-900 mb-2 mt-10">Create Your Account</h2>

@@ -198,7 +198,7 @@ const PaymentMethodForm = ({ initialValues = {}, onChange, disabled = false, cla
         )}
       </div>
       
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label htmlFor="expiry_date" className="block text-sm font-medium text-gray-700 mb-1">
             Expiry Date

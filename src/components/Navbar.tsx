@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router";
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import logoBnw from '../assets/logo-w-text-bnw.svg';
-import { LogOut, ShoppingCart, Menu, Rows3Icon, User, ChefHat, LayoutDashboard } from "lucide-react";
+import { LogOut, ShoppingCart, Menu, User, ChefHat, LayoutDashboard, ReceiptText } from "lucide-react";
 import NotificationBell from './NotificationBell';
 import NotificationSubscription from './NotificationSubscription';
 import { Toaster } from 'react-hot-toast';
@@ -62,11 +62,11 @@ const Navbar = ({ activePage: propActivePage }: NavbarProps) => {
           <Link to={userRole === 'chef' ? '/chef/home' : '/admin/home'} onClick={isMobile ? handleLinkClick : undefined}>
             <button 
               className={`${activePage === 'chef-home' || activePage === 'admin-home' 
-                ? 'bg-blue-100 md:bg-transparent md:rounded-none  p-2 md:p-0 md:text-navy md:border-b-2 md:border-navy rounded-md'
+                ? "bg-blue-100 md:bg-transparent md:rounded-none md:text-navy md:relative md:after:content-[''] md:after:absolute md:after:bottom-0 md:after:left-0 after:w-full md:after:h-[2px] md:after:bg-black"
                 : 'text-gray-600 hover:text-navy'} flex items-center font-medium transition-colors duration-200 px-2 py-1 ${isMobile ? 'w-full text-left mb-2' : ''}`}
             >
-              <LayoutDashboard size={18} className={"mr-2"} />
-              My Dashboard
+              <LayoutDashboard size={isMobile ? 30 : 18} className={"mr-2"} />
+              Dashboard
             </button>
           </Link>
         )}
@@ -76,7 +76,7 @@ const Navbar = ({ activePage: propActivePage }: NavbarProps) => {
           <Link to="/profile" onClick={isMobile ? handleLinkClick : undefined}>
             <button 
               className={`${activePage === 'profile' 
-                ? 'bg-blue-100 md:bg-transparent md:rounded-none  p-2 md:p-0 md:text-navy md:border-b-2 md:border-navy rounded-md'
+                ? "bg-blue-100 md:bg-transparent md:rounded-none md:text-navy md:relative md:after:content-[''] md:after:absolute md:after:bottom-0 md:after:left-0 after:w-full md:after:h-[2px] md:after:bg-black"
                 : 'text-gray-600 hover:text-navy'} flex items-center font-medium transition-colors duration-200 px-2 py-1 ${isMobile ? 'w-full text-left mb-2' : ''}`}
             >
               <User size={18} className={"mr-2"} />
@@ -90,11 +90,11 @@ const Navbar = ({ activePage: propActivePage }: NavbarProps) => {
           <Link to="/orders" onClick={isMobile ? handleLinkClick : undefined}>
             <button 
               className={`${activePage === 'orders' 
-                ? 'bg-blue-100 md:bg-transparent md:rounded-none  p-2 md:p-0 md:text-navy md:border-b-2 md:border-navy rounded-md'
+                ? "bg-blue-100 md:bg-transparent md:rounded-none md:text-navy md:relative md:after:content-[''] md:after:absolute md:after:bottom-0 md:after:left-0 after:w-full md:after:h-[2px] md:after:bg-black"
                 : 'text-gray-600 hover:text-navy'} flex items-center font-medium transition-colors duration-200 px-2 py-1 ${isMobile ? 'w-full text-left mb-2' : ''}`}
             >
-              <Rows3Icon size={18} className={"mr-2"} />
-              My Orders
+              <ReceiptText size={18} className={"mr-2"} />
+              Orders
             </button>
           </Link>
         )}
@@ -104,11 +104,11 @@ const Navbar = ({ activePage: propActivePage }: NavbarProps) => {
           <Link to="/chef/dishes" onClick={isMobile ? handleLinkClick : undefined}>
             <button 
               className={`${activePage === 'dishes' 
-                ? 'bg-blue-100 md:bg-transparent md:rounded-none  p-2 md:p-0 md:text-navy md:border-b-2 md:border-navy rounded-md'
+                ? "bg-blue-100 md:bg-transparent md:rounded-none md:text-navy md:relative md:after:content-[''] md:after:absolute md:after:bottom-0 md:after:left-0 after:w-full md:after:h-[2px] md:after:bg-black"
                 : 'text-gray-600 hover:text-navy'} flex items-center font-medium transition-colors duration-200 px-2 py-1 ${isMobile ? 'w-full text-left mb-2' : ''}`}
             >
               <ChefHat size={18} className={"mr-2"} />
-              My Dishes
+              Dishes
             </button>
           </Link>
         )}
@@ -118,7 +118,7 @@ const Navbar = ({ activePage: propActivePage }: NavbarProps) => {
           <Link to="/cart" onClick={isMobile ? handleLinkClick : undefined}>
             <button 
               className={`${activePage === 'cart' 
-                ? 'bg-blue-100 md:bg-transparent md:rounded-none  p-2 md:p-0 md:text-navy md:border-b-2 md:border-navy rounded-md'
+                ? "bg-blue-100 md:bg-transparent md:rounded-none md:text-navy md:relative md:after:content-[''] md:after:absolute md:after:bottom-0 md:after:left-0 after:w-full md:after:h-[2px] md:after:bg-black"
                 : 'text-gray-600 hover:text-navy'} font-medium transition-colors duration-200 flex items-center px-2 py-1 ${isMobile ? 'mb-2' : ''} relative`}
             >
               <ShoppingCart size={18} className={isMobile ? "mr-2" : "mr-1"} />
@@ -136,7 +136,7 @@ const Navbar = ({ activePage: propActivePage }: NavbarProps) => {
           <Link to="/notifications" onClick={isMobile ? handleLinkClick : undefined}>
             <button 
               className={`${activePage === 'notifications' 
-                ? 'bg-blue-100 md:bg-transparent md:rounded-none md:p-0 md:text-navy md:border-b-2 md:border-navy'
+                ? "bg-blue-100 md:bg-transparent md:rounded-none md:p-0 md:text-navy md:relative md:after:content-[''] md:after:absolute md:after:bottom-0 md:after:left-0 after:w-full md:after:h-[2px] md:after:bg-black"
                 : 'text-gray-600 hover:text-navy'} font-medium transition-colors duration-200 flex items-center w-full text-left`}
                 >
               <NotificationBell onClick={handleLinkClick} />

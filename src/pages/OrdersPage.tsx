@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { format } from 'date-fns';
-import { Clock, ChefHat, Calendar, ArrowUpRight, Search } from 'lucide-react';
+import { Clock, Calendar, ArrowUpRight, Search } from 'lucide-react';
 
 const OrdersPage = () => {
   const navigate = useNavigate();
@@ -183,7 +183,6 @@ const OrdersPage = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <ChefHat className="h-4 w-4 text-gray-400 mr-2" />
                           <div className="text-sm text-gray-900">{order.chef_name}</div>
                         </div>
                       </td>

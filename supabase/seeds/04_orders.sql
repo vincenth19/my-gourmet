@@ -120,7 +120,7 @@ BEGIN
         'Visa ending in 4242',
         reference_date::date, 
         'pending', 
-        'paid', 
+        'unpaid', 
         125.75, 
         false, 
         reference_date + interval '2 days' + interval '4 hours'
@@ -378,7 +378,7 @@ BEGIN
         'Visa ending in 4242',
         reference_date::date, 
         'pending', 
-        'paid', 
+        'unpaid', 
         93.98, 
         false, 
         reference_date + interval '1 day' + interval '10 hours'
@@ -480,7 +480,7 @@ BEGIN
         'Visa ending in 4242',
         reference_date::date - interval '20 days', 
         'accepted', 
-        'paid', 
+        'unpaid', 
         131.98, 
         true, 
         reference_date - interval '20 days' + interval '5 hours'
@@ -602,7 +602,7 @@ BEGIN
             'Visa ending in 4242',
             reference_date::date, 
             'pending', 
-            'paid', 
+            'unpaid', 
             145.50,
             false, 
             reference_date + interval '4 days' + interval '5 hours'
@@ -741,7 +741,7 @@ BEGIN
             'Visa ending in 4242',
             reference_date::date, 
             'pending', 
-            'paid', 
+            'unpaid', 
             115.50,
             false, 
             reference_date + interval '7 days' + interval '6 hours'
@@ -792,7 +792,7 @@ BEGIN
             'Visa ending in 4242',
             reference_date::date, 
             'accepted', 
-            'paid', 
+            'unpaid', 
             130.25,
             false, 
             reference_date + interval '8 days' + interval '4 hours'

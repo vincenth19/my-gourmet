@@ -356,11 +356,11 @@ const OrderConfirmationPage = () => {
                     </div>
                   )}
                   
-                  <div className="mt-8 text-center">
+                  <div className="mt-8 flex flex-col md:flex-row justify-between gap-4">
                     {canCancel && (
                       <button
                         onClick={() => setShowCancelModal(true)}
-                        className="mb-4 w-full bg-red-500 text-white px-8 py-3 rounded-lg hover:bg-red-600 transition-colors"
+                        className="border-1 border-red-500 text-red-500 px-4 py-2 hover:bg-red-50 transition-colors"
                       >
                         Cancel Order
                       </button>
@@ -368,7 +368,7 @@ const OrderConfirmationPage = () => {
                     
                     <button
                       onClick={() => navigate(backLink)}
-                      className="bg-navy text-white px-8 py-3 rounded-lg hover:bg-navy-light transition-colors"
+                      className="bg-navy text-white px-4 py-2 hover:bg-navy-light transition-colors"
                     >
                       {getBackButtonText()}
                     </button>
@@ -381,8 +381,8 @@ const OrderConfirmationPage = () => {
         
         {/* Cancellation Confirmation Modal */}
         {showCancelModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg max-w-md w-full p-6">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-4">
+            <div className="bg-white max-w-md w-full p-6">
               <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center">
                   <AlertCircle className="h-6 w-6 text-red-500 mr-2" />
@@ -409,7 +409,7 @@ const OrderConfirmationPage = () => {
                           Cancellation Fee Applies
                         </p>
                         <p className="text-sm text-red-700 mt-1">
-                          This order has already been accepted by the chef. A $50 cancellation fee will be charged.
+                          This order has already been accepted by the chef. A <strong>$50</strong> cancellation fee will be charged.
                         </p>
                       </div>
                     </div>
@@ -417,19 +417,20 @@ const OrderConfirmationPage = () => {
                 )}
               </div>
               
-              <div className="flex justify-end space-x-3">
-                <button
-                  onClick={() => setShowCancelModal(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                >
-                  No, Keep Order
-                </button>
+              <div className="flex flex-col md:flex-row md:justify-between space-y-2 md:space-y-0 md:space-x-3">
+                
                 <button
                   onClick={handleCancelOrder}
                   disabled={cancellingOrder}
-                  className="px-4 py-2 bg-red-600 rounded-md text-white hover:bg-red-700 disabled:opacity-50"
+                  className="px-4 py-2 border border-red-500 text-red-500 hover:bg-red-50 disabled:opacity-50"
                 >
-                  {cancellingOrder ? 'Cancelling...' : 'Yes, Cancel Order'}
+                  {cancellingOrder ? 'Cancelling...' : 'Cancel Order'}
+                </button>
+                <button
+                  onClick={() => setShowCancelModal(false)}
+                  className="px-4 py-2 border bg-navy text-white hover:bg-navy-light"
+                >
+                  Keep Order
                 </button>
               </div>
             </div>
