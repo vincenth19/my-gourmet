@@ -330,16 +330,16 @@ const PastOrdersSection = ({
         onClick={() => setShowPastOrders(!showPastOrders)}
         className="flex items-center justify-between w-full bg-gray-100 hover:bg-gray-200 p-4 transition-colors"
       >
-        <div className="flex items-center">
-          <h3 className="text-lg font-semibold text-gray-700">Past Orders</h3>
+        <h3 className="text-lg font-semibold text-gray-700">Past Orders</h3>
+        <div className="flex items-center gap-2">
           <span className="ml-2 bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full text-xs">
             {totalPastOrders}
           </span>
+          {showPastOrders ? 
+            <ChevronUp className="h-5 w-5 text-gray-500" /> : 
+            <ChevronDown className="h-5 w-5 text-gray-500" />
+          }
         </div>
-        {showPastOrders ? 
-          <ChevronUp className="h-5 w-5 text-gray-500" /> : 
-          <ChevronDown className="h-5 w-5 text-gray-500" />
-        }
       </button>
       
       {showPastOrders && (
