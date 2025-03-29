@@ -6,7 +6,6 @@ import { useCart } from '../contexts/CartContext';
 import { CartItem, Profile } from '../types/database.types';
 import { Trash2, Plus, Minus, ShoppingBag, ChevronLeft, AlertCircle, Edit } from 'lucide-react';
 import CustomDishForm from '../components/CustomDishForm';
-import Footer from '../components/Footer';
 
 const CartPage = () => {
   const navigate = useNavigate();
@@ -62,17 +61,6 @@ const CartPage = () => {
       const chefMap: Record<string, Partial<Profile>> = {};
       chefsData.forEach(chef => {
         chefMap[chef.id] = chef;
-      });
-      
-      // Assign chef data to cart items
-      const updatedCartItems = cartItems.map(item => {
-        if (item.dish_id) {
-          const dish = dishesData.find(d => d.id === item.dish_id);
-          if (dish) {
-            (item as any).chef_id = dish.chef_id;
-          }
-        }
-        return item;
       });
       
       setChefs(chefMap);
@@ -204,14 +192,6 @@ const CartPage = () => {
   const subtotal = calculateSubtotal();
   const itemsByChef = getItemsByChef();
   
-  // Interface for the data submitted by the custom dish form
-  interface CustomDishData {
-    custom_dish_name: string;
-    custom_description: string;
-    dish_note?: string;
-    quantity: number;
-  }
-  
   return (
     <div className="min-h-screen bg-gray-50">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -224,11 +204,16 @@ const CartPage = () => {
             Continue Shopping
           </button>
         </div>
-        
-        <h1 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-          Cart
-        </h1>
-        
+        <div className="bg-navy text-white p-4 mb-6">
+          <div className="flex items-center">
+            <div>
+              <h2 className="text-xl font-semibold flex items-center">
+                <span className='text-navy bg-white px-3 rounded-full text-sm w-fit font-bold mr-2'>3</span> Cart
+              </h2>
+              <p className="text-white/80 text-sm">Review your order and checkout</p>
+            </div>
+          </div>
+        </div>
         {loading ? (
           <div className="flex flex-col items-center justify-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-navy"></div>
@@ -350,7 +335,7 @@ const CartPage = () => {
                               {item.custom_dish_name && (
                                 <button
                                   onClick={() => handleEditCustomDish(item)}
-                                  className="flex items-center text-navy text-xs font-medium mt-2 hover:text-navy-light"
+                                  className="flex items-center text-navy text-xs font-medium mt-2 border-1 border-navy px-2 py-1 hover:bg-blue-50"
                                 >
                                   <Edit size={14} className="mr-1" />
                                   Edit Request
@@ -458,51 +443,56 @@ const CartPage = () => {
         
         {/* Custom Dish Edit Form Modal */}
         {showCustomDishForm && (
-          <CustomDishForm
-            initialValues={editingItem ? {
-              custom_dish_name: editingItem.custom_dish_name || '',
-              custom_description: editingItem.custom_description || '',
-              dish_note: editingItem.dish_note || '',
-              quantity: editingItem.quantity
-            } : undefined}
-            onCancel={closeCustomDishForm}
-            submitButtonText="Update Custom Dish"
-            onSubmit={(data) => {
-              if (editingItem) {
-                setUpdating(true);
-                
-                (async () => {
-                  try {
-                    const { error } = await supabase
-                      .from('cart_items')
-                      .update({
-                        custom_dish_name: data.custom_dish_name,
-                        custom_description: data.custom_description,
-                        dish_note: data.dish_note,
-                        quantity: data.quantity,
-                        dish_types: editingItem.dish_types || { types: [] },
-                      })
-                      .eq('id', editingItem.id);
-                      
-                    if (error) {
-                      console.error('Error updating custom dish:', error);
-                      alert('Failed to update your custom dish. Please try again.');
-                    } else {
-                      // Refresh cart to see updated item
-                      await refreshCart();
-                      setShowCustomDishForm(false);
-                      setEditingItem(null);
-                    }
-                  } catch (error: unknown) {
-                    console.error('Error updating custom dish:', error);
-                    alert('Failed to update your custom dish. Please try again.');
-                  } finally {
-                    setUpdating(false);
+          <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center">
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity" onClick={closeCustomDishForm}></div>
+            <div className="relative z-50 w-full max-w-md mx-auto">
+              <CustomDishForm
+                initialValues={editingItem ? {
+                  custom_dish_name: editingItem.custom_dish_name || '',
+                  custom_description: editingItem.custom_description || '',
+                  dish_note: editingItem.dish_note || '',
+                  quantity: editingItem.quantity
+                } : undefined}
+                onCancel={closeCustomDishForm}
+                submitButtonText="Update Custom Dish"
+                onSubmit={(data) => {
+                  if (editingItem) {
+                    setUpdating(true);
+                    
+                    (async () => {
+                      try {
+                        const { error } = await supabase
+                          .from('cart_items')
+                          .update({
+                            custom_dish_name: data.custom_dish_name,
+                            custom_description: data.custom_description,
+                            dish_note: data.dish_note,
+                            quantity: data.quantity,
+                            dish_types: editingItem.dish_types || { types: [] },
+                          })
+                          .eq('id', editingItem.id);
+                          
+                        if (error) {
+                          console.error('Error updating custom dish:', error);
+                          alert('Failed to update your custom dish. Please try again.');
+                        } else {
+                          // Refresh cart to see updated item
+                          await refreshCart();
+                          setShowCustomDishForm(false);
+                          setEditingItem(null);
+                        }
+                      } catch (error: unknown) {
+                        console.error('Error updating custom dish:', error);
+                        alert('Failed to update your custom dish. Please try again.');
+                      } finally {
+                        setUpdating(false);
+                      }
+                    })();
                   }
-                })();
-              }
-            }}
-          />
+                }}
+              />
+            </div>
+          </div>
         )}
       </main>
     </div>

@@ -24,12 +24,14 @@ import AdminHomePage from "./pages/admin/AdminHomePage.tsx";
 import NotificationsPage from "./pages/NotificationsPage.tsx";
 import { AuthProvider } from "./contexts/AuthContext.tsx";
 import { CartProvider } from "./contexts/CartContext.tsx";
+import ScrollToTop from "./components/ScrollToTop.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <AuthProvider>
       <CartProvider>
         <BrowserRouter>
+          <ScrollToTop />
           <Routes>
             <Route path="/" element={<App />} />
             <Route path="/sign-in" element={<LoginPage />} />

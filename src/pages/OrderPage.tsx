@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router';
+import { Link, useParams } from 'react-router';
 import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { Dish, Profile, DietaryTag } from '../types/database.types';
-import { FilePlus } from 'lucide-react';
+import { ChevronLeft, FilePlus } from 'lucide-react';
 import CustomDishForm from '../components/CustomDishForm';
 import DishModal from '../components/DishModal';
 import { useCart } from '../contexts/CartContext';
@@ -498,15 +498,29 @@ const OrderPage = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16">
-            <div className="w-16 h-16 border-4 border-navy border-t-transparent rounded-full animate-spin"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-navy"></div>
             <p className="mt-4 text-gray-600">Loading chef's menu...</p>
           </div>
         ) : chef ? (
           <>
-            <div className="bg-navy text-white p-4 mb-6 flex items-center justify-between">
+            <Link to="/home" onClick={() => {
+              setTimeout(() => {
+                const chefsSection = document.getElementById('chefs-section');
+                if (chefsSection) {
+                  chefsSection.scrollIntoView({ behavior: 'smooth' });
+                }
+              }, 100);
+            }}>
+              <span className="text-navy py-1 flex items-center">
+                <ChevronLeft className="h-5 w-5 mr-2" />Back to Chef Selection
+              </span>
+            </Link>
+            <div className="bg-navy text-white p-4 mb-6 mt-3">
               <div className="flex items-center">
                 <div>
-                  <h2 className="text-xl font-semibold">Select Your Dishes</h2>
+                <h2 className="text-xl font-semibold flex items-center">
+                  <span className='text-navy bg-white px-3 rounded-full text-sm w-fit font-bold mr-2'>2</span> Select Your Dishes
+                </h2>
                   <p className="text-white/80 text-sm">Choose from our delicious selection or request a custom dish</p>
                   <p className="text-white/80 text-sm mt-2">
                     If you have more than 50 guests, please contact us via email at{" "}
@@ -518,14 +532,6 @@ const OrderPage = () => {
                     (+61) 456-7890
                     </a>
                   </p>
-                </div>
-              </div>
-              <div className="hidden md:flex items-center">
-                <span className="text-white/90 mr-2 text-sm">Step 2 of 3</span>
-                <div className="flex space-x-1">
-                  <div className="w-8 h-1.5 bg-white rounded-full"></div>
-                  <div className="w-8 h-1.5 bg-white rounded-full"></div>
-                  <div className="w-8 h-1.5 bg-white/30 rounded-full"></div>
                 </div>
               </div>
             </div>

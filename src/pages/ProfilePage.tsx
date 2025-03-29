@@ -868,14 +868,14 @@ const ProfilePage = () => {
                       <div className="flex space-x-2">
                         <button
                           onClick={() => editAddress(address)}
-                          className="text-navy hover:text-navy-light text-sm border-navy border px-2 py-1"
+                          className="text-navy hover:text-navy-light hover:bg-blue-50 text-sm border-navy border px-2 py-1"
                         >
                           Edit
                         </button>
                         {address.id !== profile?.default_address && (
                         <button
                           onClick={() => setDefaultAddress(address.id)}
-                          className="text-gray-600 hover:text-navy text-sm flex items-center border-navy border px-2 py-1"
+                          className="text-gray-600 hover:text-navy hover:bg-blue-50 text-sm flex items-center border-navy border px-2 py-1"
                         >
                           Set as Default
                         </button>
@@ -883,7 +883,7 @@ const ProfilePage = () => {
                       </div>
                       <button
                         onClick={() => deleteAddress(address.id)}
-                        className="text-red-500 hover:text-red-700 text-sm border-red-500 border px-2 py-1"
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50 text-sm border-red-500 border px-2 py-1"
                       >
                         Delete
                       </button>                      

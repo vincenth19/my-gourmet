@@ -5,7 +5,7 @@ import Navbar from "../components/Navbar";
 const AppLayout = () => {
   return (
     <ProtectedRoute>
-      <div className="min-h-screen overflow-y-auto">
+      <div className="min-h-screen">
         <Navbar />
         <div>
           <Outlet />

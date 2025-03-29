@@ -109,7 +109,6 @@ export default function DietaryPreferences({
               className={`ml-2 text-sm text-gray-700 ${readOnly ? 'cursor-not-allowed' : ''}`}
             >
               {tag.label}
-              {tag.value && <span className="text-xs text-gray-500 ml-1">({tag.value})</span>}
             </label>
           </div>
         ))}

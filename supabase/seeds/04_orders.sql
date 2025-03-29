@@ -103,8 +103,7 @@ BEGIN
         id, profile_id, profile_email, profile_contact_number, chef_id, chef_name,
         address_line, city, state, zip_code, access_note,
         payment_method_type, payment_details,
-        order_date, order_status, payment_status, total_amount, is_asap, requested_time,
-        is_hidden
+        order_date, order_status, payment_status, total_amount, is_asap, requested_time
     ) VALUES (
         customer1_pending_id, 
         customer1_id, 
@@ -124,8 +123,7 @@ BEGIN
         'paid', 
         125.75, 
         false, 
-        reference_date + interval '2 days' + interval '4 hours',
-        true
+        reference_date + interval '2 days' + interval '4 hours'
     );
     
     -- Add a regular dish to the pending order

@@ -46,7 +46,7 @@ const Navbar = ({ activePage: propActivePage }: NavbarProps) => {
 
   return (
     <>
-      <nav className="bg-white shadow-sm">
+      <nav className="bg-white border-b-1 border-b-gray-300 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">

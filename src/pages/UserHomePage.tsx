@@ -264,22 +264,16 @@ const ChefsSection = ({
     className="mb-10"
   >
     {/* Add banner to indicate this is step 1 */}
-    <div className="bg-navy text-white p-4 mb-6 flex items-center justify-between">
+    <div className="bg-navy text-white p-4 mb-6">
       <div className="flex items-center">
-                <div>
-          <h2 className="text-xl font-semibold">Start Your Order Here</h2>
+        <div>
+          <h2 className="text-xl font-semibold flex items-center">
+            <span className='text-navy bg-white px-3 rounded-full text-sm w-fit font-bold mr-2'>1</span> Hire a Chef
+          </h2>
           <p className="text-white/80 text-sm">Select a chef to view their menu and place an order</p>
-                </div>
-              </div>
-      <div className="hidden md:flex items-center">
-        <span className="text-white/90 mr-2 text-sm">Step 1 of 3</span>
-        <div className="flex space-x-1">
-          <div className="w-8 h-1.5 bg-white rounded-full"></div>
-          <div className="w-8 h-1.5 bg-white/30 rounded-full"></div>
-          <div className="w-8 h-1.5 bg-white/30 rounded-full"></div>
-                </div>
-              </div>
-            </div>
+        </div>
+      </div>
+    </div>
     
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
       {loading ? (

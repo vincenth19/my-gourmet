@@ -111,5 +111,10 @@ VALUES
 ('d4444444-d444-d444-d444-d44444444444', 'Nut Free', 'nut-free'),
 ('d5555555-d555-d555-d555-d55555555555', 'Dairy Free', 'dairy-free'),
 ('d6666666-d666-d666-d666-d66666666666', 'Seafood', 'seafood'),
-('d7777777-d777-d777-d777-d77777777777', 'Spicy', 'spicy')
+('d7777777-d777-d777-d777-d77777777777', 'Spicy', 'spicy'),
+('d8888888-d888-d888-d888-d88888888888', 'Low Carb', 'low-carb'),
+('d9999999-d999-d999-d999-d99999999999', 'High Protein', 'high-protein'),
+('da000000-da00-da00-da00-da0000000000', 'Low Fat', 'low-fat'),
+('db000000-db00-db00-db00-db0000000000', 'Keto Friendly', 'keto-friendly'),
+('dc000000-dc00-dc00-dc00-dc0000000000', 'Paleo Friendly', 'paleo-friendly')
 ON CONFLICT DO NOTHING;
