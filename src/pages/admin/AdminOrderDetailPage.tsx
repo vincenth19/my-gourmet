@@ -3,7 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { format } from 'date-fns';
-import { ArrowLeft, MapPin, Calendar, User, PhoneCall, Mail, CreditCard } from 'lucide-react';
+import { MapPin, Calendar, User, PhoneCall, Mail, CreditCard, ChevronLeft } from 'lucide-react';
 
 interface OrderDish {
   id: string;
@@ -367,7 +367,7 @@ const AdminOrderDetailPage = () => {
             onClick={() => navigate(backLink)} 
             className="flex items-center text-navy hover:text-navy-light"
           >
-            <ArrowLeft className="h-5 w-5 mr-1" />
+            <ChevronLeft className="h-5 w-5 mr-1" />
             {getBackButtonText()}
           </button>
         </div>
@@ -599,7 +599,7 @@ const AdminOrderDetailPage = () => {
                           <button
                             onClick={() => updateCustomDishPrice(dish.id)}
                             disabled={editingPrices[dish.id] === undefined || savingPrices || order.order_status !== 'pending'}
-                            className="bg-navy text-white px-3 py-1 rounded text-sm hover:bg-navy-light transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="bg-navy text-white px-3 py-1 text-sm hover:bg-navy-light transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {savingPrices ? 'Saving...' : (dish.custom_price ? 'Update Price' : 'Set Price')}
                           </button>

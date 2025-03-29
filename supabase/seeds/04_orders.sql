@@ -402,6 +402,21 @@ BEGIN
         '{"option": ["Passion fruit topping", "Extra cream", "Extra berries"]}'
     );
     
+    -- Add a custom dish to the pending order
+    INSERT INTO public.order_dishes (
+        order_id, dish_id, chef_id, dish_name, quantity, dish_price, custom_dish_name, custom_description, dish_note
+    ) VALUES (
+        customer2_pending_id,
+        NULL, -- Custom dish has no dish_id reference
+        chef_sydney_id,
+        'Custom Dish Request',
+        1,
+        0.00,  -- Price will be set by chef later
+        'Native Herb Infused Barramundi',
+        'Fresh barramundi infused with native Australian herbs, including lemon myrtle and mountain pepper. Preferably grilled.',
+        'I prefer the fish to be on the less spicy side and would like to have a side of native greens if possible.'
+    );
+    
     -- 2. ACCEPTED order with chef_western (PAST ORDER 1)
     INSERT INTO public.orders (
         id, profile_id, profile_email, profile_contact_number, chef_id, chef_name,
@@ -618,6 +633,21 @@ BEGIN
             72.75,
             '{"option": ["Extra pancakes", "Extra hoisin sauce", "Spring onion garnish"]}'
         );
+        
+        -- Add a custom dish to the pending order
+        INSERT INTO public.order_dishes (
+            order_id, dish_id, chef_id, dish_name, quantity, dish_price, custom_dish_name, custom_description, dish_note
+        ) VALUES (
+            chef_ming_future1_id,
+            NULL, -- Custom dish has no dish_id reference
+            chef_asian_id,
+            'Custom Dish Request',
+            1,
+            0.00,  -- Price will be set by chef later
+            'Szechuan Flavored Fish',
+            'A traditional Chinese fish dish with Szechuan peppers and aromatic spices. Preferably with a tender white fish.',
+            'I like the dish to be moderately spicy, and would appreciate some steamed rice on the side.'
+        );
     END;
     
     -- Future Order 2 for Chef Ming Chen
@@ -764,6 +794,21 @@ BEGIN
             1,
             40.00,
             '{"option": ["Extra berries", "Macadamia crumble"]}'
+        );
+        
+        -- Add a custom dish to the pending order
+        INSERT INTO public.order_dishes (
+            order_id, dish_id, chef_id, dish_name, quantity, dish_price, custom_dish_name, custom_description, dish_note
+        ) VALUES (
+            chef_sydney_future1_id,
+            NULL, -- Custom dish has no dish_id reference
+            chef_sydney_id,
+            'Custom Dish Request',
+            1,
+            0.00,  -- Price will be set by chef later
+            'Crocodile Tail Special',
+            'Crocodile tail meat prepared with native Australian herbs and spices. Interested in trying this exotic meat in a traditional way.',
+            'I have never had crocodile before, so I would prefer it to be prepared in a way that highlights its natural flavor. Not too spicy please.'
         );
     END;
     
