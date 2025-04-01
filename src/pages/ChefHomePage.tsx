@@ -154,9 +154,6 @@ const RegularDishes = ({ dishes }: { dishes: OrderDish[] }) => (
               )}
             </div>
           </div>
-          <div className="text-sm text-gray-700">
-            ${dish.dish_price.toFixed(2)}
-          </div>
         </div>
       </div>
     ))}
@@ -189,9 +186,6 @@ const CustomDishes = ({ dishes }: { dishes: OrderDish[] }) => (
                 </p>
               )}
             </div>
-          </div>
-          <div className="text-sm text-gray-700">
-            ${dish.dish_price.toFixed(2)}
           </div>
         </div>
       </div>
@@ -660,11 +654,6 @@ const ChefHomePage = () => {
                           <h3 className="text-lg font-semibold">
                             {isToday(dateOrders[0].requested_time) ? 'Today' : date}
                           </h3>
-                          {isToday(dateOrders[0].requested_time) && (
-                            <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              Today
-                            </span>
-                          )}
                         </div>
                         
                         <div className="space-y-2">
