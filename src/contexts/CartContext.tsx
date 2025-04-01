@@ -54,7 +54,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         .order('created_at', { ascending: false });
       
       if (cartsError) throw cartsError;
-      console.log(userCarts);
       // Check if we have any carts
       if (!userCarts || userCarts.length === 0) {
         // Set empty cart state - don't create a new cart here

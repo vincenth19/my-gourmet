@@ -40,20 +40,6 @@ interface PopularDish {
   order_count: number;
 }
 
-// Add dish interface with correct typing that matches DishModal's expectations
-interface Dish {
-  id: string;
-  name: string;
-  chef_id: string;
-  price: number;
-  description?: string;
-  image_url?: string; // Change to match expected type
-  dietary_tags?: { label: string }[];
-  customization_options?: { option: string[] };
-  dish_types?: { types: string[] };
-  created_at: string; 
-}
-
 // Function to adapt customization_options format
 const adaptDishFormat = (dish: any): DishWithTags => {
   // Convert from backend format to UI format if needed
@@ -385,7 +371,6 @@ const UserHomePage = () => {
         const { data, error } = await supabase.rpc('get_most_ordered_dishes', {
           limit_count: 8 // Request more to account for possible missing dishes
         });
-
         if (error) {
           // If the RPC function doesn't exist yet, use a direct query instead
           const { data: fallbackData, error: fallbackError } = await supabase
@@ -496,6 +481,7 @@ const UserHomePage = () => {
           
           setPopularDishes(dishesWithInfo);
         } else {
+          console.log(data);
           // If the RPC function exists and returns data, it already filters out non-existent dishes
           // Take only the first 4 dishes and ensure all have valid dish_id
           const validDishes = data.filter((dish: PopularDish) => dish.dish_id != null).slice(0, 4);

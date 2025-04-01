@@ -8,7 +8,10 @@ RETURNS TABLE (
   image_url TEXT,
   price DECIMAL,
   order_count BIGINT
-) AS $$
+) 
+SECURITY DEFINER -- Run with function owner's permissions
+SET search_path = '' -- Security precaution to avoid search_path hijacking
+AS $$
 BEGIN
   RETURN QUERY
   -- Select dishes by frequency, excluding custom dishes and using the direct dish_id reference
