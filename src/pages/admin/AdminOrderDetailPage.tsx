@@ -3,7 +3,8 @@ import { useParams, useNavigate, useLocation } from 'react-router';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { format } from 'date-fns';
-import { MapPin, Calendar, User, PhoneCall, Mail, CreditCard, ChevronLeft } from 'lucide-react';
+import { MapPin, Calendar, User, PhoneCall, Mail, CreditCard, ChevronLeft} from 'lucide-react';
+import { sendChefOrderAcceptedNotification } from '../../utils/emailService';
 
 interface OrderDish {
   id: string;
@@ -20,14 +21,37 @@ interface OrderDish {
   };
 }
 
+interface Order {
+  id: string;
+  profile_id: string;
+  profile_email: string;
+  profile_contact_number: string;
+  chef_id: string;
+  chef_name: string;
+  order_status: string;
+  payment_status: string;
+  total_amount: number;
+  requested_time: string;
+  order_date: string;
+  address_line: string;
+  city: string;
+  state: string;
+  zip_code: string;
+  access_note?: string;
+  payment_method_type: string;
+  payment_details: string;
+  created_at: string;
+  updated_at: string;
+}
+
 const AdminOrderDetailPage = () => {
-  const { orderId } = useParams<{ orderId: string }>();
+  const { orderId = '' } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
   
   const [loading, setLoading] = useState(true);
-  const [order, setOrder] = useState<any>(null);
+  const [order, setOrder] = useState<Order | null>(null);
   const [orderDishes, setOrderDishes] = useState<OrderDish[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState(false);
@@ -178,7 +202,15 @@ const AdminOrderDetailPage = () => {
       if (orderError) throw orderError;
       
       // Update local state
-      setOrder(prev => ({ ...prev, total_amount: newTotal }));
+      setOrder((prev: Order | null) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          total_amount: newTotal,
+          // Also update payment_status in local state when completed
+          ...(prev.order_status === 'accepted' ? { payment_status: 'paid' } : {})
+        };
+      });
       
       setError(null);
     } catch (error: any) {
@@ -192,7 +224,7 @@ const AdminOrderDetailPage = () => {
   // Update order status
   const updateOrder = async (status: string) => {
     setNewStatus(status);
-    if (!user || !orderId || status === order.order_status) return;
+    if (!user || !orderId || !order || status === order.order_status) return;
     
     // Ensure all custom dishes have prices set before accepting or completing
     if (['accepted', 'completed'].includes(status) && !allCustomDishesHavePrices()) {
@@ -264,13 +296,40 @@ const AdminOrderDetailPage = () => {
         if (error) throw error;
         
         // Update local state
-        setOrder((prev: any) => ({
-          ...prev,
-          order_status: status,
-          total_amount: newTotal,
-          // Also update payment_status in local state when completed
-          ...(status === 'accepted' ? { payment_status: 'paid' } : {})
-        }));
+        setOrder((prev: Order | null) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            order_status: status,
+            total_amount: newTotal,
+            // Also update payment_status in local state when completed
+            ...(status === 'accepted' ? { payment_status: 'paid' } : {})
+          };
+        });
+        
+        // Send email notification to chef when order is accepted
+        if (status === 'accepted' && order) {
+          try {
+            // Fetch chef's email and name
+            const { data: chefData, error: chefError } = await supabase
+              .from('profiles')
+              .select('email, display_name')
+              .eq('id', order.chef_id)
+              .single();
+              
+            if (!chefError && chefData) {
+              await sendChefOrderAcceptedNotification(
+                chefData.email,
+                chefData.display_name,
+                orderId,
+                new Date().toLocaleString()
+              );
+            }
+          } catch (emailError) {
+            console.error('Error sending email notification:', emailError);
+            // Don't throw here - we don't want to fail the order update if email fails
+          }
+        }
       }
       
       // Show success message

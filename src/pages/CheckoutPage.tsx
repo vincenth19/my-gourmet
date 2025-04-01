@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { CartItem, Profile, Address, DietaryTag, PaymentMethod } from '../types/database.types';
 import { Calendar, Clock, MapPin, CreditCard, Check, AlertCircle, ChevronLeft, Calendar as CalendarIcon } from 'lucide-react';
-import { format, addDays, setHours, setMinutes} from 'date-fns';
+import { format, addDays, setHours, setMinutes, getHours } from 'date-fns';
 import AddressForm from '../components/AddressForm';
 import PaymentMethodForm from '../components/PaymentMethodForm';
+import { sendChefNewOrderNotification, sendAdminCustomOrderNotification } from '../utils/emailService';
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
@@ -46,8 +47,8 @@ const CheckoutPage = () => {
   
   // Available time slots
   const timeSlots = [
-    '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', 
-    '17:00', '17:30', '18:00', '18:30', '19:00', '19:30', '20:00'
+    "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", 
+    "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"
   ];
   
   // Add a new useEffect to ensure selectedTime is valid when the page loads or date changes
@@ -423,6 +424,34 @@ const CheckoutPage = () => {
       
       // Refresh the cart context to update the UI
       await refreshCart();
+      
+      // Send email notifications
+      if (hasCustomDishes) {
+        // For custom dishes, notify admin
+        const adminEmail = 'vincentvendeta+admin@gmail.com'; // Replace with your admin email
+        await sendAdminCustomOrderNotification(
+          adminEmail,
+          orderData.id,
+          new Date().toLocaleString()
+        );
+      } else {
+        // For regular orders, notify chef
+        // Fetch chef's email
+        const { data: chefData, error: chefError } = await supabase
+          .from('profiles')
+          .select('email, display_name')
+          .eq('id', chef.id)
+          .single();
+          
+        if (!chefError && chefData) {
+          await sendChefNewOrderNotification(
+            chefData.email,
+            chefData.display_name,
+            orderData.id,
+            new Date().toLocaleString()
+          );
+        }
+      }
       
       // Redirect to confirmation page
       navigate(`/order-confirmation/${orderData.id}`);
