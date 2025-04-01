@@ -963,23 +963,25 @@ const ProfilePage = () => {
                   </div>
                   
                   <div className="bg-blue-50 bg-opacity-5 p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 gap-6">
                       <div>
                         <h2 className="text-sm font-medium mb-1">Name</h2>
                         <p className="text-lg font-medium text-gray-900">{profile.display_name}</p>
-                      </div>
-                      <div>
-                        <h2 className="text-sm font-medium mb-1">Email</h2>
-                        <p className="text-lg font-medium text-gray-900">{profile.email}</p>
                       </div>
                       <div>
                         <h2 className="text-sm font-medium mb-1">Contact Number</h2>
                         <p className="text-lg font-medium text-gray-900">{profile.contact_number || 'Not provided'}</p>
                       </div>
                       <div>
-                        <h2 className="text-sm font-medium mb-1">Member Since</h2>
-                        <p className="text-lg font-medium text-gray-900">{formatDate(profile.created_at)}</p>
+                        <h2 className="text-sm font-medium mb-1">Email</h2>
+                        <p className="text-lg font-medium text-gray-900">{profile.email}</p>
                       </div>
+                      {profile.role === 'customer' && (
+                        <div>
+                          <h2 className="text-sm font-medium mb-1">Member Since</h2>
+                          <p className="text-lg font-medium text-gray-900">{formatDate(profile.created_at)}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -1047,7 +1049,7 @@ const ProfilePage = () => {
                   </div>
                 
                   <div className="bg-blue-50 bg-opacity-5 p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 gap-6">
                       <div>
                         <label htmlFor="display_name" className="block text-sm font-medium text-gray-500 mb-1">
                           Name
@@ -1060,12 +1062,6 @@ const ProfilePage = () => {
                           onChange={handleChange}
                           className="w-full px-4 py-2 border border-gray-300 focus:ring-2 focus:ring-navy focus:border-transparent"
                         />
-                      </div>
-                      
-                      <div>
-                        <h2 className="text-sm font-medium text-gray-500 mb-1">Email</h2>
-                        <p className="text-lg font-medium text-gray-700">{profile.email}</p>
-                        <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
                       </div>
                       
                       <div>
@@ -1084,9 +1080,17 @@ const ProfilePage = () => {
                       </div>
                       
                       <div>
-                        <h2 className="text-sm font-medium text-gray-500 mb-1">Member Since</h2>
-                        <p className="text-lg font-medium text-gray-700">{formatDate(profile.created_at)}</p>
+                        <h2 className="text-sm font-medium text-gray-500 mb-1">Email</h2>
+                        <p className="text-lg font-medium text-gray-700">{profile.email}</p>
+                        <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
                       </div>
+                      
+                      {profile.role === 'customer' && (
+                        <div>
+                          <h2 className="text-sm font-medium text-gray-500 mb-1">Member Since</h2>
+                          <p className="text-lg font-medium text-gray-700">{formatDate(profile.created_at)}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                   
