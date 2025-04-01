@@ -323,7 +323,7 @@ const ChefsSection = ({
 const UserHomePage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { refreshCart } = useCart();
+  const { refreshCart, cartId } = useCart();
   const [loading, setLoading] = useState(true);
   const [recentOrders, setRecentOrders] = useState<Order[]>([]);
   const [chefs, setChefs] = useState<Chef[]>([]);
@@ -610,17 +610,12 @@ const UserHomePage = () => {
     }
 
     try {
-      // Check for existing cart
-      const { data: cartData, error: cartError } = await supabase
-        .from('carts')
-        .select('id')
-        .eq('profile_id', user.id)
-        .single();
+      // Use the cart ID from CartContext
+      let currentCartId = cartId;
       
-      let cartId;
-      
-      // Create cart if doesn't exist
-      if (cartError && cartError.code === 'PGRST116') {
+      // Create a cart only if one doesn't exist (for users registered before this change)
+      if (!currentCartId) {
+        console.log('No cart found - creating one');
         const { data: newCart, error: newCartError } = await supabase
           .from('carts')
           .insert({ profile_id: user.id })
@@ -628,11 +623,10 @@ const UserHomePage = () => {
           .single();
         
         if (newCartError) throw newCartError;
-        cartId = newCart.id;
-      } else if (cartError) {
-        throw cartError;
-      } else {
-        cartId = cartData.id;
+        currentCartId = newCart.id;
+        
+        // Refresh cart context
+        await refreshCart();
       }
 
       // Prepare customization_options in the correct format
@@ -646,7 +640,7 @@ const UserHomePage = () => {
       const { error: itemError } = await supabase
         .from('cart_items')
         .insert({
-          cart_id: cartId,
+          cart_id: currentCartId,
           dish_id: selectedPopularDish.id,
           chef_id: selectedPopularDish.chef_id,
           dish_name: selectedPopularDish.name,

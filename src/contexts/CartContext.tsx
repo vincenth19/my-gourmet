@@ -54,18 +54,13 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         .order('created_at', { ascending: false });
       
       if (cartsError) throw cartsError;
-      
+      console.log(userCarts);
       // Check if we have any carts
       if (!userCarts || userCarts.length === 0) {
-        // Create new cart
-        const { data: newCart, error: newCartError } = await supabase
-          .from('carts')
-          .insert({ profile_id: user.id })
-          .select()
-          .single();
-        
-        if (newCartError) throw newCartError;
-        setCartId(newCart.id);
+        // Set empty cart state - don't create a new cart here
+        // The cart should have been created during registration
+        console.warn('No cart found for user. Cart should be created during registration.');
+        setCartId(null);
         setCartItems([]);
         setLoading(false);
         return;

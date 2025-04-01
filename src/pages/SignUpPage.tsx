@@ -19,7 +19,7 @@ const SignUpPage = () => {
     firstName: '',
     lastName: '',
     phoneNumber: '',
-    userType: '', // Empty default value
+    userType: 'customer', // Default to customer
   });
   
   // State for payment method details
@@ -197,6 +197,16 @@ const SignUpPage = () => {
             });
 
           if (paymentError) throw paymentError;
+          
+          // Create a cart for the new customer user
+          const { error: cartError } = await supabase
+            .from('carts')
+            .insert({ profile_id: authData.user.id });
+            
+          if (cartError) {
+            console.error('Error creating cart for new user:', cartError);
+            // Non-blocking - we'll continue even if cart creation fails
+          }
         }
 
         // Check if email confirmation is required
@@ -279,28 +289,31 @@ const SignUpPage = () => {
         </div>
 
         <div>
-          <label htmlFor="userType" className="block text-sm font-medium text-gray-700 mb-1">
-            I want to...
-          </label>
-          <div className="relative">
-            <select
-              id="userType"
-              name="userType"
-              value={formData.userType}
-              onChange={handleChange}
-              required
-              className="appearance-none relative block w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 focus:outline-none focus:ring-2 focus:ring-navy focus:border-transparent transition-colors duration-200 pr-10"
+          <div className="flex border-1 border-gray-200 w-full overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setFormData(prev => ({ ...prev, userType: 'customer' }))}
+              className={`flex-1 py-3 px-4 text-center transition-colors duration-200 ${
+                formData.userType === 'customer'
+                  ? 'bg-navy text-white font-medium'
+                  : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+              }`}
               disabled={loading}
             >
-              <option value="" disabled>Select account type</option>
-              <option value="customer">Book Private Chefs</option>
-              <option value="chef">Work as a Private Chef</option>
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-            </div>
+              I am a Foodie
+            </button>
+            <button
+              type="button"
+              onClick={() => setFormData(prev => ({ ...prev, userType: 'chef' }))}
+              className={`flex-1 py-3 px-4 text-center transition-colors duration-200 ${
+                formData.userType === 'chef'
+                  ? 'bg-navy text-white font-medium'
+                  : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+              }`}
+              disabled={loading}
+            >
+              I am a Chef
+            </button>
           </div>
         </div>
 

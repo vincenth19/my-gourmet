@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router";
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import logoBnw from '../assets/logo-w-text-bnw.svg';
-import { LogOut, ShoppingCart, Menu, User, ChefHat, LayoutDashboard, ReceiptText } from "lucide-react";
+import { LogOut, ShoppingCart, Menu, User, ChefHat, LayoutDashboard, ReceiptText, Bell } from "lucide-react";
 import NotificationBell from './NotificationBell';
 import NotificationSubscription from './NotificationSubscription';
 import { Toaster } from 'react-hot-toast';
@@ -133,17 +133,21 @@ const Navbar = ({ activePage: propActivePage }: NavbarProps) => {
         )}
 
         {/* Notification Bell - available for all roles (only show in mobile drawer) */}
-          <Link to="/notifications" onClick={isMobile ? handleLinkClick : undefined}>
-            <button 
-              className={`${activePage === 'notifications' 
-                ? "bg-blue-100 md:bg-transparent md:rounded-none md:p-0 md:text-navy md:relative md:after:content-[''] md:after:absolute md:after:bottom-0 md:after:left-0 after:w-full md:after:h-[2px] md:after:bg-black"
-                : 'text-gray-600 hover:text-navy'} font-medium transition-colors duration-200 flex items-center w-full text-left`}
-                >
+          <Link 
+            to="/notifications" 
+            onClick={isMobile ? handleLinkClick : undefined}
+            className={`${activePage === 'notifications' 
+              ? "bg-blue-100 md:bg-transparent md:rounded-none md:p-0 md:text-navy md:relative md:after:content-[''] md:after:absolute md:after:bottom-0 md:after:left-0 after:w-full md:after:h-[2px] md:after:bg-black"
+              : 'text-gray-600 hover:text-navy'} font-medium transition-colors duration-200 flex items-center`}
+          >
+            {isMobile ? (
+              <div className="flex items-center px-2 py-1 w-full">
+                <Bell size={18} className="mr-2" />
+                Notifications
+              </div>
+            ) : (
               <NotificationBell onClick={handleLinkClick} />
-                {isMobile && (
-                  'Notifications'
-                )}
-            </button>
+            )}
           </Link>
 
         {/* Logout button */}
