@@ -268,7 +268,7 @@ const ChefsSection = ({
       <div className="flex items-center">
         <div>
           <h2 className="text-xl font-semibold flex items-center">
-            <span className='text-navy bg-white px-3 rounded-full text-sm w-fit font-bold mr-2'>1</span> Hire a Chef
+            <span className='text-navy bg-white px-3 rounded-full text-sm w-fit font-bold mr-2'>Step 1/3</span> Hire a Chef
           </h2>
           <p className="text-white/80 text-sm">Select a chef to view their menu and place an order</p>
         </div>

@@ -208,7 +208,7 @@ const CartPage = () => {
           <div className="flex items-center">
             <div>
               <h2 className="text-xl font-semibold flex items-center">
-                <span className='text-navy bg-white px-3 rounded-full text-sm w-fit font-bold mr-2'>3</span> Cart
+                <span className='text-navy bg-white px-3 rounded-full text-sm w-fit font-bold mr-2'>Step 3/3</span> Cart
               </h2>
               <p className="text-white/80 text-sm">Review your order and checkout</p>
             </div>

@@ -519,7 +519,7 @@ const OrderPage = () => {
               <div className="flex items-center">
                 <div>
                 <h2 className="text-xl font-semibold flex items-center">
-                  <span className='text-navy bg-white px-3 rounded-full text-sm w-fit font-bold mr-2'>2</span> Select Your Dishes
+                  <span className='text-navy bg-white px-3 rounded-full text-sm w-fit font-bold mr-2'>Step 2/3</span> Select Your Dishes
                 </h2>
                   <p className="text-white/80 text-sm">Choose from our delicious selection or request a custom dish</p>
                   <p className="text-white/80 text-sm mt-2">
