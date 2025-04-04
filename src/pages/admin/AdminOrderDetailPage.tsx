@@ -162,7 +162,7 @@ const AdminOrderDetailPage = () => {
     
     try {
       // Update the custom dish price
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('order_dishes')
         .update({ 
           custom_price: priceValue,
