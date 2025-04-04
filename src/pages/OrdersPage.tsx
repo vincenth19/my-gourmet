@@ -29,7 +29,7 @@ const OrdersPage = () => {
           .from('orders')
           .select('*')
           .eq('profile_id', user.id)
-          .order('created_at', { ascending: false });
+          .order('order_date', { ascending: false });
           
         if (error) throw error;
         
@@ -179,7 +179,7 @@ const OrdersPage = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{formatDate(order.created_at)}</div>
+                        <div className="text-sm text-gray-900">{formatDate(order.order_date)}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">

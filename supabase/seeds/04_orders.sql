@@ -123,7 +123,7 @@ BEGIN
         'unpaid', 
         125.75, 
         false, 
-        reference_date + interval '2 days' + interval '4 hours'
+        reference_date + interval '9 days' + interval '4 hours'
     );
     
     -- Add a regular dish to the pending order
@@ -232,12 +232,12 @@ BEGIN
         customer1_access_note,
         'card', 
         'Visa ending in 4242',
-        reference_date::date - interval '5 days', 
+        reference_date::date - interval '8 days', 
         'accepted', 
         'paid', 
         97.48, 
         false, 
-        reference_date - interval '5 days' + interval '8 hours'
+        reference_date - interval '8 days' + interval '8 hours'
     );
     
     -- Add dishes to the accepted order
@@ -381,7 +381,7 @@ BEGIN
         'unpaid', 
         93.98, 
         false, 
-        reference_date + interval '1 day' + interval '10 hours'
+        reference_date + interval '5 day' + interval '10 hours'
     );
     
     -- Add dishes to the pending order
@@ -532,12 +532,12 @@ BEGIN
         customer2_access_note,
         'card', 
         'Visa ending in 4242',
-        reference_date::date - interval '7 days', 
+        reference_date::date - interval '8 days', 
         'accepted', 
         'paid', 
         49.50, 
         false, 
-        reference_date - interval '7 days' + interval '6 hours'
+        reference_date - interval '8 days' + interval '6 hours'
     );
     
     -- Add dishes to the accepted order
@@ -620,7 +620,7 @@ BEGIN
             'unpaid', 
             145.50,
             false, 
-            reference_date + interval '4 days' + interval '5 hours'
+            reference_date + interval '11 days' + interval '5 hours'
         );
         
         -- Add dishes to the order
@@ -678,7 +678,7 @@ BEGIN
             'paid', 
             89.99,
             false, 
-            reference_date + interval '5 days' + interval '7 hours'
+            reference_date + interval '8 days' + interval '7 hours'
         );
         
         -- Add dishes to the order
@@ -721,7 +721,7 @@ BEGIN
             'paid', 
             120.25,
             false, 
-            reference_date + interval '6 days' + interval '2 hours'
+            reference_date + interval '9 days' + interval '2 hours'
         );
         
         -- Add dishes to the order
@@ -774,7 +774,7 @@ BEGIN
             'unpaid', 
             115.50,
             false, 
-            reference_date + interval '7 days' + interval '6 hours'
+            reference_date + interval '8 days' + interval '6 hours'
         );
         
         -- Add dishes to the order
