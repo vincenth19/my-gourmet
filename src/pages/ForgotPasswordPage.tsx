@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react';
-import { useNavigate, Link } from 'react-router';
+import { Link } from 'react-router';
 import { supabase } from '../lib/supabase';
 import logoBnw from '../assets/logo-w-text-bnw.svg';
 
@@ -8,7 +8,6 @@ const ForgotPasswordPage = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [message, setMessage] = useState<string>('');
-  const navigate = useNavigate();
 
   const handlePasswordReset = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();

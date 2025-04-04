@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { X, ChevronRight } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { supabase } from '../lib/supabase';
 

@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { useNavigate } from 'react-router';
 import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { CartItem, Profile, Address, DietaryTag, PaymentMethod } from '../types/database.types';
 import { Calendar, Clock, MapPin, CreditCard, Check, AlertCircle, ChevronLeft, Calendar as CalendarIcon } from 'lucide-react';
-import { format, addDays, setHours, setMinutes, getHours } from 'date-fns';
+import { format, addDays, setHours, setMinutes } from 'date-fns';
 import AddressForm from '../components/AddressForm';
 import PaymentMethodForm from '../components/PaymentMethodForm';
 import { sendChefNewOrderNotification, sendAdminCustomOrderNotification } from '../utils/emailService';

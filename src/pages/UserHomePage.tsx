@@ -84,23 +84,6 @@ const getImageUrl = (imageUrl: string | null) => {
   return data.publicUrl || 'https://placehold.co/600x400?text=No+Image';
 };
 
-// Welcome Banner Component
-const WelcomeBanner = () => (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-    className="bg-white rounded-xl shadow-md p-6 sm:p-8 mb-8"
-        >
-    <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Welcome to MyGourmet
-          </h1>
-          <p className="text-gray-600">
-            Discover delicious home-cooked meals from talented chefs in your area.
-          </p>
-        </motion.div>
-);
-
 // Recent Orders Section Component
 const RecentOrdersSection = ({ orders }: { orders: Order[] }) => {
   const navigate = useNavigate();
@@ -160,7 +143,7 @@ const PopularDishesSection = ({
 }: { 
   dishes: PopularDish[],
   loading: boolean,
-  onDishClick: (dishId: string, chefId: string, dishName: string, price: number, imageUrl: string | null) => void
+  onDishClick: (dishId: string, chefId: string) => void
 }) => (
   <motion.section
     initial={{ opacity: 0, y: 20 }}
@@ -197,7 +180,7 @@ const PopularDishesSection = ({
                 console.error('Cannot open dish details: Dish ID is undefined');
                 return;
               }
-              onDishClick(dish.dish_id, dish.chef_id, dish.dish_name, dish.price, dish.image_url);
+              onDishClick(dish.dish_id, dish.chef_id);
             }}
           >
             <div className="h-48 overflow-hidden">
@@ -510,7 +493,7 @@ const UserHomePage = () => {
   };
 
   // Handler for popular dish selection - update to match DishModal requirements
-  const handlePopularDishClick = async (dishId: string, chefId: string, dishName: string, price: number, imageUrl: string | null) => {
+  const handlePopularDishClick = async (dishId: string, chefId: string) => {
     setLoadingPopularDishes(true);
     try {
       // Check if dishId is undefined or null

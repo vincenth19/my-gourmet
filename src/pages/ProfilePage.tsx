@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import type { Profile, ProfileRole, Address } from '../types/database.types';
-import { Pencil, Upload, X, User, Plus, MapPin, Check, Home } from 'lucide-react';
+import { Pencil, Upload, X, User, Plus, MapPin} from 'lucide-react';
 import DietaryPreferences from '../components/DietaryPreferences';
 import PaymentMethodForm from '../components/PaymentMethodForm';
 import AddressForm from '../components/AddressForm';
@@ -35,10 +35,9 @@ const ProfilePage = () => {
   const [isEditingPayment, setIsEditingPayment] = useState(false);
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [profileImagePreview, setProfileImagePreview] = useState<string | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [currentYear] = useState(new Date().getFullYear());
-  const [expiryMonth, setExpiryMonth] = useState<string>('');
-  const [expiryYear, setExpiryYear] = useState<string>('');
+  const [, setIsUploading] = useState(false);
+  const [, setExpiryMonth] = useState<string>('');
+  const [, setExpiryYear] = useState<string>('');
   
   // New state for addresses
   const [addresses, setAddresses] = useState<Address[]>([]);
@@ -152,22 +151,22 @@ const ProfilePage = () => {
   }, [editedPaymentMethod?.expiry_date]);
 
   // Update the expiry date when dropdowns change
-  const handleExpiryChange = (type: 'month' | 'year', value: string) => {
-    if (type === 'month') {
-      setExpiryMonth(value);
-    } else {
-      setExpiryYear(value);
-    }
+  // const handleExpiryChange = (type: 'month' | 'year', value: string) => {
+  //   if (type === 'month') {
+  //     setExpiryMonth(value);
+  //   } else {
+  //     setExpiryYear(value);
+  //   }
     
-    // Update the editedPaymentMethod with the new expiry date
-    const newExpiryDate = type === 'month' 
-      ? `${value}/${expiryYear}` 
-      : `${expiryMonth}/${value}`;
+  //   // Update the editedPaymentMethod with the new expiry date
+  //   const newExpiryDate = type === 'month' 
+  //     ? `${value}/${expiryYear}` 
+  //     : `${expiryMonth}/${value}`;
       
-    setEditedPaymentMethod(prev => 
-      prev ? { ...prev, expiry_date: newExpiryDate } : null
-    );
-  };
+  //   setEditedPaymentMethod(prev => 
+  //     prev ? { ...prev, expiry_date: newExpiryDate } : null
+  //   );
+  // };
 
   const handleLogout = async () => {
     try {
@@ -220,10 +219,10 @@ const ProfilePage = () => {
     setEditedProfile(prev => prev ? { ...prev, [name]: value } : null);
   };
 
-  const handlePaymentMethodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setEditedPaymentMethod(prev => prev ? { ...prev, [name]: value } : null);
-  };
+  // const handlePaymentMethodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const { name, value } = e.target;
+  //   setEditedPaymentMethod(prev => prev ? { ...prev, [name]: value } : null);
+  // };
 
   const fetchUserDietaryTags = async (profileId?: string) => {
     if (!profileId) return;

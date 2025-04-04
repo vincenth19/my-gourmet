@@ -87,34 +87,34 @@ const EmptyState = () => (
 );
 
 // View Toggle Component
-const ViewToggle = ({ view, setView }: { view: 'table' | 'timeline', setView: (view: 'table' | 'timeline') => void }) => (
-  <div className="mb-6 flex justify-end">
-    <div className="inline-flex" role="group">
-      <button
-        type="button"
-        onClick={() => setView('timeline')}
-        className={`px-4 py-2 text-sm font-medium ${
-          view === 'timeline'
-            ? 'bg-navy text-white'
-            : 'bg-white text-gray-700 hover:bg-blue-50'
-        } border border-gray-200`}
-      >
-        Timeline
-      </button>
-      <button
-        type="button"
-        onClick={() => setView('table')}
-        className={`px-4 py-2 text-sm font-medium ${
-          view === 'table'
-            ? 'bg-navy text-white'
-            : 'bg-white text-gray-700 hover:bg-blue-50'
-        } border border-gray-200`}
-      >
-        Table
-      </button>
-    </div>
-  </div>
-);
+// const ViewToggle = ({ view, setView }: { view: 'table' | 'timeline', setView: (view: 'table' | 'timeline') => void }) => (
+//   <div className="mb-6 flex justify-end">
+//     <div className="inline-flex" role="group">
+//       <button
+//         type="button"
+//         onClick={() => setView('timeline')}
+//         className={`px-4 py-2 text-sm font-medium ${
+//           view === 'timeline'
+//             ? 'bg-navy text-white'
+//             : 'bg-white text-gray-700 hover:bg-blue-50'
+//         } border border-gray-200`}
+//       >
+//         Timeline
+//       </button>
+//       <button
+//         type="button"
+//         onClick={() => setView('table')}
+//         className={`px-4 py-2 text-sm font-medium ${
+//           view === 'table'
+//             ? 'bg-navy text-white'
+//             : 'bg-white text-gray-700 hover:bg-blue-50'
+//         } border border-gray-200`}
+//       >
+//         Table
+//       </button>
+//     </div>
+//   </div>
+// );
 
 // Regular Dishes Component
 const RegularDishes = ({ dishes }: { dishes: OrderDish[] }) => (
@@ -305,7 +305,6 @@ const PastOrdersSection = ({
   toggleOrderExpansion,
   onViewFullDetails,
   formatTime,
-  formatDate
 }: { 
   pastOrders: GroupedOrders,
   showPastOrders: boolean,
@@ -465,7 +464,7 @@ const ChefHomePage = () => {
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState<Order[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [view, setView] = useState<'table' | 'timeline'>('timeline');
+  const [view] = useState<'table' | 'timeline'>('timeline');
   const [showPastOrders, setShowPastOrders] = useState(false);
   const [expandedOrderIds, setExpandedOrderIds] = useState<Set<string>>(new Set());
   

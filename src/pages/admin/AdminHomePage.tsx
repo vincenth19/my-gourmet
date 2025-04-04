@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { format } from 'date-fns';
-import { Clock, ChevronRight, CheckCircle, XCircle, AlertCircle, DollarSign } from 'lucide-react';
+import { Clock, ChevronRight, XCircle, AlertCircle, DollarSign } from 'lucide-react';
 
 // Type for order data
 interface Order {
@@ -88,7 +88,7 @@ const AdminHomePage = () => {
   // Get counts by status for the stats section
   const pendingCount = orders.filter(order => order.order_status === 'pending').length;
   const acceptedCount = orders.filter(order => order.order_status === 'accepted').length;
-  const completedCount = orders.filter(order => order.order_status === 'completed').length;
+  // const completedCount = orders.filter(order => order.order_status === 'completed').length;
   const rejectedCount = orders.filter(order => order.order_status === 'rejected').length;
   const cancelledCount = orders.filter(order => order.order_status === 'cancelled').length;
   

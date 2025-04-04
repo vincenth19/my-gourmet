@@ -13,9 +13,7 @@ const OrderConfirmationPage = () => {
   const { user } = useAuth();
   
   const [loading, setLoading] = useState(true);
-  const [order, setOrder] = useState<any>(null);
-  const [orderDishes, setOrderDishes] = useState<any[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [order, setOrder] = useState<any>(null);  const [error, setError] = useState<string | null>(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancellingOrder, setCancellingOrder] = useState(false);
   const [cancellationMessage, setCancellationMessage] = useState<string | null>(null);

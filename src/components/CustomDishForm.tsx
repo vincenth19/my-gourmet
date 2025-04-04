@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { CartItem } from '../types/database.types';
 import { X, Plus, Minus } from 'lucide-react';
 
 interface CustomDishFormProps {

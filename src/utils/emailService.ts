@@ -46,7 +46,7 @@ export const sendEmailNotification = async (params: EmailParams): Promise<boolea
  */
 export const sendChefNewOrderNotification = async (
   chefEmail: string, 
-  chefName: string, 
+  chefName: string,
   orderId: string,
   orderTime: string,
 ): Promise<boolean> => {
@@ -55,7 +55,7 @@ export const sendChefNewOrderNotification = async (
   
   return sendEmailNotification({
     title: 'New Order Notification',
-    name: 'Order MyGourmet',
+    name: `Order MyGourmet: ${chefName}`,
     time: orderTime,
     message: `You have received a new order (#${shortOrderId}). 
 Please check your dashboard to see the details: ${orderDetailLink}`,
@@ -98,7 +98,7 @@ export const sendChefOrderAcceptedNotification = async (
   
   return sendEmailNotification({
     title: 'Order Accepted Notification',
-    name: 'Order MyGourmet',
+    name: `Order MyGourmet: ${chefName}`,
     time: orderTime,
     message: `New order (#${shortOrderId}) has been accepted by the admin.
 Please check your dashboard for details: ${orderDetailLink}`,
@@ -120,7 +120,7 @@ export const sendCustomerOrderAcceptedNotification = async (
   
   return sendEmailNotification({
     title: 'Your Order Has Been Accepted',
-    name: 'Order MyGourmet',
+    name: `Order MyGourmet: ${customerName}`,
     time: orderTime,
     message: `Good news! Your order (#${shortOrderId}) has been accepted. 
 Your chef is preparing for your scheduled date. You can view your order details here: ${orderDetailLink}`,
@@ -142,7 +142,7 @@ export const sendCustomerOrderRejectedNotification = async (
   
   return sendEmailNotification({
     title: 'Important Update About Your Order',
-    name: 'Order MyGourmet',
+    name: `Order MyGourmet: ${customerName}`,
     time: orderTime,
     message: `We're sorry to inform you that your order (#${shortOrderId}) cannot be fulfilled at this time. 
 Please contact our support team for more information. You can view your order details here: ${orderDetailLink}`,
