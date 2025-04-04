@@ -4,7 +4,11 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { format } from 'date-fns';
 import { MapPin, Calendar, User, PhoneCall, Mail, CreditCard, ChevronLeft} from 'lucide-react';
-import { sendChefOrderAcceptedNotification } from '../../utils/emailService';
+import { 
+  sendChefOrderAcceptedNotification, 
+  sendCustomerOrderAcceptedNotification,
+  sendCustomerOrderRejectedNotification
+} from '../../utils/emailService';
 
 interface OrderDish {
   id: string;
@@ -325,8 +329,31 @@ const AdminOrderDetailPage = () => {
                 new Date().toLocaleString()
               );
             }
+            
+            // Send email to customer that their order has been accepted
+            await sendCustomerOrderAcceptedNotification(
+              order.profile_email,
+              "Customer", // We could fetch customer name if needed
+              orderId,
+              new Date().toLocaleString()
+            );
           } catch (emailError) {
             console.error('Error sending email notification:', emailError);
+            // Don't throw here - we don't want to fail the order update if email fails
+          }
+        }
+        
+        // Send email notification to customer when order is rejected
+        if (status === 'rejected' && order) {
+          try {
+            await sendCustomerOrderRejectedNotification(
+              order.profile_email,
+              "Customer", // We could fetch customer name if needed
+              orderId,
+              new Date().toLocaleString()
+            );
+          } catch (emailError) {
+            console.error('Error sending rejection email notification:', emailError);
             // Don't throw here - we don't want to fail the order update if email fails
           }
         }
@@ -716,7 +743,7 @@ const AdminOrderDetailPage = () => {
                 className="px-5 py-3 bg-navy text-white hover:bg-navy-light transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={() => updateOrder('accepted')}
                 disabled={updatingStatus || 
-                  (order.order_status === 'accepted' || order.order_status === 'completed' || order.order_status === 'cancelled' || (order.order_status === 'pending' && !allCustomDishesHavePrices()))}
+                  (order.order_status === 'accepted' || order.order_status === 'rejected' || order.order_status === 'completed' || order.order_status === 'cancelled' || (order.order_status === 'pending' && !allCustomDishesHavePrices()))}
               >
                 {updatingStatus ? 'Accepting Order...' : 'Accept Order'}
               </button>

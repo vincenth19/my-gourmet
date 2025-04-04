@@ -3,7 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router';
 import { motion } from 'framer-motion';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { CheckCircle, ArrowLeft, Calendar, MapPin, ChefHat, AlertCircle, X } from 'lucide-react';
+import { CheckCircle, ArrowLeft, Calendar, MapPin, ChefHat, AlertCircle, X, Clock, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
 
 const OrderConfirmationPage = () => {
@@ -199,21 +199,31 @@ const OrderConfirmationPage = () => {
             transition={{ duration: 0.4 }}
           >
             <div className="bg-white border border-gray-200 overflow-hidden">
-              <div className="bg-navy text-white px-6 py-8 text-center">
-                <CheckCircle className="h-16 w-16 mx-auto mb-4" />
-                <h1 className="text-2xl font-bold mb-2">Order Confirmed!</h1>
-                <p className="text-lg opacity-90">Thank you for your order.</p>
-              </div>
+              {order.order_status === 'pending' && (
+                <div className="bg-yellow-500 text-white px-6 py-8 text-center">
+                  <Clock className="h-16 w-16 mx-auto mb-4" />
+                  <h1 className="text-2xl font-bold mb-2">Order Pending</h1>
+                  <p className="text-lg opacity-90">Your order is being reviewed by our team.</p>
+                </div>
+              )}
+              
+              {order.order_status === 'accepted' && (
+                <div className="bg-navy text-white px-6 py-8 text-center">
+                  <CheckCircle className="h-16 w-16 mx-auto mb-4" />
+                  <h1 className="text-2xl font-bold mb-2">Order Accepted!</h1>
+                  <p className="text-lg opacity-90">Your chef is preparing for your scheduled date.</p>
+                </div>
+              )}
+              
+              {order.order_status === 'rejected' && (
+                <div className="bg-red-500 text-white px-6 py-8 text-center">
+                  <XCircle className="h-16 w-16 mx-auto mb-4" />
+                  <h1 className="text-2xl font-bold mb-2">Order Rejected</h1>
+                  <p className="text-lg opacity-90">We're sorry, but your order could not be fulfilled at this time.</p>
+                </div>
+              )}
               
               <div className="p-6 md:p-8">
-                {/* 
-                <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-6">
-                  <p className="text-emerald-800 text-center">
-                    We have sent a confirmation email to your registered email address.
-                  </p>
-                </div>
-                */}
-                
                 <div className="space-y-6">
                   <div>
                     <h2 className="text-lg font-medium text-gray-900 mb-3">Order Details</h2>

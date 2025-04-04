@@ -57,7 +57,8 @@ export const sendChefNewOrderNotification = async (
     title: 'New Order Notification',
     name: 'Order MyGourmet',
     time: orderTime,
-    message: `You have received a new order (#${shortOrderId}). Please check your dashboard to see the details: ${orderDetailLink}`,
+    message: `You have received a new order (#${shortOrderId}). 
+Please check your dashboard to see the details: ${orderDetailLink}`,
     email: chefEmail,
   });
 };
@@ -77,7 +78,8 @@ export const sendAdminCustomOrderNotification = async (
     title: 'Custom Order Notification',
     name: 'Order MyGourmet',
     time: orderTime,
-    message: `A new order with custom dish (#${shortOrderId}) has been placed. Please review and set the price: ${orderDetailLink}`,
+    message: `A new order with custom dish (#${shortOrderId}) has been placed. 
+Please review and set the price: ${orderDetailLink}`,
     email: adminEmail,
   });
 };
@@ -98,7 +100,52 @@ export const sendChefOrderAcceptedNotification = async (
     title: 'Order Accepted Notification',
     name: 'Order MyGourmet',
     time: orderTime,
-    message: `Your order (#${shortOrderId}) has been accepted by the admin. Please check your dashboard for details: ${orderDetailLink}`,
+    message: `New order (#${shortOrderId}) has been accepted by the admin.
+Please check your dashboard for details: ${orderDetailLink}`,
     email: chefEmail,
+  });
+};
+
+/**
+ * Send email notification to customer when an order is accepted by admin
+ */
+export const sendCustomerOrderAcceptedNotification = async (
+  customerEmail: string,
+  customerName: string,
+  orderId: string,
+  orderTime: string,
+): Promise<boolean> => {
+  const orderDetailLink = `${window.location.origin}/orders`;
+  const shortOrderId = orderId.split('-')[0];
+  
+  return sendEmailNotification({
+    title: 'Your Order Has Been Accepted',
+    name: 'Order MyGourmet',
+    time: orderTime,
+    message: `Good news! Your order (#${shortOrderId}) has been accepted. 
+Your chef is preparing for your scheduled date. You can view your order details here: ${orderDetailLink}`,
+    email: customerEmail,
+  });
+};
+
+/**
+ * Send email notification to customer when an order is rejected by admin
+ */
+export const sendCustomerOrderRejectedNotification = async (
+  customerEmail: string,
+  customerName: string,
+  orderId: string,
+  orderTime: string,
+): Promise<boolean> => {
+  const orderDetailLink = `${window.location.origin}/orders`;
+  const shortOrderId = orderId.split('-')[0];
+  
+  return sendEmailNotification({
+    title: 'Important Update About Your Order',
+    name: 'Order MyGourmet',
+    time: orderTime,
+    message: `We're sorry to inform you that your order (#${shortOrderId}) cannot be fulfilled at this time. 
+Please contact our support team for more information. You can view your order details here: ${orderDetailLink}`,
+    email: customerEmail,
   });
 }; 
