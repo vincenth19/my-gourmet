@@ -381,7 +381,7 @@ const CartPage = () => {
                           {/* Custom dish note if price is zero */}
                           {item.custom_dish_name && item.dish_price === 0 && (
                             <div className="mt-3 bg-blue-50 border border-blue-100 p-2 text-xs text-blue-800">
-                              <p>Pricing for this custom dish will be provided by the chef after reviewing your request.</p>
+                              <p>Pricing for this custom dish will be provided by the admin after reviewing your request.</p>
                             </div>
                           )}
                         </div>

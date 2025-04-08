@@ -732,7 +732,7 @@ const AdminOrderDetailPage = () => {
             
             <div className="flex justify-between gap-4">
               <button
-                className="px-5 py-3 bg-red-500 text-white hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-5 py-3 border-1 border-red-500 text-red-500 hover:bg-red-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={() => updateOrder('rejected')}
                 disabled={updatingStatus || 
                   (order.order_status === 'rejected' || order.order_status === 'completed' || order.order_status === 'cancelled' || order.order_status === 'accepted')}

@@ -217,58 +217,109 @@ const OrderPage = () => {
         // Check if cart already has items from a different chef
         const { data: existingItems, error: itemsError } = await supabase
           .from('cart_items')
-          .select('dish_id')
+          .select('dish_id, chef_id')
           .eq('cart_id', cartId);
           
         if (itemsError) throw itemsError;
         
         if (existingItems && existingItems.length > 0) {
-          // Get first dish to check its chef
-          const { data: firstDish, error: dishError } = await supabase
-            .from('dishes')
-            .select('chef_id')
-            .eq('id', existingItems[0].dish_id)
-            .single();
-            
-          if (dishError) throw dishError;
+          // First, check if any existing item has chef_id directly
+          const existingChefId = existingItems.find(item => item.chef_id)?.chef_id;
           
-          // If dish exists and belongs to a different chef
-          if (firstDish && firstDish.chef_id !== chef.id) {
-            // Get chef name
-            const { data: chefData } = await supabase
-              .from('profiles')
-              .select('display_name')
-              .eq('id', firstDish.chef_id)
-              .single();
+          if (existingChefId) {
+            // If we have a chef ID directly stored, compare with current chef
+            if (existingChefId !== chef.id) {
+              // Get chef name for display
+              const { data: chefData } = await supabase
+                .from('profiles')
+                .select('display_name')
+                .eq('id', existingChefId)
+                .single();
+                
+                // Store current item details for later use if user confirms
+                setExistingChefName(chefData?.display_name || 'another chef');
+                
+                // Prepare customization_options in the correct format
+                const customizationOptions = selectedCustomizations.length > 0 
+                  ? { option: selectedCustomizations }
+                  : null;
+                
+                console.log("OrderPage - Creating pending item - selectedDishType:", selectedDishType);
+                const pendingDishTypesValue = selectedDishType ? { types: [selectedDishType] } : { types: [] };
+                console.log("OrderPage - pending dish_types being stored:", pendingDishTypesValue);
+                
+                // Store pending item data
+                setPendingCartItem({
+                  cart_id: cartId,
+                  dish_id: selectedDish.id,
+                  chef_id: chef.id,
+                  dish_name: selectedDish.name,
+                  dish_price: selectedDish.price,
+                  quantity: quantity,
+                  customization_options: customizationOptions,
+                  dish_note: dishNote.trim() || null,
+                  dietary_tags: selectedDish.dietary_tags ? { tags: selectedDish.dietary_tags.map(tag => tag.label) } : null,
+                  dish_types: pendingDishTypesValue,
+                });
+                
+                // Show conflict modal
+                setShowChefConflictModal(true);
+                return;
+            }
+          } else {
+            // If no chef_id directly stored, try to find it through dish_id
+            const itemWithDishId = existingItems.find(item => item.dish_id);
+            
+            if (itemWithDishId) {
+              // Get the chef_id from the dish
+              const { data: dishData, error: dishError } = await supabase
+                .from('dishes')
+                .select('chef_id')
+                .eq('id', itemWithDishId.dish_id)
+                .single();
+                
+              if (dishError && dishError.code !== 'PGRST116') throw dishError;
               
-            // Store current item details for later use if user confirms
-            setExistingChefName(chefData?.display_name || 'another chef');
-            
-            // Prepare customization_options in the correct format
-            const customizationOptions = selectedCustomizations.length > 0 
-              ? { option: selectedCustomizations }
-              : null;
-              
-            console.log("OrderPage - Creating pending item - selectedDishType:", selectedDishType);
-            const pendingDishTypesValue = selectedDishType ? { types: [selectedDishType] } : { types: [] };
-            console.log("OrderPage - pending dish_types being stored:", pendingDishTypesValue);
-            
-            // Store pending item data
-            setPendingCartItem({
-              cart_id: cartId,
-              dish_id: selectedDish.id,
-              dish_name: selectedDish.name,
-              dish_price: selectedDish.price,
-              quantity: quantity,
-              customization_options: customizationOptions,
-              dish_note: dishNote.trim() || null,
-              dietary_tags: selectedDish.dietary_tags ? { tags: selectedDish.dietary_tags.map(tag => tag.label) } : null,
-              dish_types: pendingDishTypesValue,
-            });
-            
-            // Show conflict modal
-            setShowChefConflictModal(true);
-            return;
+              // If dish exists and belongs to a different chef
+              if (dishData && dishData.chef_id !== chef.id) {
+                // Get chef name
+                const { data: chefData } = await supabase
+                  .from('profiles')
+                  .select('display_name')
+                  .eq('id', dishData.chef_id)
+                  .single();
+                  
+                // Store current item details for later use if user confirms
+                setExistingChefName(chefData?.display_name || 'another chef');
+                
+                // Prepare customization_options in the correct format
+                const customizationOptions = selectedCustomizations.length > 0 
+                  ? { option: selectedCustomizations }
+                  : null;
+                
+                const pendingDishTypesValue = selectedDishType ? { types: [selectedDishType] } : { types: [] };
+                
+                // Store pending item data
+                setPendingCartItem({
+                  cart_id: cartId,
+                  dish_id: selectedDish.id,
+                  chef_id: chef.id,
+                  dish_name: selectedDish.name,
+                  dish_price: selectedDish.price,
+                  quantity: quantity,
+                  customization_options: customizationOptions,
+                  dish_note: dishNote.trim() || null,
+                  dietary_tags: selectedDish.dietary_tags ? { tags: selectedDish.dietary_tags.map(tag => tag.label) } : null,
+                  dish_types: pendingDishTypesValue,
+                });
+                
+                // Show conflict modal
+                setShowChefConflictModal(true);
+                return;
+              }
+            }
+            // If we get here, there are only custom dishes in cart with no chef_id and dish_id reference
+            // Since we can't determine the chef, we'll assume it's the same chef
           }
         }
       }
@@ -334,6 +385,7 @@ const OrderPage = () => {
     custom_dish_name: string;
     custom_description: string;
     dish_note?: string;
+    quantity: number;
   }) => {
     if (!user || !chef) return;
     
@@ -367,48 +419,91 @@ const OrderPage = () => {
         // Check if cart already has items from a different chef
         const { data: existingItems, error: itemsError } = await supabase
           .from('cart_items')
-          .select('dish_id')
+          .select('dish_id, chef_id')
           .eq('cart_id', cartId);
           
         if (itemsError) throw itemsError;
         
         if (existingItems && existingItems.length > 0) {
-          // Get first dish to check its chef
-          const { data: firstDish, error: dishError } = await supabase
-            .from('dishes')
-            .select('chef_id')
-            .eq('id', existingItems[0].dish_id)
-            .single();
-            
-          if (dishError && dishError.code !== 'PGRST116') throw dishError;
+          // First, check if any existing item has chef_id directly
+          const existingChefId = existingItems.find(item => item.chef_id)?.chef_id;
           
-          // If dish exists and belongs to a different chef
-          if (firstDish && firstDish.chef_id !== chef.id) {
-            // Get chef name
-            const { data: chefData } = await supabase
-              .from('profiles')
-              .select('display_name')
-              .eq('id', firstDish.chef_id)
-              .single();
+          if (existingChefId) {
+            // If we have a chef ID directly stored, compare with current chef
+            if (existingChefId !== chef.id) {
+              // Get chef name for display
+              const { data: chefData } = await supabase
+                .from('profiles')
+                .select('display_name')
+                .eq('id', existingChefId)
+                .single();
+                
+                // Store current item details for later use if user confirms
+                setExistingChefName(chefData?.display_name || 'another chef');
+                
+                // Store pending item data
+                setPendingCartItem({
+                  cart_id: cartId,
+                  chef_id: chef?.id,
+                  dish_name: 'Custom Dish Request',
+                  dish_price: 0, // Price will be set by chef later
+                  quantity: customDishData.quantity,
+                  custom_dish_name: customDishData.custom_dish_name,
+                  custom_description: customDishData.custom_description,
+                  dish_note: customDishData.dish_note,
+                  dish_types: { types: [] }, // Initialize empty dish_types for custom dishes
+                });
+                
+                // Show conflict modal
+                setShowChefConflictModal(true);
+                return;
+            }
+          } else {
+            // If no chef_id directly stored, try to find it through dish_id
+            const itemWithDishId = existingItems.find(item => item.dish_id);
+            
+            if (itemWithDishId) {
+              // Get the chef_id from the dish
+              const { data: dishData, error: dishError } = await supabase
+                .from('dishes')
+                .select('chef_id')
+                .eq('id', itemWithDishId.dish_id)
+                .single();
+                
+              if (dishError && dishError.code !== 'PGRST116') throw dishError;
               
-            // Store current item details for later use if user confirms
-            setExistingChefName(chefData?.display_name || 'another chef');
-            
-            // Store pending item data
-            setPendingCartItem({
-              cart_id: cartId,
-              dish_name: 'Custom Dish Request',
-              dish_price: 0, // Price will be set by chef later
-              quantity: 1,
-              custom_dish_name: customDishData.custom_dish_name,
-              custom_description: customDishData.custom_description,
-              dish_note: customDishData.dish_note,
-              dish_types: { types: [] }, // Initialize empty dish_types for custom dishes
-            });
-            
-            // Show conflict modal
-            setShowChefConflictModal(true);
-            return;
+              // If dish exists and belongs to a different chef
+              if (dishData && dishData.chef_id !== chef.id) {
+                // Get chef name
+                const { data: chefData } = await supabase
+                  .from('profiles')
+                  .select('display_name')
+                  .eq('id', dishData.chef_id)
+                  .single();
+                  
+                // Store current item details for later use if user confirms
+                setExistingChefName(chefData?.display_name || 'another chef');
+                
+                // Store pending item data
+                setPendingCartItem({
+                  cart_id: cartId,
+                  chef_id: chef?.id,
+                  dish_name: 'Custom Dish Request',
+                  dish_price: 0, // Price will be set by chef later
+                  quantity: customDishData.quantity,
+                  custom_dish_name: customDishData.custom_dish_name,
+                  custom_description: customDishData.custom_description,
+                  dish_note: customDishData.dish_note,
+                  dish_types: { types: [] }, // Initialize empty dish_types for custom dishes
+                });
+                
+                // Show conflict modal
+                setShowChefConflictModal(true);
+                return;
+              }
+            }
+            // If we get here, there are only custom dishes in cart with no chef_id reference
+            // Since we can't determine the chef, we'll assume it's the same chef
           }
         }
       }
@@ -422,7 +517,7 @@ const OrderPage = () => {
           chef_id: chef?.id,
           dish_name: 'Custom Dish Request',
           dish_price: 0, // Price will be set by chef later
-          quantity: 1,
+          quantity: customDishData.quantity,
           custom_dish_name: customDishData.custom_dish_name,
           custom_description: customDishData.custom_description,
           dish_note: customDishData.dish_note,
